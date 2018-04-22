@@ -36,7 +36,9 @@ namespace teamsannio_med_control {
 
 PositionController::PositionController()
     : controller_active_(false),
-      first_time_derivate_computing_(false){
+      first_time_derivate_computing_XY(false),
+      first_time_derivate_computing_Z(false),
+      first_time_derivate_computing_Angles(false){
 
 }
 
@@ -44,7 +46,9 @@ PositionController::~PositionController() {}
 
 void PositionController::SetOdometry(const EigenOdometry& odometry) {
     
-    odometry_ = odometry;    
+    odometry_ = odometry; 
+    SetOdometryEstimated(); 
+
 }
 
 void PositionController::SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory) {
@@ -117,44 +121,27 @@ void PositionController::SetOdometryEstimated() {
     extended_kalman_filter_bebop_.Estimator(&state_, &odometry_);
 }
 
-void PositionController::Errors(double* e_x, double* dot_ex, double* e_y, double* dot_ey, double* e_z, double* dot_ez, double* e_phi, double* dot_ephi, double* e_theta, double* dot_etheta, double* e_psi, double* dot_epsi){
+void PositionController::ErrorsXY(double* e_x, double* dot_ex, double* e_y, double* dot_ey){
 
     assert(e_x);
     assert(e_y);
-    assert(e_z);
-    assert(e_phi);
-    assert(e_theta);
-    assert(e_psi);
     assert(dot_ex);
     assert(dot_ey);
-    assert(dot_ez);
-    assert(dot_ephi);
-    assert(dot_etheta);
-    assert(dot_epsi);
 
     //Trajectory references
-    double x_r, y_r, z_r, psi_r;
+    double x_r, y_r;
     x_r = command_trajectory_.position_W[0];
     y_r = command_trajectory_.position_W[1];
-    z_r = command_trajectory_.position_W[2];
-    psi_r = command_trajectory_.getYaw();
-
-    //Virtual references
-    double phi_r, theta_r;
-    AttitudePlanner(&phi_r, &theta_r);
 
     //Trajectory derivates
-    double x_r_pre, y_r_pre, z_r_pre, phi_r_pre, theta_r_pre, psi_r_pre;
-    double dot_x_r, dot_y_r, dot_z_r, dot_phi_r, dot_theta_r, dot_psi_r;
+    double x_r_pre, y_r_pre;
+    double dot_x_r, dot_y_r;
 
-    if(!first_time_derivate_computing_){
+    if(!first_time_derivate_computing_XY){
        x_r_pre = 0;
        y_r_pre = 0;
-       z_r_pre = 0;
 
-       phi_r_pre = 0;
-       theta_r_pre = 0;
-       first_time_derivate_computing_ = true;
+       first_time_derivate_computing_XY = true;
     }
 
     dot_x_r = (x_r - x_r_pre)/Ts;
@@ -163,8 +150,71 @@ void PositionController::Errors(double* e_x, double* dot_ex, double* e_y, double
     dot_y_r = (y_r - y_r_pre)/Ts;
     y_r_pre = y_r;
     
+    //Errors computed
+    *e_x = x_r - state_.position.x;
+    *e_y = y_r - state_.position.y;
+
+    *dot_ex = dot_x_r - state_.linearVelocity.x;
+    *dot_ey = dot_y_r - state_.linearVelocity.y;
+
+}
+
+void PositionController::ErrorsZ(double* e_z, double* dot_ez){
+
+    assert(e_z);
+    assert(dot_ez);
+
+    //Trajectory references
+    double z_r;
+    z_r = command_trajectory_.position_W[2];
+
+    //Trajectory derivates
+    double z_r_pre;
+    double dot_z_r;
+
+    if(!first_time_derivate_computing_Z){
+       z_r_pre = 0;
+
+       first_time_derivate_computing_Z = true;
+    }
+
     dot_z_r = (z_r - z_r_pre)/Ts;
-    z_r_pre = z_r;   
+    z_r_pre = z_r;
+    
+    //Errors computed
+    *e_z = z_r - state_.position.z;
+
+    *dot_ez = dot_z_r - state_.linearVelocity.z;
+
+}
+
+void PositionController::ErrorsAngles(double* e_phi, double* dot_ephi, double* e_theta, double* dot_etheta, double* e_psi, double* dot_epsi){
+
+    assert(e_phi);
+    assert(e_theta);
+    assert(e_psi);
+    assert(dot_ephi);
+    assert(dot_etheta);
+    assert(dot_epsi);
+
+    //Trajectory references
+    double psi_r;
+    psi_r = command_trajectory_.getYaw();
+
+    //Virtual references
+    double phi_r, theta_r;
+    AttitudePlanner(&phi_r, &theta_r);
+
+    //Trajectory derivates
+    double phi_r_pre, theta_r_pre, psi_r_pre;
+    double dot_phi_r, dot_theta_r, dot_psi_r;
+
+    if(!first_time_derivate_computing_Angles){
+       phi_r_pre = 0;
+       theta_r_pre = 0;
+       psi_r_pre = 0;
+       first_time_derivate_computing_Angles = true;
+    }
 
     dot_phi_r = (phi_r - phi_r_pre)/Ts;
     phi_r_pre = phi_r;
@@ -174,19 +224,11 @@ void PositionController::Errors(double* e_x, double* dot_ex, double* e_y, double
 
     dot_psi_r = (psi_r - psi_r_pre)/Ts;
     psi_r_pre = psi_r;
- 
-    //Errors computed
-    *e_x = x_r - state_.position.x;
-    *e_y = y_r - state_.position.y;
-    *e_z = z_r - state_.position.z;
 
+    //Errors computed
     *e_phi = phi_r - state_.attitude.roll;
     *e_theta = theta_r - state_.attitude.pitch;
     *e_psi = psi_r - state_.attitude.yaw; 
-
-    *dot_ex = dot_x_r - state_.linearVelocity.x;
-    *dot_ey = dot_y_r - state_.linearVelocity.y;
-    *dot_ez = dot_z_r - state_.linearVelocity.z;
 
     *dot_ephi = dot_phi_r - state_.angularVelocity.x;
     *dot_etheta = dot_theta_r - state_.angularVelocity.y;
@@ -215,8 +257,8 @@ void PositionController::DesiredActuation(double* tilde_ux, double* tilde_uy){
    assert(tilde_ux);
    assert(tilde_uy);
 
-   double e_x, dot_ex, e_y, dot_ey, e_z, dot_ez, e_phi, dot_ephi, e_theta, dot_etheta, e_psi, dot_epsi;
-   Errors(&e_x, &dot_ex, &e_y, &dot_ey, &e_z, &dot_ez, &e_phi, &dot_ephi, &e_theta, &dot_etheta, &e_psi, &dot_epsi);
+   double e_x, dot_ex, e_y, dot_ey;
+   ErrorsXY(&e_x, &dot_ex, &e_y, &dot_ey);
 
    double beta_x, beta_y, alpha_x, alpha_y;
    beta_x = controller_parameters_.xy_gain_kp_.x();
@@ -244,8 +286,8 @@ void PositionController::AttitudePlanner(double* phi_r, double* theta_r){
    double psi_r;
    psi_r = command_trajectory_.getYaw();
 
-   double e_x, dot_ex, e_y, dot_ey, e_z, dot_ez, e_phi, dot_ephi, e_theta, dot_etheta, e_psi, dot_epsi;
-   Errors(&e_x, &dot_ex, &e_y, &dot_ey, &e_z, &dot_ez, &e_phi, &dot_ephi, &e_theta, &dot_etheta, &e_psi, &dot_epsi);
+   double e_z, dot_ez;
+   ErrorsZ(&e_z, &dot_ez);
 
    double u_x, u_y;
    PositionControl(&u_x, &u_y);
@@ -275,8 +317,8 @@ void PositionController::AltitudeControl(double* u_T){
    phi = state_.attitude.roll;
    theta = state_.attitude.pitch;
 
-   double e_x, dot_ex, e_y, dot_ey, e_z, dot_ez, e_phi, dot_ephi, e_theta, dot_etheta, e_psi, dot_epsi;
-   Errors(&e_x, &dot_ex, &e_y, &dot_ey, &e_z, &dot_ez, &e_phi, &dot_ephi, &e_theta, &dot_etheta, &e_psi, &dot_epsi);
+   double e_z, dot_ez;
+   ErrorsZ(&e_z, &dot_ez);
 
    double m, g;
    m = vehicle_parameters_.mass_;
@@ -297,8 +339,8 @@ void PositionController::RollPitchYawControl(double* u_phi, double* u_theta, dou
    assert(u_theta);
    assert(u_psi);
 
-   double e_x, dot_ex, e_y, dot_ey, e_z, dot_ez, e_phi, dot_ephi, e_theta, dot_etheta, e_psi, dot_epsi;
-   Errors(&e_x, &dot_ex, &e_y, &dot_ey, &e_z, &dot_ez, &e_phi, &dot_ephi, &e_theta, &dot_etheta, &e_psi, &dot_epsi);
+   double e_phi, dot_ephi, e_theta, dot_etheta, e_psi, dot_epsi;
+   ErrorsAngles(&e_phi, &dot_ephi, &e_theta, &dot_etheta, &e_psi, &dot_epsi);
 
    double Ix, Iy, Iz;
    Ix = vehicle_parameters_.inertia_(0,0);

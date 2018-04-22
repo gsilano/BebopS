@@ -94,15 +94,18 @@ class PositionControllerParameters {
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         private:
             bool controller_active_;
-            bool first_time_derivate_computing_;
+            bool first_time_derivate_computing_XY;
+            bool first_time_derivate_computing_Z;
+            bool first_time_derivate_computing_Angles;
 
 	    state_t state_;
-
             mav_msgs::EigenTrajectoryPoint command_trajectory_;
             EigenOdometry odometry_;
 
             void SetOdometryEstimated();
-            void Errors(double* e_x, double* dot_ex, double* e_y, double* dot_ey, double* e_z, double* dot_ez, double* e_phi, double* dot_ephi, double* e_theta, double* dot_etheta, double* e_psi, double* dot_epsi);
+            void ErrorsXY(double* e_x, double* dot_ex, double* e_y, double* dot_ey);
+            void ErrorsZ(double* e_z, double* dot_ez);
+            void ErrorsAngles(double* e_phi, double* dot_ephi, double* e_theta, double* dot_etheta, double* e_psi, double* dot_epsi);
             void PositionControl(double* u_x, double* u_y);
             void DesiredActuation(double* tilde_ux, double* tilde_uy);
             void AttitudePlanner(double* phi_r, double* theta_r);
