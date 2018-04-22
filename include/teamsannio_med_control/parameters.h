@@ -3,7 +3,7 @@
 
 namespace teamsannio_med_control {
 
-// Default vehicle parameters for Asctec Firefly.
+// Default vehicle parameters
 static constexpr double kDefaultMass = 0.5;
 static constexpr double kDefaultArmLength = 0.12905;
 static constexpr double kDefaultInertiaXx = 0.00389;
@@ -22,10 +22,17 @@ class VehicleParameters {
       : mass_(kDefaultMass),
         gravity_(kDefaultGravity),
         inertia_(Eigen::Vector3d(kDefaultInertiaXx, kDefaultInertiaYy,
-                                 kDefaultInertiaZz).asDiagonal()) {}
+                                 kDefaultInertiaZz).asDiagonal()),
+        bf_(kDefaultRotorForceConstant),
+        bm_(kDefaultRotorMomentConstant),
+        armLength_(kDefaultArmLength) {}
+
   double mass_;
   const double gravity_;
   Eigen::Matrix3d inertia_;
+  double bm_;
+  double bf_;
+  double armLength_;
 };
 
 }

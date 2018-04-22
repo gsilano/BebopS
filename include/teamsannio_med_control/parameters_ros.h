@@ -45,7 +45,17 @@ inline void GetVehicleParameters(const ros::NodeHandle& nh, VehicleParameters* v
   GetRosParameter(nh, "inertia/zz",
                   vehicle_parameters->inertia_(2, 2),
                   &vehicle_parameters->inertia_(2, 2));
+  GetRosParameter(nh, "bf",
+                  vehicle_parameters->bf_,
+                  &vehicle_parameters->bf_);
+  GetRosParameter(nh, "bm",
+                  vehicle_parameters->bm_,
+                  &vehicle_parameters->bm_);
+  GetRosParameter(nh, "l",
+                  vehicle_parameters->armLength_,
+                  &vehicle_parameters->armLength_);
 }
+
 }
 
 #endif /* INCLUDE_BEBOP_CONTROL_PARAMETERS_ROS_H_ */

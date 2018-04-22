@@ -1,0 +1,11 @@
+# Position controller parameters
+xy_gain_kp: {beta_x: -0.3351, beta_y: -1.1307}
+z_gain_kp: {beta_z: -1.5994}
+roll_gain_kp: {beta_roll: -2.2616}
+pitch_gain_kp: {beta_pitch: -2.7457}
+yaw_rate_gain_kp: {beta_yaw: -1.8249}
+mu_xy: {mu_x: 1, mu_y: 1}
+mu_z: {mu_z: 0.12}
+mu_pitch: {mu_pitch: 0.09}
+mu_roll: {mu_roll: 0.26}
+mu_yaw_rate: {mu_yaw: 0.04}

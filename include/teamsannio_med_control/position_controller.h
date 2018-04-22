@@ -22,6 +22,9 @@
 #include <mav_msgs/conversions.h>
 #include <mav_msgs/eigen_mav_msgs.h>
 
+#include "extendedKalmanFilter.h"
+#include "stabilizer_types.h"
+#include "parameters.h"
 #include "common.h"
 
 
@@ -29,12 +32,12 @@ namespace teamsannio_med_control {
 
 // Default values for the position controller of the Bebop. XYController [x,y], Roll Control [phi],
 // Pitch Control [theta], Altitude Control [z], Yaw Control  [psi] 
-static const Eigen::Vector2d kPDefaultXYController = Eigen::Vector2d(-1, -1);
-static const double kPDefaultAltitudeController = -1;
+static const Eigen::Vector2d kPDefaultXYController = Eigen::Vector2d(-0.3351, -1.1307);
+static const double kPDefaultAltitudeController = -1.5994;
 
-static const double kPDefaultPitchController = -1;
-static const double kPDefaultRollController = -1;
-static const double kPDefaultYawRateController = -1;
+static const double kPDefaultPitchController = -2.7457;
+static const double kPDefaultRollController = -2.2616;
+static const double kPDefaultYawRateController = -1.8249;
 
 static const Eigen::Vector2d MuDefaultXYController = Eigen::Vector2d(1, 1);
 static const double MuDefaultAltitudeController = 0.12;
@@ -85,15 +88,26 @@ class PositionControllerParameters {
             void SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory);
             
             PositionControllerParameters controller_parameters_;
+            ExtendedKalmanFilter extended_kalman_filter_bebop_;
+            VehicleParameters vehicle_parameters_;
 
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         private:
             bool controller_active_;
+            bool first_time_derivate_computing_;
+
+	    state_t state_;
 
             mav_msgs::EigenTrajectoryPoint command_trajectory_;
             EigenOdometry odometry_;
 
-            void Quaternion2Euler(double* roll, double* pitch, double* yaw) const;
+            void SetOdometryEstimated();
+            void Errors(double* e_x, double* dot_ex, double* e_y, double* dot_ey, double* e_z, double* dot_ez, double* e_phi, double* dot_ephi, double* e_theta, double* dot_etheta, double* e_psi, double* dot_epsi);
+            void PositionControl(double* u_x, double* u_y);
+            void DesiredActuation(double* tilde_ux, double* tilde_uy);
+            void AttitudePlanner(double* phi_r, double* theta_r);
+            void AltitudeControl(double* u_T);
+            void RollPitchYawControl(double* u_phi, double* u_theta, double* u_psi);
 
     };
 

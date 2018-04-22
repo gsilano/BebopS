@@ -147,6 +147,8 @@ void PositionControllerNode::InitializeParams() {
   GetRosParameter(pnh, "mu_yaw_rate/mu_yaw",
                   position_controller_.controller_parameters_.mu_yaw_,
                   &position_controller_.controller_parameters_.mu_yaw_);
+
+  GetVehicleParameters(pnh, &position_controller_.vehicle_parameters_);
   
 }
 
