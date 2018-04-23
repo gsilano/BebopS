@@ -303,7 +303,7 @@ void PositionController::AttitudePlanner(double* phi_r, double* theta_r){
    g = vehicle_parameters_.gravity_;
 
    double common;
-   common = 1/( (dot_ez * (alpha_z/mu_z)) + (e_z * (beta_z/pow(mu_z,2))) + g );
+   common = 1/( (dot_ez * (alpha_z/mu_z)) - (e_z * (beta_z/pow(mu_z,2))) + g );
 
    *theta_r = atan( common * ( (sin(psi_r) * u_y) + (cos(psi_r) * u_x) ) );
    *phi_r = atan(common * cos(*theta_r) * ( (sin(psi_r) * u_x) - (cos(psi_r)* u_y) ));
@@ -361,7 +361,7 @@ void PositionController::RollPitchYawControl(double* u_phi, double* u_theta, dou
    mu_theta = controller_parameters_.mu_pitch_;
    mu_psi = controller_parameters_.mu_yaw_;
 
-   *u_phi = Ix * ( (dot_ephi * (alpha_phi/mu_phi) ) - (e_phi * (beta_phi/pow(mu_phi,2)) ) + ( e_theta * e_psi * ((Iy-Iz)/(Ix * mu_theta * mu_psi))) );
+   *u_phi = Ix * ( (dot_ephi * (alpha_phi/mu_phi) ) - (e_phi * (beta_phi/pow(mu_phi,2)) ) - ( e_theta * e_psi * ((Iy-Iz)/(Ix * mu_theta * mu_psi))) );
 
    *u_theta = Iy * ( (dot_etheta * (alpha_theta/mu_theta) ) - (e_theta * (beta_theta/pow(mu_theta,2)) ) - ( e_phi * e_psi * ((Iz-Ix)/(Iy * mu_phi * mu_psi))) );
 
