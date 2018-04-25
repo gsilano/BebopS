@@ -112,6 +112,18 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     omega_2 = sqrt(sat2);
     omega_3 = sqrt(sat3);
     omega_4 = sqrt(sat4);
+	
+	if(omega_1 > 838)
+		omega_1 = 838;
+	
+	if(omega_2 > 838)
+		omega_2 = 838;
+	
+	if(omega_3 > 838)
+		omega_3 = 838;
+	
+	if(omega_4 > 838)
+	    omega_4 = 838;
 
     *rotor_velocities = Eigen::Vector4d(omega_1, omega_2, omega_3, omega_4);
 }

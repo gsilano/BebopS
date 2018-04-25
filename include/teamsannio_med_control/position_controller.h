@@ -32,7 +32,7 @@ namespace teamsannio_med_control {
 
 // Default values for the position controller of the Bebop. XYController [x,y], Roll Control [phi],
 // Pitch Control [theta], Altitude Control [z], Yaw Control  [psi] 
-static const Eigen::Vector2d kPDefaultXYController = Eigen::Vector2d(-0.3351, -1.1307);
+static const Eigen::Vector2d kPDefaultXYController = Eigen::Vector2d(-1.3351, -1.1307);
 static const double kPDefaultAltitudeController = -1.5994;
 
 static const double kPDefaultPitchController = -2.7457;
@@ -42,9 +42,9 @@ static const double kPDefaultYawRateController = -1.8249;
 static const Eigen::Vector2d MuDefaultXYController = Eigen::Vector2d(1, 1);
 static const double MuDefaultAltitudeController = 0.12;
 
-static const double MuDefaultPitchController = 0.09;
+static const double MuDefaultPitchController = 0.26;
 static const double MuDefaultYawRateController = 0.04;
-static const double MuDefaultRollController = 0.26;
+static const double MuDefaultRollController = 0.09;
 
 
 class PositionControllerParameters {

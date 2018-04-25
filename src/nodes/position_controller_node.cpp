@@ -111,23 +111,23 @@ void PositionControllerNode::InitializeParams() {
   ros::NodeHandle pnh("~");
 
   // Read parameters from rosparam.
-  GetRosParameter(pnh, "xy_gain_kp/beta_x",
+  GetRosParameter(pnh, "beta_xy/beta_x",
                   position_controller_.controller_parameters_.xy_gain_kp_.x(),
                   &position_controller_.controller_parameters_.xy_gain_kp_.x());
-  GetRosParameter(pnh, "xy_gain_kp/beta_y",
+  GetRosParameter(pnh, "beta_xy/beta_y",
                   position_controller_.controller_parameters_.xy_gain_kp_.y(),
                   &position_controller_.controller_parameters_.xy_gain_kp_.y());
-  GetRosParameter(pnh, "z_gain_kp/beta_z",
+  GetRosParameter(pnh, "beta_z/beta_z",
                   position_controller_.controller_parameters_.z_gain_kp_,
                   &position_controller_.controller_parameters_.z_gain_kp_);
   
-  GetRosParameter(pnh, "roll_gain_kp/beta_roll",
+  GetRosParameter(pnh, "beta_phi/beta_phi",
                   position_controller_.controller_parameters_.roll_gain_kp_,
                   &position_controller_.controller_parameters_.roll_gain_kp_);
-  GetRosParameter(pnh, "pitch_gain_kp/beta_pitch",
+  GetRosParameter(pnh, "beta_theta/beta_theta",
                   position_controller_.controller_parameters_.pitch_gain_kp_,
                   &position_controller_.controller_parameters_.pitch_gain_kp_);
-  GetRosParameter(pnh, "yaw_rate_gain_kp/beta_yaw",
+  GetRosParameter(pnh, "beta_psi/beta_psi",
                   position_controller_.controller_parameters_.yaw_rate_gain_kp_,
                   &position_controller_.controller_parameters_.yaw_rate_gain_kp_);
 
@@ -141,13 +141,13 @@ void PositionControllerNode::InitializeParams() {
                   position_controller_.controller_parameters_.mu_z_,
                   &position_controller_.controller_parameters_.mu_z_);
   
-  GetRosParameter(pnh, "mu_roll/mu_roll",
+  GetRosParameter(pnh, "mu_phi/mu_phi",
                   position_controller_.controller_parameters_.mu_roll_,
                   &position_controller_.controller_parameters_.mu_roll_);
-  GetRosParameter(pnh, "mu_pitch/mu_pitch",
+  GetRosParameter(pnh, "mu_theta/mu_theta",
                   position_controller_.controller_parameters_.mu_pitch_,
                   &position_controller_.controller_parameters_.mu_pitch_);
-  GetRosParameter(pnh, "mu_yaw_rate/mu_yaw",
+  GetRosParameter(pnh, "mu_psi/mu_psi",
                   position_controller_.controller_parameters_.mu_yaw_,
                   &position_controller_.controller_parameters_.mu_yaw_);
 
