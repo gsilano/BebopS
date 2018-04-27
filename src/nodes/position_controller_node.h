@@ -47,6 +47,8 @@ namespace teamsannio_med_control {
 
         private:
 
+            bool waypointHasBeenPublished_ = false;
+
             PositionController position_controller_;
 
             std::string namespace_;

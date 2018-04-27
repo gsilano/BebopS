@@ -22,10 +22,13 @@
 #include <mav_msgs/conversions.h>
 #include <mav_msgs/eigen_mav_msgs.h>
 
+#include <ros/time.h>
+
 #include "extendedKalmanFilter.h"
 #include "stabilizer_types.h"
 #include "parameters.h"
 #include "common.h"
+
 
 
 namespace teamsannio_med_control {
@@ -51,31 +54,31 @@ class PositionControllerParameters {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   PositionControllerParameters()
-      : xy_gain_kp_(kPDefaultXYController), 
-        z_gain_kp_(kPDefaultAltitudeController), 
-        roll_gain_kp_(kPDefaultRollController), 
-        pitch_gain_kp_(kPDefaultPitchController),  
-        yaw_rate_gain_kp_(kPDefaultYawRateController),
+      : beta_xy_(kPDefaultXYController), 
+        beta_z_(kPDefaultAltitudeController), 
+        beta_phi_(kPDefaultRollController), 
+        beta_theta_(kPDefaultPitchController),  
+        beta_psi_(kPDefaultYawRateController),
         mu_xy_(MuDefaultXYController),
         mu_z_(MuDefaultAltitudeController),
-        mu_pitch_(MuDefaultPitchController),
-        mu_roll_(MuDefaultRollController),
-        mu_yaw_(MuDefaultYawRateController){
+        mu_theta_(MuDefaultPitchController),
+        mu_phi_(MuDefaultRollController),
+        mu_psi_(MuDefaultYawRateController){
   }
 
-  Eigen::Vector2d xy_gain_kp_;
-  double z_gain_kp_;
+  Eigen::Vector2d beta_xy_;
+  double beta_z_;
 
-  double roll_gain_kp_;
-  double pitch_gain_kp_;
-  double yaw_rate_gain_kp_;
+  double beta_phi_;
+  double beta_theta_;
+  double beta_psi_;
 
   Eigen::Vector2d mu_xy_;
   double mu_z_;
 
-  double mu_pitch_;
-  double mu_yaw_;
-  double mu_roll_;
+  double mu_phi_;
+  double mu_theta_;
+  double mu_psi_;
 };
     
     class PositionController{
@@ -94,23 +97,53 @@ class PositionControllerParameters {
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         private:
             bool controller_active_;
-            bool first_time_derivate_computing_XY;
-            bool first_time_derivate_computing_Z;
-            bool first_time_derivate_computing_Angles;
+            bool first_step_position_controller;
+            bool first_step_attitude_controller;
+
+            double e_x_ = 0;
+            double e_y_ = 0;
+            double e_z_ = 0;
+            double dot_e_x_ = 0;
+            double dot_e_y_ = 0; 
+            double dot_e_z_ = 0;
+ 
+            double e_phi_ = 0;
+            double e_theta_ = 0;
+            double e_psi_ = 0;
+            double dot_e_phi_ = 0;
+            double dot_e_theta_ = 0; 
+            double dot_e_psi_ = 0;
+
+            double x_r_pre_ = 0;
+            double y_r_pre_ = 0;
+            double z_r_pre_ = 0;
+
+            double phi_r_pre_ = 0;
+            double theta_r_pre_ = 0;
+            double psi_r_pre_ = 0;
+
+            ros::Time prev_time_pos;
+            ros::Duration delta_t_pos;
+
+            ros::Time prev_time_att;
+            ros::Duration delta_t_att;
+
+            int64_t nanosecsPosition_pre_ = ros::Time::now().toNSec();
+            int64_t nanosecsAttitude_pre_ = ros::Time::now().toNSec();
 
 	    state_t state_;
             mav_msgs::EigenTrajectoryPoint command_trajectory_;
             EigenOdometry odometry_;
 
             void SetOdometryEstimated();
-            void ErrorsXY(double* e_x, double* dot_ex, double* e_y, double* dot_ey);
-            void ErrorsZ(double* e_z, double* dot_ez);
-            void ErrorsAngles(double* e_phi, double* dot_ephi, double* e_theta, double* dot_etheta, double* e_psi, double* dot_epsi);
-            void PositionControl(double* u_x, double* u_y);
-            void DesiredActuation(double* tilde_ux, double* tilde_uy);
-            void AttitudePlanner(double* phi_r, double* theta_r);
-            void AltitudeControl(double* u_T);
-            void RollPitchYawControl(double* u_phi, double* u_theta, double* u_psi);
+            void AttitudeController(double* u_phi, double* u_theta, double* u_psi);
+            void AngularVelocityErrors(double* dot_e_phi_, double* dot_e_theta_, double* dot_e_psi_);
+            void AttitudeErrors(double* e_phi_, double* e_theta_, double* e_psi_);
+            void PosController(double* u_x, double* u_y, double* u_T, double* u_Terr);
+            void PositionErrors(double* e_x, double* e_y, double* e_z);
+            void VelocityErrors(double* dot_e_x, double* dot_e_y, double* dot_e_z);
+            void ReferenceAngles(double* phi_r, double* theta_r);
+            
 
     };
 

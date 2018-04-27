@@ -1,6 +1,6 @@
 # Position controller parameters
 beta_xy: {beta_x: -1.3351, beta_y: -1.1307}
-beta_z: {beta_z: -1.5994}
+beta_z: {beta_z: -1}
 beta_phi: {beta_phi: -2.2616}
 beta_theta: {beta_theta: -2.7457}
 beta_psi: {beta_psi: -1.8249}

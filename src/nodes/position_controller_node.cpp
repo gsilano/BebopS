@@ -62,12 +62,10 @@ void PositionControllerNode::MultiDofJointTrajectoryCallback(const trajectory_ms
     return;
   }
 
-  ROS_INFO("PositionController got first MultiDOFJointTrajectory message.");
-
   mav_msgs::EigenTrajectoryPoint eigen_reference;
   mav_msgs::eigenTrajectoryPointFromMsg(msg->points.front(), &eigen_reference);
   commands_.push_front(eigen_reference);
-
+ 
   for (size_t i = 1; i < n_commands; ++i) {
     const trajectory_msgs::MultiDOFJointTrajectoryPoint& reference_before = msg->points[i-1];
     const trajectory_msgs::MultiDOFJointTrajectoryPoint& current_reference = msg->points[i];
@@ -82,10 +80,12 @@ void PositionControllerNode::MultiDofJointTrajectoryCallback(const trajectory_ms
   position_controller_.SetTrajectoryPoint(commands_.front());
   commands_.pop_front();
 
-  if (n_commands > 1) {
+  if (n_commands >= 1) {
     command_timer_.setPeriod(command_waiting_times_.front());
     command_waiting_times_.pop_front();
     command_timer_.start();
+    waypointHasBeenPublished_ = true;
+    ROS_INFO("PositionController got first MultiDOFJointTrajectory message.");
   }
 }
 
@@ -112,24 +112,24 @@ void PositionControllerNode::InitializeParams() {
 
   // Read parameters from rosparam.
   GetRosParameter(pnh, "beta_xy/beta_x",
-                  position_controller_.controller_parameters_.xy_gain_kp_.x(),
-                  &position_controller_.controller_parameters_.xy_gain_kp_.x());
+                  position_controller_.controller_parameters_.beta_xy_.x(),
+                  &position_controller_.controller_parameters_.beta_xy_.x());
   GetRosParameter(pnh, "beta_xy/beta_y",
-                  position_controller_.controller_parameters_.xy_gain_kp_.y(),
-                  &position_controller_.controller_parameters_.xy_gain_kp_.y());
+                  position_controller_.controller_parameters_.beta_xy_.y(),
+                  &position_controller_.controller_parameters_.beta_xy_.y());
   GetRosParameter(pnh, "beta_z/beta_z",
-                  position_controller_.controller_parameters_.z_gain_kp_,
-                  &position_controller_.controller_parameters_.z_gain_kp_);
+                  position_controller_.controller_parameters_.beta_z_,
+                  &position_controller_.controller_parameters_.beta_z_);
   
   GetRosParameter(pnh, "beta_phi/beta_phi",
-                  position_controller_.controller_parameters_.roll_gain_kp_,
-                  &position_controller_.controller_parameters_.roll_gain_kp_);
+                  position_controller_.controller_parameters_.beta_phi_,
+                  &position_controller_.controller_parameters_.beta_phi_);
   GetRosParameter(pnh, "beta_theta/beta_theta",
-                  position_controller_.controller_parameters_.pitch_gain_kp_,
-                  &position_controller_.controller_parameters_.pitch_gain_kp_);
+                  position_controller_.controller_parameters_.beta_theta_,
+                  &position_controller_.controller_parameters_.beta_theta_);
   GetRosParameter(pnh, "beta_psi/beta_psi",
-                  position_controller_.controller_parameters_.yaw_rate_gain_kp_,
-                  &position_controller_.controller_parameters_.yaw_rate_gain_kp_);
+                  position_controller_.controller_parameters_.beta_psi_,
+                  &position_controller_.controller_parameters_.beta_psi_);
 
   GetRosParameter(pnh, "mu_xy/mu_x",
                   position_controller_.controller_parameters_.mu_xy_.x(),
@@ -142,14 +142,14 @@ void PositionControllerNode::InitializeParams() {
                   &position_controller_.controller_parameters_.mu_z_);
   
   GetRosParameter(pnh, "mu_phi/mu_phi",
-                  position_controller_.controller_parameters_.mu_roll_,
-                  &position_controller_.controller_parameters_.mu_roll_);
+                  position_controller_.controller_parameters_.mu_phi_,
+                  &position_controller_.controller_parameters_.mu_phi_);
   GetRosParameter(pnh, "mu_theta/mu_theta",
-                  position_controller_.controller_parameters_.mu_pitch_,
-                  &position_controller_.controller_parameters_.mu_pitch_);
+                  position_controller_.controller_parameters_.mu_theta_,
+                  &position_controller_.controller_parameters_.mu_theta_);
   GetRosParameter(pnh, "mu_psi/mu_psi",
-                  position_controller_.controller_parameters_.mu_yaw_,
-                  &position_controller_.controller_parameters_.mu_yaw_);
+                  position_controller_.controller_parameters_.mu_psi_,
+                  &position_controller_.controller_parameters_.mu_psi_);
 
   GetVehicleParameters(pnh, &position_controller_.vehicle_parameters_);
   
@@ -177,30 +177,32 @@ void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& 
 
     ROS_INFO_ONCE("PositionController got first odometry message.");
 
-    //This functions allows to put the odometry message into the odometry variable--> _position, _orientation,_velocit_body,
-    //_angular_velocity
-    EigenOdometry odometry;
-    eigenOdometryFromMsg(odometry_msg, &odometry);
-    position_controller_.SetOdometry(odometry);
- 
-    Eigen::Vector4d ref_rotor_velocities;
-    position_controller_.CalculateRotorVelocities(&ref_rotor_velocities);
+    if (waypointHasBeenPublished_){
 
-    //creating a new mav message. actuator_msg is used to send the velocities of the propellers.  
-    mav_msgs::ActuatorsPtr actuator_msg(new mav_msgs::Actuators);
+	    //This functions allows to put the odometry message into the odometry variable--> _position, _orientation,_velocit_body,
+            //_angular_velocity
+	    EigenOdometry odometry;
+	    eigenOdometryFromMsg(odometry_msg, &odometry);
+	    position_controller_.SetOdometry(odometry);
 
-    //we use clear because we later want to be sure that we used the previously calculated velocity.
-    actuator_msg->angular_velocities.clear();
-    //for all propellers, we put them into actuator_msg so they will later be used to control the crazyflie.
-    for (int i = 0; i < ref_rotor_velocities.size(); i++)
-       actuator_msg->angular_velocities.push_back(ref_rotor_velocities[i]);
-    actuator_msg->header.stamp = odometry_msg->header.stamp;
+    
+	    Eigen::Vector4d ref_rotor_velocities;
+	    position_controller_.CalculateRotorVelocities(&ref_rotor_velocities);
 
-    //ROS_INFO("M0: %f, M1: %f, M2: %f, M3: %f", actuator_msg->angular_velocities[0], actuator_msg->angular_velocities[1], actuator_msg->angular_velocities[2],
-    //actuator_msg->angular_velocities[3]);
+	    //creating a new mav message. actuator_msg is used to send the velocities of the propellers.  
+	    mav_msgs::ActuatorsPtr actuator_msg(new mav_msgs::Actuators);
 
-    motor_velocity_reference_pub_.publish(actuator_msg);
- 
+	    //we use clear because we later want to be sure that we used the previously calculated velocity.
+	    actuator_msg->angular_velocities.clear();
+	    //for all propellers, we put them into actuator_msg so they will later be used to control the crazyflie.
+	    for (int i = 0; i < ref_rotor_velocities.size(); i++)
+	       actuator_msg->angular_velocities.push_back(ref_rotor_velocities[i]);
+	    actuator_msg->header.stamp = odometry_msg->header.stamp;
+
+	    ROS_INFO("M0: %f, M1: %f, M2: %f, M3: %f", actuator_msg->angular_velocities[0], actuator_msg->angular_velocities[1], actuator_msg->angular_velocities[2], actuator_msg->angular_velocities[3]);
+
+	    motor_velocity_reference_pub_.publish(actuator_msg);
+    }	 
 }
 
 
