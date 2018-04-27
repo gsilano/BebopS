@@ -312,9 +312,9 @@ void PositionController::AngularVelocityErrors(double* dot_e_phi_, double* dot_e
    theta_r_pre_ = theta_r;
    psi_r_pre_ = psi_r;
 
-   *dot_e_phi_ = phi_r_pre_ - state_.angularVelocity.x;
-   *dot_e_theta_ = theta_r_pre_ - state_.angularVelocity.y;
-   *dot_e_psi_ = psi_r_pre_ - state_.angularVelocity.z;
+   *dot_e_phi_ = dot_phi_r - state_.angularVelocity.x;
+   *dot_e_theta_ = dot_theta_r - state_.angularVelocity.y;
+   *dot_e_psi_ = dot_psi_r - state_.angularVelocity.z;
 
 }
 
