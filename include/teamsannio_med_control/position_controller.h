@@ -97,39 +97,61 @@ class PositionControllerParameters {
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         private:
             bool controller_active_;
-            bool first_step_position_controller;
-            bool first_step_attitude_controller;
 
-            double e_x_ = 0;
-            double e_y_ = 0;
-            double e_z_ = 0;
-            double dot_e_x_ = 0;
-            double dot_e_y_ = 0; 
-            double dot_e_z_ = 0;
+            //Controller gains
+            double beta_x_, beta_y_, beta_z_;
+            double beta_phi_, beta_theta_, beta_psi_;
+
+            double alpha_x_, alpha_y_, alpha_z_;
+            double alpha_phi_, alpha_theta_, alpha_psi_;
+
+            double mu_x_, mu_y_, mu_z_;
+            double mu_phi_, mu_theta_, mu_psi_;
+
+            //Position and linear velocity errors
+            double e_x_;
+            double e_y_;
+            double e_z_;
+            double dot_e_x_;
+            double dot_e_y_; 
+            double dot_e_z_;
  
-            double e_phi_ = 0;
-            double e_theta_ = 0;
-            double e_psi_ = 0;
-            double dot_e_phi_ = 0;
-            double dot_e_theta_ = 0; 
-            double dot_e_psi_ = 0;
+            //Attitude and angular velocity errors
+            double e_phi_;
+            double e_theta_;
+            double e_psi_;
+            double dot_e_phi_;
+            double dot_e_theta_; 
+            double dot_e_psi_;
 
-            double x_r_pre_ = 0;
-            double y_r_pre_ = 0;
-            double z_r_pre_ = 0;
+            //Needed to compute the derivates
+            double x_r_pre_;
+            double y_r_pre_;
+            double z_r_pre_;
 
-            double phi_r_pre_ = 0;
-            double theta_r_pre_ = 0;
-            double psi_r_pre_ = 0;
+            double phi_r_pre_;
+            double theta_r_pre_;
+            double psi_r_pre_;
 
-            ros::Time prev_time_pos;
-            ros::Duration delta_t_pos;
+            //Vehicle parameters
+            double bf_, m_, g_;
+            double l_, bm_;
+            double Ix_, Iy_, Iz_;
 
-            ros::Time prev_time_att;
-            ros::Duration delta_t_att;
+            ros::Time prev_time_pos_;
+            ros::Duration delta_t_pos_;
 
-            int64_t nanosecsPosition_pre_ = ros::Time::now().toNSec();
-            int64_t nanosecsAttitude_pre_ = ros::Time::now().toNSec();
+            ros::Time prev_time_att_;
+            ros::Duration delta_t_att_;
+            
+            ros::NodeHandle n1_;
+            ros::NodeHandle n2_;
+            ros::Timer timer1_;
+            ros::Timer timer2_;
+
+            //Callback functions to compute the errors among axis and angles
+            void CallbackAttitude(const ros::TimerEvent& event);
+            void CallbackPosition(const ros::TimerEvent& event);
 
 	    state_t state_;
             mav_msgs::EigenTrajectoryPoint command_trajectory_;
@@ -143,7 +165,6 @@ class PositionControllerParameters {
             void PositionErrors(double* e_x, double* e_y, double* e_z);
             void VelocityErrors(double* dot_e_x, double* dot_e_y, double* dot_e_z);
             void ReferenceAngles(double* phi_r, double* theta_r);
-            
 
     };
 

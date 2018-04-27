@@ -34,16 +34,11 @@ PositionControllerNode::PositionControllerNode() {
 
     ros::NodeHandle nh;
 
-    cmd_pose_sub_ = nh.subscribe(mav_msgs::default_topics::COMMAND_POSE, 1, &PositionControllerNode::CommandPoseCallback, this);
-    
     cmd_multi_dof_joint_trajectory_sub_ = nh.subscribe(mav_msgs::default_topics::COMMAND_TRAJECTORY, 1,  &PositionControllerNode::MultiDofJointTrajectoryCallback, this);
 
     odometry_sub_ = nh.subscribe(mav_msgs::default_topics::ODOMETRY, 1, &PositionControllerNode::OdometryCallback, this);
 
     motor_velocity_reference_pub_ = nh.advertise<mav_msgs::Actuators>(mav_msgs::default_topics::COMMAND_ACTUATORS, 1);
-
-    command_timer_ = nh.createTimer(ros::Duration(0), &PositionControllerNode::TimedCommandCallback, this,
-                                  true, false);
 
 }
 
@@ -65,45 +60,14 @@ void PositionControllerNode::MultiDofJointTrajectoryCallback(const trajectory_ms
   mav_msgs::EigenTrajectoryPoint eigen_reference;
   mav_msgs::eigenTrajectoryPointFromMsg(msg->points.front(), &eigen_reference);
   commands_.push_front(eigen_reference);
- 
-  for (size_t i = 1; i < n_commands; ++i) {
-    const trajectory_msgs::MultiDOFJointTrajectoryPoint& reference_before = msg->points[i-1];
-    const trajectory_msgs::MultiDOFJointTrajectoryPoint& current_reference = msg->points[i];
-
-    mav_msgs::eigenTrajectoryPointFromMsg(current_reference, &eigen_reference);
-
-    commands_.push_back(eigen_reference);
-    command_waiting_times_.push_back(current_reference.time_from_start - reference_before.time_from_start);
-  }
 
   // We can trigger the first command immediately.
-  position_controller_.SetTrajectoryPoint(commands_.front());
+  position_controller_.SetTrajectoryPoint(eigen_reference);
   commands_.pop_front();
 
   if (n_commands >= 1) {
-    command_timer_.setPeriod(command_waiting_times_.front());
-    command_waiting_times_.pop_front();
-    command_timer_.start();
     waypointHasBeenPublished_ = true;
     ROS_INFO("PositionController got first MultiDOFJointTrajectory message.");
-  }
-}
-
-void PositionControllerNode::TimedCommandCallback(const ros::TimerEvent& e) {
-
-  if(commands_.empty()){
-    ROS_WARN("Commands empty, this should not happen here");
-    return;
-  }
-
-  const mav_msgs::EigenTrajectoryPoint eigen_reference = commands_.front();
-  position_controller_.SetTrajectoryPoint(commands_.front());
-  commands_.pop_front();
-  command_timer_.stop();
-  if(!command_waiting_times_.empty()){
-    command_timer_.setPeriod(command_waiting_times_.front());
-    command_waiting_times_.pop_front();
-    command_timer_.start();
   }
 }
 
@@ -158,21 +122,6 @@ void PositionControllerNode::InitializeParams() {
 void PositionControllerNode::Publish(){
 }
 
-void PositionControllerNode::CommandPoseCallback(const geometry_msgs::PoseStampedConstPtr& pose_msg){
-
-    // Clear all pending commands.
-    command_timer_.stop();
-    commands_.clear();
-    command_waiting_times_.clear();
-
-    mav_msgs::EigenTrajectoryPoint eigen_reference;
-    mav_msgs::eigenTrajectoryPointFromPoseMsg(*pose_msg, &eigen_reference);
-    commands_.push_front(eigen_reference);
-
-    position_controller_.SetTrajectoryPoint(commands_.front());
-    commands_.pop_front();
-}
-
 void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg) {
 
     ROS_INFO_ONCE("PositionController got first odometry message.");
@@ -185,7 +134,6 @@ void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& 
 	    eigenOdometryFromMsg(odometry_msg, &odometry);
 	    position_controller_.SetOdometry(odometry);
 
-    
 	    Eigen::Vector4d ref_rotor_velocities;
 	    position_controller_.CalculateRotorVelocities(&ref_rotor_velocities);
 
@@ -199,7 +147,7 @@ void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& 
 	       actuator_msg->angular_velocities.push_back(ref_rotor_velocities[i]);
 	    actuator_msg->header.stamp = odometry_msg->header.stamp;
 
-	    ROS_INFO("M0: %f, M1: %f, M2: %f, M3: %f", actuator_msg->angular_velocities[0], actuator_msg->angular_velocities[1], actuator_msg->angular_velocities[2], actuator_msg->angular_velocities[3]);
+	    //ROS_INFO("M0: %f, M1: %f, M2: %f, M3: %f", actuator_msg->angular_velocities[0], actuator_msg->angular_velocities[1], actuator_msg->angular_velocities[2], actuator_msg->angular_velocities[3]);
 
 	    motor_velocity_reference_pub_.publish(actuator_msg);
     }	 
@@ -210,7 +158,7 @@ void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& 
 
 int main(int argc, char** argv){
     ros::init(argc, argv, "position_controller_node");
-    
+
     ros::NodeHandle nh2;
     
     teamsannio_med_control::PositionControllerNode position_controller_node;
@@ -219,3 +167,4 @@ int main(int argc, char** argv){
 
     return 0;
 }
+

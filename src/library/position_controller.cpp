@@ -34,14 +34,58 @@
 #define M_PI                      3.14159265358979323846  /* pi */
 #define TsP                       1e7  /* Position control sampling time */
 #define TsA                       5e6 /* Attitude control sampling time */
-#define cosPI4                    0.7071f /* cos(pi/4) */
 
 namespace teamsannio_med_control {
 
 PositionController::PositionController()
     : controller_active_(false),
-      first_step_position_controller(false),
-      first_step_attitude_controller(false){
+      e_x_(0),
+      e_y_(0),
+      e_z_(0),
+      dot_e_x_(0),
+      dot_e_y_(0), 
+      dot_e_z_(0),
+      e_phi_(0),
+      e_theta_(0),
+      e_psi_(0),
+      dot_e_phi_(0),
+      dot_e_theta_(0), 
+      dot_e_psi_(0),
+      x_r_pre_(0),
+      y_r_pre_(0),
+      z_r_pre_(0),
+      phi_r_pre_(0),
+      theta_r_pre_(0),
+      psi_r_pre_(0),
+      bf_(vehicle_parameters_.bf_),
+      l_(vehicle_parameters_.armLength_),
+      bm_(vehicle_parameters_.bm_),
+      m_(vehicle_parameters_.mass_),
+      g_(vehicle_parameters_.gravity_),
+      Ix_(vehicle_parameters_.inertia_(0,0)),
+      Iy_(vehicle_parameters_.inertia_(1,1)),
+      Iz_(vehicle_parameters_.inertia_(2,2)),
+      beta_x_(controller_parameters_.beta_xy_.x()),
+      beta_y_(controller_parameters_.beta_xy_.y()),
+      beta_z_(controller_parameters_.beta_z_),
+      beta_phi_(controller_parameters_.beta_phi_),
+      beta_theta_(controller_parameters_.beta_theta_),
+      beta_psi_(controller_parameters_.beta_psi_),
+      alpha_x_(1 - beta_x_),
+      alpha_y_(1 - beta_y_),
+      alpha_z_(1 - beta_z_),
+      alpha_phi_(1 - beta_phi_),
+      alpha_theta_(1 - beta_theta_),
+      alpha_psi_(1 - beta_psi_),
+      mu_x_(controller_parameters_.mu_xy_.x()),
+      mu_y_(controller_parameters_.mu_xy_.y()),
+      mu_z_(controller_parameters_.mu_z_),
+      mu_phi_(controller_parameters_.mu_phi_),
+      mu_theta_(controller_parameters_.mu_theta_),
+      mu_psi_(controller_parameters_.mu_psi_){  
+
+            timer1_ = n1_.createTimer(ros::Duration(0.005), &PositionController::CallbackAttitude, this, false, true);
+            timer2_ = n2_.createTimer(ros::Duration(0.01), &PositionController::CallbackPosition, this, false, true); 
 
 }
 
@@ -59,6 +103,11 @@ void PositionController::SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint
     controller_active_= true;
 }
 
+void PositionController::SetOdometryEstimated() {
+
+    extended_kalman_filter_bebop_.Estimator(&state_, &odometry_);
+}
+
 void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocities) {
     assert(rotor_velocities);
     
@@ -68,22 +117,16 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     return;
     }
 
-    double bf;
-    double l, bm;
-    bf = vehicle_parameters_.bf_;
-    bm  = vehicle_parameters_.bm_;
-    l  = vehicle_parameters_.armLength_;
-
     double u_T, u_phi, u_theta, u_psi;
     double u_x, u_y, u_Terr;
     AttitudeController(&u_phi, &u_theta, &u_psi);
     PosController(&u_x, &u_y, &u_T, &u_Terr);
     
     double first, second, third, fourth;
-    first = (1/ ( 4 * bf )) * u_T;
-    second = (1/ (4 * bf * l * cosPI4 ) ) * u_phi;
-    third = (1/ (4 * bf * l * cosPI4 ) ) * u_theta;
-    fourth = (1/ ( 4 * bf * bm)) * u_psi;
+    first = (1/ ( 4 * bf_ )) * u_T;
+    second = (1/ (4 * bf_ * l_ * cos(M_PI/4) ) ) * u_phi;
+    third = (1/ (4 * bf_ * l_ * cos(M_PI/4) ) ) * u_theta;
+    fourth = (1/ ( 4 * bf_ * bm_)) * u_psi;
 
     double not_sat1, not_sat2, not_sat3, not_sat4;
     not_sat1 = first - second - third - fourth;
@@ -91,6 +134,7 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     not_sat3 = first + second + third - fourth;
     not_sat4 = first - second + third + fourth;
 
+    //The values have been saturated to avoid the root square of negative values
     double sat1, sat2, sat3, sat4;
     if(not_sat1 < 0)
        sat1 = 0;
@@ -117,7 +161,8 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     omega_2 = sqrt(sat2);
     omega_3 = sqrt(sat3);
     omega_4 = sqrt(sat4);
-	
+    
+    //The propellers velocities is limited by taking into account the physical constrains
     if(omega_1 > 838)
        omega_1 = 838;
 	
@@ -131,11 +176,6 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
        omega_4 = 838;
 
     *rotor_velocities = Eigen::Vector4d(omega_1, omega_2, omega_3, omega_4);
-}
-
-void PositionController::SetOdometryEstimated() {
-
-    extended_kalman_filter_bebop_.Estimator(&state_, &odometry_);
 }
 
 
@@ -165,11 +205,11 @@ void PositionController::VelocityErrors(double* dot_e_x, double* dot_e_y, double
    z_r = command_trajectory_.position_W[2];
 
   // calculate delta_t
-  if (!prev_time_pos.isZero()) // Not first time through the program  
+  if (!prev_time_pos_.isZero()) // Not first time through the program  
   {
-    delta_t_pos = ros::Time::now() - prev_time_pos;
-    prev_time_pos = ros::Time::now();
-    if (0 == delta_t_pos.toSec())
+    delta_t_pos_ = ros::Time::now() - prev_time_pos_;
+    prev_time_pos_ = ros::Time::now();
+    if (0 == delta_t_pos_.toSec())
     {
       ROS_ERROR("delta_t is 0, skipping this loop. Possible overloaded cpu at time: %f", ros::Time::now().toSec());
       return;
@@ -178,14 +218,14 @@ void PositionController::VelocityErrors(double* dot_e_x, double* dot_e_y, double
   else
   {
     ROS_INFO("prev_time is 0, doing nothing");
-    prev_time_pos = ros::Time::now();
+    prev_time_pos_ = ros::Time::now();
     return;
   }
    
    double dot_x_r, dot_y_r, dot_z_r;
-   dot_x_r = (x_r - x_r_pre_)/delta_t_pos.toSec();
-   dot_y_r = (y_r - y_r_pre_)/delta_t_pos.toSec();
-   dot_z_r = (z_r - z_r_pre_)/delta_t_pos.toSec();
+   dot_x_r = (x_r - x_r_pre_)/delta_t_pos_.toSec();
+   dot_y_r = (y_r - y_r_pre_)/delta_t_pos_.toSec();
+   dot_z_r = (z_r - z_r_pre_)/delta_t_pos_.toSec();
 
    x_r_pre_ = x_r;
    y_r_pre_ = y_r;
@@ -210,6 +250,7 @@ void PositionController::PositionErrors(double* e_x, double* e_y, double* e_z){
    *e_x = x_r - state_.position.x;
    *e_y = y_r - state_.position.y;
    *e_z = z_r - state_.position.z;
+
 }
 
 void PositionController::PosController(double* u_x, double* u_y, double* u_T, double* u_Terr){
@@ -218,49 +259,17 @@ void PositionController::PosController(double* u_x, double* u_y, double* u_T, do
    assert(u_T);
    assert(u_Terr);
 
-   double m, g;
-   m = vehicle_parameters_.mass_;
-   g = vehicle_parameters_.gravity_;
-
-   double beta_x, beta_y, beta_z;
-   beta_x = controller_parameters_.beta_xy_.x();
-   beta_y = controller_parameters_.beta_xy_.y();
-   beta_z = controller_parameters_.beta_z_;
-
-   double alpha_x, alpha_y, alpha_z;
-   alpha_x = 1 - beta_x;
-   alpha_y = 1 - beta_y;
-   alpha_z = 1 - beta_z;
-
-   double mu_x, mu_y, mu_z;
-   mu_x = controller_parameters_.mu_xy_.x();
-   mu_y = controller_parameters_.mu_xy_.y();
-   mu_z =  controller_parameters_.mu_z_;
-
-   int64_t nanosecsPosition = ros::Time::now().toNSec();
-
-   if(!first_step_position_controller){
-      nanosecsPosition_pre_ = nanosecsPosition;
-      first_step_position_controller = true;
-   }
-
-   if(nanosecsPosition - nanosecsPosition_pre_ > TsP){
-      nanosecsPosition_pre_ = ros::Time::now().toNSec();
-      PositionErrors(&e_x_, &e_y_, &e_z_);
-      VelocityErrors(&dot_e_x_, &dot_e_y_, &dot_e_z_);
-   }
-
-   *u_x = m * ( (alpha_x/mu_x) * dot_e_x_) - ( (beta_x/pow(mu_x,2)) * e_x_);
-   *u_y = m * ( (alpha_y/mu_y) * dot_e_y_) -  ( (beta_y/pow(mu_y,2)) *  e_y_);
-   *u_Terr = m * ( g + ( (alpha_z/mu_z) * dot_e_z_) - ( (beta_z/pow(mu_z,2)) * e_z_) );
+   *u_x = m_ * ( (alpha_x_/mu_x_) * dot_e_x_) - ( (beta_x_/pow(mu_x_,2)) * e_x_);
+   *u_y = m_ * ( (alpha_y_/mu_y_) * dot_e_y_) -  ( (beta_y_/pow(mu_y_,2)) *  e_y_);
+   *u_Terr = m_ * ( g_ + ( (alpha_z_/mu_z_) * dot_e_z_) - ( (beta_z_/pow(mu_z_,2)) * e_z_) );
    *u_T = sqrt( pow(*u_x,2) + pow(*u_y,2) + pow(*u_Terr,2) );
    
 }
 
-void PositionController::AttitudeErrors(double* e_phi_, double* e_theta_, double* e_psi_){
-   assert(e_phi_);
-   assert(e_theta_);
-   assert(e_psi_);
+void PositionController::AttitudeErrors(double* e_phi, double* e_theta, double* e_psi){
+   assert(e_phi);
+   assert(e_theta);
+   assert(e_psi);
    
    double psi_r;
    psi_r = command_trajectory_.getYaw();
@@ -268,23 +277,23 @@ void PositionController::AttitudeErrors(double* e_phi_, double* e_theta_, double
    double phi_r, theta_r;
    ReferenceAngles(&phi_r, &theta_r);
 
-   *e_phi_ = phi_r - state_.attitude.roll;
-   *e_theta_ = theta_r - state_.attitude.pitch;
-   *e_psi_ = psi_r - state_.attitude.yaw;
+   *e_phi = phi_r - state_.attitude.roll;
+   *e_theta = theta_r - state_.attitude.pitch;
+   *e_psi = psi_r - state_.attitude.yaw;
 
 }
 
-void PositionController::AngularVelocityErrors(double* dot_e_phi_, double* dot_e_theta_, double* dot_e_psi_){
-   assert(dot_e_phi_);
-   assert(dot_e_theta_);
-   assert(dot_e_psi_);
+void PositionController::AngularVelocityErrors(double* dot_e_phi, double* dot_e_theta, double* dot_e_psi){
+   assert(dot_e_phi);
+   assert(dot_e_theta);
+   assert(dot_e_psi);
 
   // calculate delta_t
-  if (!prev_time_att.isZero()) // Not first time through the program  
+  if (!prev_time_att_.isZero()) // Not first time through the program  
   {
-    delta_t_att = ros::Time::now() - prev_time_att;
-    prev_time_att = ros::Time::now();
-    if (0 == delta_t_att.toSec())
+    delta_t_att_ = ros::Time::now() - prev_time_att_;
+    prev_time_att_ = ros::Time::now();
+    if (0 == delta_t_att_.toSec())
     {
       ROS_ERROR("delta_t is 0, skipping this loop. Possible overloaded cpu at time: %f", ros::Time::now().toSec());
       return;
@@ -293,7 +302,7 @@ void PositionController::AngularVelocityErrors(double* dot_e_phi_, double* dot_e
   else
   {
     ROS_INFO("prev_time is 0, doing nothing");
-    prev_time_att = ros::Time::now();
+    prev_time_att_ = ros::Time::now();
     return;
   }
 
@@ -304,17 +313,17 @@ void PositionController::AngularVelocityErrors(double* dot_e_phi_, double* dot_e
    ReferenceAngles(&phi_r, &theta_r);
    
    double dot_phi_r, dot_theta_r, dot_psi_r;
-   dot_phi_r = (phi_r - phi_r_pre_)/delta_t_att.toSec();
-   dot_theta_r = (theta_r - theta_r_pre_)/delta_t_att.toSec();
-   dot_psi_r = (psi_r - psi_r_pre_)/delta_t_att.toSec();
+   dot_phi_r = (phi_r - phi_r_pre_)/delta_t_att_.toSec();
+   dot_theta_r = (theta_r - theta_r_pre_)/delta_t_att_.toSec();
+   dot_psi_r = (psi_r - psi_r_pre_)/delta_t_att_.toSec();
 
    phi_r_pre_ = phi_r;
    theta_r_pre_ = theta_r;
    psi_r_pre_ = psi_r;
 
-   *dot_e_phi_ = dot_phi_r - state_.angularVelocity.x;
-   *dot_e_theta_ = dot_theta_r - state_.angularVelocity.y;
-   *dot_e_psi_ = dot_psi_r - state_.angularVelocity.z;
+   *dot_e_phi =  dot_phi_r - state_.angularVelocity.x;
+   *dot_e_theta =  dot_theta_r - state_.angularVelocity.y;
+   *dot_e_psi = dot_psi_r - state_.angularVelocity.z;
 
 }
 
@@ -322,45 +331,22 @@ void PositionController::AttitudeController(double* u_phi, double* u_theta, doub
    assert(u_phi);
    assert(u_theta);
    assert(u_psi);
+
+   *u_phi = Ix_ * ( ( ( (alpha_phi_/mu_phi_) * dot_e_phi_) - ( (beta_phi_/pow(mu_phi_,2)) * e_phi_) ) - ( ( (Iy_ - Iz_)/(Ix_ * mu_theta_ * mu_psi_) ) * e_theta_ * e_psi_) );
+   *u_theta = Iy_ * ( ( ( (alpha_theta_/mu_theta_) * dot_e_theta_) - ( (beta_theta_/pow(mu_theta_,2)) * e_theta_) ) - ( ( (Iz_ - Ix_)/(Iy_ * mu_phi_ * mu_psi_) ) * e_phi_ * e_psi_) );
+   *u_psi = Iz_ * ( ( ( (alpha_psi_/mu_psi_) * dot_e_psi_) - ( (beta_psi_/pow(mu_psi_,2)) * e_psi_) ) - ( ( (Ix_ - Iy_)/(Iz_ * mu_theta_ * mu_phi_) ) * e_theta_ * e_phi_) );
+}
+
+void PositionController::CallbackAttitude(const ros::TimerEvent& event){
+     
+     AttitudeErrors(&e_phi_, &e_theta_, &e_psi_);
+     AngularVelocityErrors(&dot_e_phi_, &dot_e_theta_, &dot_e_psi_);
+}
+
+void PositionController::CallbackPosition(const ros::TimerEvent& event){
  
-   double Ix, Iy, Iz;
-   Ix = vehicle_parameters_.inertia_(0,0);
-   Iy = vehicle_parameters_.inertia_(1,1);
-   Iz = vehicle_parameters_.inertia_(2,2);
-
-   double beta_phi, beta_theta, beta_psi;
-   beta_phi = controller_parameters_.beta_phi_;
-   beta_theta = controller_parameters_.beta_theta_;
-   beta_psi = controller_parameters_.beta_psi_;
-
-   double alpha_phi, alpha_theta, alpha_psi;
-   alpha_phi = 1 - beta_phi;
-   alpha_theta = 1 - beta_theta;
-   alpha_psi = 1 - beta_psi;
-
-   double mu_phi, mu_theta, mu_psi;
-   mu_phi = controller_parameters_.mu_phi_;
-   mu_theta = controller_parameters_.mu_theta_;
-   mu_psi =  controller_parameters_.mu_psi_;
-
-   int64_t nanosecsAttitude = ros::Time::now().toNSec();
-
-   if(!first_step_attitude_controller){
-      nanosecsAttitude_pre_ = nanosecsAttitude;
-      first_step_attitude_controller = true;
-   }
-   
-   if(nanosecsAttitude - nanosecsAttitude_pre_ > TsA){
-      nanosecsAttitude_pre_ = ros::Time::now().toNSec();
-      AttitudeErrors(&e_phi_, &e_theta_, &e_psi_);
-      AngularVelocityErrors(&dot_e_phi_, &dot_e_theta_, &dot_e_psi_);
-      
-   }
-
-
-   *u_phi = Ix * ( ( ( (alpha_phi/mu_phi) * dot_e_phi_) - ( (beta_phi/pow(mu_phi,2)) * e_phi_) ) - ( ( (Iy - Iz)/(Ix * mu_theta * mu_psi) ) * e_theta_ * e_psi_) );
-   *u_theta = Iy * ( ( ( (alpha_theta/mu_theta) * dot_e_theta_) - ( (beta_theta/pow(mu_theta,2)) * e_theta_) ) - ( ( (Iz - Ix)/(Iy * mu_phi * mu_psi) ) * e_phi_ * e_psi_) );
-   *u_psi = Iz * ( ( ( (alpha_psi/mu_psi) * dot_e_psi_) - ( (beta_psi/pow(mu_psi,2)) * e_psi_) ) - ( ( (Ix - Iy)/(Iz * mu_theta * mu_phi) ) * e_theta_ * e_phi_) );
+     PositionErrors(&e_x_, &e_y_, &e_z_);
+     VelocityErrors(&dot_e_x_, &dot_e_y_, &dot_e_z_);
 }
 
 

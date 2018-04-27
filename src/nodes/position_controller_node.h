@@ -54,9 +54,7 @@ namespace teamsannio_med_control {
             std::string namespace_;
 
             //subscribers
-            ros::Subscriber cmd_trajectory_sub_;
             ros::Subscriber cmd_multi_dof_joint_trajectory_sub_;
-            ros::Subscriber cmd_pose_sub_;
             ros::Subscriber odometry_sub_;
 
             //publisher
