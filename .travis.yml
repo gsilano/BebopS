@@ -68,9 +68,6 @@ before_install:
   - sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" > /etc/apt/sources.list.d/ros-latest.list'
   - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
   - sudo apt-get update
-  - sudo rm /var/lib/apt/lists/lock
-  - sudo rm /var/cache/apt/archives/lock
-  - sudo rm /var/lib/dpkg/lock
   - sudo apt-get install ros-$ROS_DISTRO-desktop-full ros-$ROS_DISTRO-joy ros-$ROS_DISTRO-octomap-ros python-wstool python-catkin-tools
   - sudo apt-get install protobuf-compiler libgoogle-glog-dev ros-$ROS_DISTRO-mavlink python-wstool python-catkin-tools protobuf-compiler 
   - sudo atp-get install libgoogle-glog-dev ros-$ROS_DISTRO-control-toolbox python-pip ros-$ROS_DISTRO-dynamic-reconfigure
@@ -90,8 +87,8 @@ install:
   # source it to set the path variables.
   - git clone https://github.com/gsilano/teamsannio_med_control.git
   - git clone https://github.com/gsilano/med_uav_description.git
-  - git clone https://github.com/larics/rotors_simulator.git
-  - git clone https://github.com/larics/mav_comm.git
+  - git clone https://github.com/gsilano/rotors_simulator.git
+  - git clone https://github.com/gsilano/mav_comm.git
   - cd ~/catkin_ws/src/rotors_simulator & git checkout med2018
   - cd ~/catkin_ws/src/mav_comm & git checkout med2018
   - cd ~/catkin_ws
