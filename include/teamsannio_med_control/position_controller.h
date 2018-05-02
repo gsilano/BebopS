@@ -89,6 +89,8 @@ class PositionControllerParameters {
 
             void SetOdometry(const EigenOdometry& odometry);
             void SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory);
+            void SetControllerGains();
+            void SetVehicleParameters();
             
             PositionControllerParameters controller_parameters_;
             ExtendedKalmanFilter extended_kalman_filter_bebop_;

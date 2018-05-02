@@ -116,7 +116,10 @@ void PositionControllerNode::InitializeParams() {
                   &position_controller_.controller_parameters_.mu_psi_);
 
   GetVehicleParameters(pnh, &position_controller_.vehicle_parameters_);
-  
+
+  position_controller_.SetControllerGains();
+  position_controller_.SetVehicleParameters();
+
 }
 
 void PositionControllerNode::Publish(){

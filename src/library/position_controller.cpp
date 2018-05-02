@@ -56,33 +56,7 @@ PositionController::PositionController()
       z_r_pre_(0),
       phi_r_pre_(0),
       theta_r_pre_(0),
-      psi_r_pre_(0),
-      bf_(vehicle_parameters_.bf_),
-      l_(vehicle_parameters_.armLength_),
-      bm_(vehicle_parameters_.bm_),
-      m_(vehicle_parameters_.mass_),
-      g_(vehicle_parameters_.gravity_),
-      Ix_(vehicle_parameters_.inertia_(0,0)),
-      Iy_(vehicle_parameters_.inertia_(1,1)),
-      Iz_(vehicle_parameters_.inertia_(2,2)),
-      beta_x_(controller_parameters_.beta_xy_.x()),
-      beta_y_(controller_parameters_.beta_xy_.y()),
-      beta_z_(controller_parameters_.beta_z_),
-      beta_phi_(controller_parameters_.beta_phi_),
-      beta_theta_(controller_parameters_.beta_theta_),
-      beta_psi_(controller_parameters_.beta_psi_),
-      alpha_x_(1 - beta_x_),
-      alpha_y_(1 - beta_y_),
-      alpha_z_(1 - beta_z_),
-      alpha_phi_(1 - beta_phi_),
-      alpha_theta_(1 - beta_theta_),
-      alpha_psi_(1 - beta_psi_),
-      mu_x_(controller_parameters_.mu_xy_.x()),
-      mu_y_(controller_parameters_.mu_xy_.y()),
-      mu_z_(controller_parameters_.mu_z_),
-      mu_phi_(controller_parameters_.mu_phi_),
-      mu_theta_(controller_parameters_.mu_theta_),
-      mu_psi_(controller_parameters_.mu_psi_){  
+      psi_r_pre_(0){  
 
             timer1_ = n1_.createTimer(ros::Duration(0.005), &PositionController::CallbackAttitude, this, false, true);
             timer2_ = n2_.createTimer(ros::Duration(0.01), &PositionController::CallbackPosition, this, false, true); 
@@ -91,16 +65,59 @@ PositionController::PositionController()
 
 PositionController::~PositionController() {}
 
+void PositionController::SetControllerGains(){
+
+      beta_x_ = controller_parameters_.beta_xy_.x();
+      beta_y_ = controller_parameters_.beta_xy_.y();
+      beta_z_ = controller_parameters_.beta_z_;
+
+      beta_phi_ = controller_parameters_.beta_phi_;
+      beta_theta_ = controller_parameters_.beta_theta_;
+      beta_psi_ = controller_parameters_.beta_psi_;
+
+      alpha_x_ = 1 - beta_x_;
+      alpha_y_ = 1 - beta_y_;
+      alpha_z_ = 1 - beta_z_;
+
+      alpha_phi_ = 1 - beta_phi_;
+      alpha_theta_ = 1 - beta_theta_;
+      alpha_psi_ = 1 - beta_psi_;
+
+      mu_x_ = controller_parameters_.mu_xy_.x();
+      mu_y_ = controller_parameters_.mu_xy_.y();
+      mu_z_ = controller_parameters_.mu_z_;
+
+      mu_phi_ = controller_parameters_.mu_phi_;
+      mu_theta_ = controller_parameters_.mu_theta_;
+      mu_psi_ = controller_parameters_.mu_psi_;
+
+}
+
+void PositionController::SetVehicleParameters(){
+
+      bf_ = vehicle_parameters_.bf_;
+      l_ = vehicle_parameters_.armLength_;
+      bm_ = vehicle_parameters_.bm_;
+      m_ = vehicle_parameters_.mass_;
+      g_ = vehicle_parameters_.gravity_;
+      Ix_ = vehicle_parameters_.inertia_(0,0);
+      Iy_ = vehicle_parameters_.inertia_(1,1);
+      Iz_ = vehicle_parameters_.inertia_(2,2);
+
+}
+
 void PositionController::SetOdometry(const EigenOdometry& odometry) {
     
     odometry_ = odometry; 
-    SetOdometryEstimated(); 
+    SetOdometryEstimated();
 
 }
 
 void PositionController::SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory) {
+
     command_trajectory_= command_trajectory;
     controller_active_= true;
+
 }
 
 void PositionController::SetOdometryEstimated() {
@@ -322,7 +339,7 @@ void PositionController::AngularVelocityErrors(double* dot_e_phi, double* dot_e_
    psi_r_pre_ = psi_r;
 
    *dot_e_phi =  dot_phi_r - state_.angularVelocity.x;
-   *dot_e_theta =  dot_theta_r - state_.angularVelocity.y;
+   *dot_e_theta = dot_theta_r - state_.angularVelocity.y;
    *dot_e_psi = dot_psi_r - state_.angularVelocity.z;
 
 }
