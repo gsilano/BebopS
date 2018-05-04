@@ -3,6 +3,7 @@
     <arg name="x" default="0.0" />
     <arg name="y" default="0.0" />
     <arg name="z" default="0.02" />
+    <arg name="world_name" default="basic"/>
     <arg name="wind_force" default="0.0"/>
     <arg name="wind_start" default="0.0"/>
     <arg name="wind_duration" default="0.0"/>
@@ -10,10 +11,11 @@
     <arg name="wind_direction_y" default="0.0"/>
     <arg name="wind_direction_z" default="1.0"/>
     
-    <include file="$(find gazebo_ros)/launch/empty_world.launch">
-       <arg name="paused" value="false" />
-       <arg name="use_sim_time" value="true"/>
-    </include>
+  <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find rotors_gazebo)/models"/>
+  <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find rotors_gazebo)/models"/>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find rotors_gazebo)/worlds/$(arg world_name).world" />
+  </include>
 
     <!-- Launch UAV -->
     <include file="$(find med_uav_description)/launch/spawn_bebop.launch">
