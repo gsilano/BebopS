@@ -40,6 +40,7 @@
 ################################################################################
 
 # Use ubuntu trusty (16.04) with sudo privileges.
+os: linux
 dist: xenial
 sudo: required
 language:
@@ -67,6 +68,8 @@ env:
 before_install:
   - sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" > /etc/apt/sources.list.d/ros-latest.list'
   - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+  - sudo rm /var/lib/dpkg/lock
+  - sudo dpkg --configure -a
   - sudo apt-get update
   - sudo apt-get install ros-$ROS_DISTRO-desktop-full ros-$ROS_DISTRO-joy ros-$ROS_DISTRO-octomap-ros python-wstool python-catkin-tools
   - sudo apt-get install protobuf-compiler libgoogle-glog-dev ros-$ROS_DISTRO-mavlink python-wstool python-catkin-tools protobuf-compiler 
@@ -75,7 +78,7 @@ before_install:
  # Prepare rosdep to install dependencies.  
   - sudo rosdep init 
   - rosdep update
-  - source /opt/ros/kinetic/setup.bash
+  - source /opt/ros/$ROS_DISTRO/setup.bash
   
 # Create a catkin workspace with the package under integration.
 install:
