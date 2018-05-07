@@ -191,7 +191,7 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
 	
     if(omega_4 > 838)
        omega_4 = 838;
-
+    
     *rotor_velocities = Eigen::Vector4d(omega_1, omega_2, omega_3, omega_4);
 }
 
@@ -248,9 +248,9 @@ void PositionController::VelocityErrors(double* dot_e_x, double* dot_e_y, double
    y_r_pre_ = y_r;
    z_r_pre_ = z_r;
    
-   *dot_e_x = dot_x_r - state_.linearVelocity.x;
-   *dot_e_y = dot_y_r - state_.linearVelocity.y; 
-   *dot_e_z = dot_z_r - state_.linearVelocity.z;
+   *dot_e_x = - state_.linearVelocity.x;
+   *dot_e_y = - state_.linearVelocity.y; 
+   *dot_e_z = - state_.linearVelocity.z;
    
 }
 
@@ -338,9 +338,9 @@ void PositionController::AngularVelocityErrors(double* dot_e_phi, double* dot_e_
    theta_r_pre_ = theta_r;
    psi_r_pre_ = psi_r;
 
-   *dot_e_phi =  dot_phi_r - state_.angularVelocity.x;
-   *dot_e_theta = dot_theta_r - state_.angularVelocity.y;
-   *dot_e_psi = dot_psi_r - state_.angularVelocity.z;
+   *dot_e_phi =  - state_.angularVelocity.x;
+   *dot_e_theta = - state_.angularVelocity.y;
+   *dot_e_psi = - state_.angularVelocity.z;
 
 }
 
