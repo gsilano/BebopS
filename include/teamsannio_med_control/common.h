@@ -46,21 +46,30 @@ static const std::string kDefaultOdometryTopic =
 
 struct EigenOdometry {
   EigenOdometry()
-      : position(0.0, 0.0, 0.0),
+      : timeStampSec(-1),
+        timeStampNsec(-1),
+        position(0.0, 0.0, 0.0),
         orientation(Eigen::Quaterniond::Identity()),
         velocity(0.0, 0.0, 0.0),
         angular_velocity(0.0, 0.0, 0.0) {};
 
-  EigenOdometry(const Eigen::Vector3d& _position,
+  EigenOdometry(const double _timeStampSec,
+                const double _timeStampNsec,
+                const Eigen::Vector3d& _position,
                 const Eigen::Quaterniond& _orientation,
                 const Eigen::Vector3d& _velocity,
                 const Eigen::Vector3d& _angular_velocity) {
+    
+    timeStampSec = _timeStampSec;
+    timeStampNsec = _timeStampNsec;
     position = _position;
     orientation = _orientation;
     velocity = _velocity;
     angular_velocity = _angular_velocity;
   };
 
+  double timeStampSec; //nano seconds timeStamp Odometry message
+  double timeStampNsec; //nano seconds timeStamp Odometry message
   Eigen::Vector3d position;
   Eigen::Quaterniond orientation;
   Eigen::Vector3d velocity; // Velocity is expressed in the Body frame!
@@ -69,6 +78,8 @@ struct EigenOdometry {
 
 inline void eigenOdometryFromMsg(const nav_msgs::OdometryConstPtr& msg,
                                  EigenOdometry* odometry) {
+  odometry->timeStampSec = msg->header.stamp.sec;
+  odometry->timeStampNsec = msg->header.stamp.nsec;
   odometry->position = mav_msgs::vector3FromPointMsg(msg->pose.pose.position);
   odometry->orientation = mav_msgs::quaternionFromMsg(msg->pose.pose.orientation);
   odometry->velocity = mav_msgs::vector3FromMsg(msg->twist.twist.linear);

@@ -38,16 +38,17 @@ namespace teamsannio_med_control {
 static const Eigen::Vector2d kPDefaultXYController = Eigen::Vector2d(-1.3351, -1.1307);
 static const double kPDefaultAltitudeController = -1.5994;
 
-static const double kPDefaultPitchController = -2.7457;
 static const double kPDefaultRollController = -2.2616;
+static const double kPDefaultPitchController = -2.7457;
 static const double kPDefaultYawRateController = -1.8249;
 
-static const Eigen::Vector2d MuDefaultXYController = Eigen::Vector2d(1, 1);
+static const Eigen::Vector2d MuDefaultXYController = Eigen::Vector2d(0.08, 0.03);
 static const double MuDefaultAltitudeController = 0.12;
 
+static const double MuDefaultRollController = 0.09;
 static const double MuDefaultPitchController = 0.26;
 static const double MuDefaultYawRateController = 0.04;
-static const double MuDefaultRollController = 0.09;
+
 
 
 class PositionControllerParameters {
@@ -126,25 +127,10 @@ class PositionControllerParameters {
             double dot_e_theta_; 
             double dot_e_psi_;
 
-            //Needed to compute the derivates
-            double x_r_pre_;
-            double y_r_pre_;
-            double z_r_pre_;
-
-            double phi_r_pre_;
-            double theta_r_pre_;
-            double psi_r_pre_;
-
             //Vehicle parameters
             double bf_, m_, g_;
             double l_, bm_;
             double Ix_, Iy_, Iz_;
-
-            ros::Time prev_time_pos_;
-            ros::Duration delta_t_pos_;
-
-            ros::Time prev_time_att_;
-            ros::Duration delta_t_att_;
             
             ros::NodeHandle n1_;
             ros::NodeHandle n2_;

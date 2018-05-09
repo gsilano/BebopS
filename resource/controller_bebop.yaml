@@ -4,8 +4,8 @@ beta_z: {beta_z: -1.5994}
 beta_phi: {beta_phi: -2.2616}
 beta_theta: {beta_theta: -2.7457}
 beta_psi: {beta_psi: -1.8249}
-mu_xy: {mu_x: 1, mu_y: 1}
+mu_xy: {mu_x: 0.08, mu_y: 0.03}
 mu_z: {mu_z: 0.12}
-mu_theta: {mu_theta: 0.26}
 mu_phi: {mu_phi: 0.09}
+mu_theta: {mu_theta: 0.26}
 mu_psi: {mu_psi: 0.04}
