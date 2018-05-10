@@ -38,8 +38,8 @@
 
 
 #define M_PI                      3.14159265358979323846  /* pi */
-#define TsP                       1e7  /* Position control sampling time */
-#define TsA                       5e6 /* Attitude control sampling time */
+#define TsP                       10e-3  /* Position control sampling time */
+#define TsA                       5e-3 /* Attitude control sampling time */
 
 using namespace std;
 
@@ -60,12 +60,21 @@ PositionController::PositionController()
       dot_e_theta_(0), 
       dot_e_psi_(0){  
 
-            timer1_ = n1_.createTimer(ros::Duration(0.005), &PositionController::CallbackAttitude, this, false, true);
-            timer2_ = n2_.createTimer(ros::Duration(0.010), &PositionController::CallbackPosition, this, false, true); 
+            timer1_ = n1_.createTimer(ros::Duration(TsA), &PositionController::CallbackAttitude, this, false, true);
+            timer2_ = n2_.createTimer(ros::Duration(TsP), &PositionController::CallbackPosition, this, false, true); 
             timer3_ = n3_.createTimer(ros::Duration(3.0), &PositionController::CallbackSaveData, this, false, true);
 
             //Cleaning the string vector contents
             listControlSignals_.clear();
+			listControlSignals_.clear();
+            listControlMixerTerms_.clear();
+            listPropellersAngularVelocities_.clear();
+            listReferenceAngles_.clear();
+            listVelocityErrors_.clear();
+            listDroneAttitude_.clear();
+            listTrajectoryErrors_.clear();
+            listAttitudeErrors_.clear();
+            listDerivativeAttitudeErrors_.clear();
 
 }
 
