@@ -26,6 +26,9 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <sstream>
+#include <iterator>
+
 #include <ros/ros.h>
 #include <chrono>
 #include <inttypes.h>
@@ -59,10 +62,110 @@ PositionController::PositionController()
 
             timer1_ = n1_.createTimer(ros::Duration(0.005), &PositionController::CallbackAttitude, this, false, true);
             timer2_ = n2_.createTimer(ros::Duration(0.010), &PositionController::CallbackPosition, this, false, true); 
+            timer3_ = n3_.createTimer(ros::Duration(3.0), &PositionController::CallbackSaveData, this, false, true);
+
+            //Cleaning the string vector contents
+            listControlSignals_.clear();
 
 }
 
 PositionController::~PositionController() {}
+
+void PositionController::CallbackSaveData(const ros::TimerEvent& event){
+
+      ofstream fileControllerGains;
+      ofstream fileVehicleParameters;
+      ofstream fileControlSignals;
+      ofstream fileControlMixerTerms;
+      ofstream filePropellersAngularVelocities;
+      ofstream fileReferenceAngles;
+      ofstream fileVelocityErrors;
+      ofstream fileDroneAttiude;
+      ofstream fileTrajectoryErrors;
+      ofstream fileAttitudeErrors;
+      ofstream fileDerivativeAttitudeErrors;
+
+    
+      ROS_INFO("CallbackSavaData function is working. Time: %f seconds, %f nanoseconds", odometry_.timeStampSec, odometry_.timeStampNsec);
+    
+      fileControllerGains.open ("/home/giuseppe/Scrivania/controllerGains.csv", std::ios_base::app);
+      fileVehicleParameters.open ("/home/giuseppe/Scrivania/vehicleParamters.csv", std::ios_base::app);
+      fileControlSignals.open ("/home/giuseppe/Scrivania/controlSignals.csv", std::ios_base::app);
+      fileControlMixerTerms.open ("/home/giuseppe/Scrivania/controlMixer.csv", std::ios_base::app);
+      filePropellersAngularVelocities.open ("/home/giuseppe/Scrivania/propellersAngularVelocities.csv", std::ios_base::app);
+      fileReferenceAngles.open ("/home/giuseppe/Scrivania/referenceAngles.csv", std::ios_base::app);
+      fileVelocityErrors.open ("/home/giuseppe/Scrivania/velocityErrors.csv", std::ios_base::app);
+      fileDroneAttiude.open ("/home/giuseppe/Scrivania/droneAttitude.csv", std::ios_base::app);
+      fileTrajectoryErrors.open ("/home/giuseppe/Scrivania/trajectoryErrors.csv", std::ios_base::app);
+      fileAttitudeErrors.open ("/home/giuseppe/Scrivania/attitudeErrors.csv", std::ios_base::app);
+      fileDerivativeAttitudeErrors.open ("/home/giuseppe/Scrivania/derivativeAttitudeErrors.csv", std::ios_base::app);
+
+      //Saving vehicle parameters in a file
+      fileControllerGains << beta_x_ << "," << beta_y_ << "," << beta_z_ << "," << alpha_x_ << "," << alpha_y_ << "," << alpha_z_ << "," << beta_phi_ << "," << beta_theta_ << "," << beta_psi_ << "," << alpha_phi_ << "," << alpha_theta_ << "," << alpha_psi_ << "," << mu_x_ << "," << mu_y_ << "," << mu_z_ << "," << mu_phi_ << "," << mu_theta_ << "," << mu_psi_ << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+
+      //Saving vehicle parameters in a file
+      fileVehicleParameters << bf_ << "," << l_ << "," << bm_ << "," << m_ << "," << g_ << "," << Ix_ << "," << Iy_ << "," << Iz_ << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+
+      //Saving control signals in a file
+      for (unsigned n=0; n < listControlSignals_.size(); ++n) {
+          fileControlSignals << listControlSignals_.at( n );
+      }
+
+      //Saving the control mixer terms in a file
+      for (unsigned n=0; n < listControlMixerTerms_.size(); ++n) {
+          fileControlMixerTerms << listControlMixerTerms_.at( n );
+      }
+
+      //Saving the propellers angular velocities in a file
+      for (unsigned n=0; n < listPropellersAngularVelocities_.size(); ++n) {
+          filePropellersAngularVelocities << listPropellersAngularVelocities_.at( n );
+      }
+
+      //Saving the reference angles in a file
+      for (unsigned n=0; n < listReferenceAngles_.size(); ++n) {
+          fileReferenceAngles << listReferenceAngles_.at( n );
+      }
+
+      //Saving the velcoty errors in a file
+      for (unsigned n=0; n < listVelocityErrors_.size(); ++n) {
+          fileVelocityErrors << listVelocityErrors_.at( n );
+      }
+
+      //Saving the drone attitude in a file
+      for (unsigned n=0; n < listDroneAttitude_.size(); ++n) {
+          fileDroneAttiude << listDroneAttitude_.at( n );
+      }
+ 
+      //Saving the trajectory errors in a file
+      for (unsigned n=0; n < listTrajectoryErrors_.size(); ++n) {
+          fileTrajectoryErrors << listTrajectoryErrors_.at( n );
+      }
+
+      //Saving the attitude errors in a file
+      for (unsigned n=0; n < listAttitudeErrors_.size(); ++n) {
+          fileAttitudeErrors << listAttitudeErrors_.at( n );
+      }
+
+      //Saving the derivative attitude errors in a file
+      for (unsigned n=0; n < listDerivativeAttitudeErrors_.size(); ++n) {
+          fileDerivativeAttitudeErrors << listDerivativeAttitudeErrors_.at( n );
+      }
+
+
+      //Closing all opened files
+      fileControllerGains.close ();
+      fileVehicleParameters.close ();
+      fileControlSignals.close ();
+      fileControlMixerTerms.close();
+      filePropellersAngularVelocities.close();
+      fileReferenceAngles.close();
+      fileVelocityErrors.close();
+      fileDroneAttiude.close();
+      fileTrajectoryErrors.close();
+      fileAttitudeErrors.close();
+      fileDerivativeAttitudeErrors.close();
+
+}
 
 void PositionController::SetControllerGains(){
 
@@ -88,12 +191,7 @@ void PositionController::SetControllerGains(){
 
       mu_phi_ = controller_parameters_.mu_phi_;
       mu_theta_ = controller_parameters_.mu_theta_;
-      mu_psi_ = controller_parameters_.mu_psi_;
-
-    //Saving vehicle parameters in a file
-    ofstream file;
-    file.open ("/home/giuseppe/Scrivania/controllerGains.csv", std::ios_base::app);
-    file << beta_x_ << "," << beta_y_ << "," << beta_z_ << "," << alpha_x_ << "," << alpha_y_ << "," << alpha_z_ << "," << beta_phi_ << "," << beta_theta_ << "," << beta_psi_ << "," << alpha_phi_ << "," << alpha_theta_ << "," << alpha_psi_ << "," << mu_x_ << "," << mu_y_ << "," << mu_z_ << "," << mu_phi_ << "," << mu_theta_ << "," << mu_psi_ << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+      mu_psi_ = controller_parameters_.mu_psi_;  
 
 }
 
@@ -107,11 +205,6 @@ void PositionController::SetVehicleParameters(){
       Ix_ = vehicle_parameters_.inertia_(0,0);
       Iy_ = vehicle_parameters_.inertia_(1,1);
       Iz_ = vehicle_parameters_.inertia_(2,2);
-
-    //Saving vehicle parameters in a file
-    ofstream file;
-    file.open ("/home/giuseppe/Scrivania/vehicleParamters.csv", std::ios_base::app);
-    file << bf_ << "," << l_ << "," << bm_ << "," << m_ << "," << g_ << "," << Ix_ << "," << Iy_ << "," << Iz_ << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
 }
 
@@ -149,9 +242,11 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     PosController(&u_x, &u_y, &u_T, &u_Terr);
 
     //Saving control signals in a file
-    ofstream fileControlSignals;
-    fileControlSignals.open ("/home/giuseppe/Scrivania/controlSignals.csv", std::ios_base::app);
-    fileControlSignals << u_T << "," << u_phi << "," << u_theta << "," << u_psi << "," << u_x << "," << u_y << "," << u_Terr << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+    std::stringstream tempControlSignals;
+    tempControlSignals << u_T << "," << u_phi << "," << u_theta << "," << u_psi << "," << u_x << "," << u_y << "," << u_Terr << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+
+    listControlSignals_.push_back(tempControlSignals.str());
+
     
     double first, second, third, fourth;
     first = (1/ ( 4 * bf_ )) * u_T;
@@ -160,9 +255,10 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     fourth = (1/ ( 4 * bf_ * bm_)) * u_psi;
 
     //Saving the control mixer terms in a file
-    ofstream fileControlMixerTerms;
-    fileControlMixerTerms.open ("/home/giuseppe/Scrivania/controlMixer.csv", std::ios_base::app);
-    fileControlMixerTerms << first << "," << second << "," << third << "," << fourth << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+    std::stringstream tempControlMixerTerms;
+    tempControlMixerTerms << first << "," << second << "," << third << "," << fourth << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+
+    listControlMixerTerms_.push_back(tempControlMixerTerms.str());
 
     double not_sat1, not_sat2, not_sat3, not_sat4;
     not_sat1 = first - second - third - fourth;
@@ -213,9 +309,10 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
        omega_4 = maxRotorsVelocity;
 
     //Saving propellers angular velocities in a file
-    ofstream filePropellersAngularVelocities;
-    filePropellersAngularVelocities.open ("/home/giuseppe/Scrivania/propellersAngularVelocities.csv", std::ios_base::app);
-    filePropellersAngularVelocities << omega_1 << "," << omega_2 << "," << omega_3 << "," << omega_4 << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+    std::stringstream tempPropellersAngularVelocities;
+    tempPropellersAngularVelocities << omega_1 << "," << omega_2 << "," << omega_3 << "," << omega_4 << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+
+    listPropellersAngularVelocities_.push_back(tempPropellersAngularVelocities.str());
     
     *rotor_velocities = Eigen::Vector4d(omega_1, omega_2, omega_3, omega_4);
 }
@@ -235,10 +332,11 @@ void PositionController::ReferenceAngles(double* phi_r, double* theta_r){
    *phi_r = atan( cos(*theta_r) * ( ( (u_x * sin(psi_r)) - (u_y * cos(psi_r)) ) / (u_Terr) ) );
 
     //Saving reference angles in a file
-    ofstream file;
-    file.open ("/home/giuseppe/Scrivania/referenceAngles.csv", std::ios_base::app);
-    file << *theta_r << "," << *phi_r << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+    std::stringstream tempReferenceAngles;
+    tempReferenceAngles << *theta_r << "," << *phi_r << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
+    listReferenceAngles_.push_back(tempReferenceAngles.str());
+    
 }
 
 void PositionController::VelocityErrors(double* dot_e_x, double* dot_e_y, double* dot_e_z){
@@ -275,14 +373,16 @@ void PositionController::VelocityErrors(double* dot_e_x, double* dot_e_y, double
    *dot_e_z = - dot_z;
 
     //Saving velocity errors in a file
-    ofstream fileVelocityErrors;
-    fileVelocityErrors.open ("/home/giuseppe/Scrivania/velocityErrors.csv", std::ios_base::app);
-    fileVelocityErrors << *dot_e_x << "," << *dot_e_y << "," << *dot_e_z << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+    std::stringstream tempVelocityErrors;
+    tempVelocityErrors << *dot_e_x << "," << *dot_e_y << "," << *dot_e_z << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+
+    listVelocityErrors_.push_back(tempVelocityErrors.str());
 
     //Saving drone attitude in a file
-    ofstream fileDroneAttiude;
-    fileDroneAttiude.open ("/home/giuseppe/Scrivania/droneAttitude.csv", std::ios_base::app);
-    fileDroneAttiude << phi << "," << theta << "," << psi << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+    std::stringstream tempDroneAttitude;
+    tempDroneAttitude << phi << "," << theta << "," << psi << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+
+    listDroneAttitude_.push_back(tempDroneAttitude.str());
    
 }
 
@@ -301,9 +401,10 @@ void PositionController::PositionErrors(double* e_x, double* e_y, double* e_z){
    *e_z = z_r - state_.position.z;
 
     //Saving trajectory errors in a file
-    ofstream file;
-    file.open ("/home/giuseppe/Scrivania/trajectoryErrors.csv", std::ios_base::app);
-    file << *e_x << "," << *e_y << "," << *e_z << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+    std::stringstream tempTrajectoryErrors;
+    tempTrajectoryErrors << *e_x << "," << *e_y << "," << *e_z << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+
+    listTrajectoryErrors_.push_back(tempTrajectoryErrors.str());
 
 }
 
@@ -335,10 +436,11 @@ void PositionController::AttitudeErrors(double* e_phi, double* e_theta, double* 
    *e_theta = theta_r - state_.attitude.pitch;
    *e_psi = psi_r - state_.attitude.yaw;
 
-    //Saving attitude errors in a file
-    ofstream file;
-    file.open ("/home/giuseppe/Scrivania/attitudeErrors.csv", std::ios_base::app);
-    file << *e_phi << "," << *e_theta << "," << *e_psi << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+    //Saving attitude errors in a file    
+    std::stringstream tempAttitudeErrors;
+    tempAttitudeErrors << *e_phi << "," << *e_theta << "," << *e_psi << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+
+    listAttitudeErrors_.push_back(tempAttitudeErrors.str());
 
 }
 
@@ -368,9 +470,10 @@ void PositionController::AngularVelocityErrors(double* dot_e_phi, double* dot_e_
    *dot_e_psi = - dot_psi;
 
     //Saving attitude derivate errors in a file
-    ofstream file;
-    file.open ("/home/giuseppe/Scrivania/derivativeAttitudeErrors.csv", std::ios_base::app);
-    file << *dot_e_phi << "," << *dot_e_theta << "," << *dot_e_psi << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+    std::stringstream tempDerivativeAttitudeErrors;
+    tempDerivativeAttitudeErrors << *dot_e_phi << "," << *dot_e_theta << "," << *dot_e_psi << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+
+    listDerivativeAttitudeErrors_.push_back(tempDerivativeAttitudeErrors.str());
 
 }
 

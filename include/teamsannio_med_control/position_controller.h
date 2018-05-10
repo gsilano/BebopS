@@ -22,12 +22,17 @@
 #include <mav_msgs/conversions.h>
 #include <mav_msgs/eigen_mav_msgs.h>
 
+
+#include <string>
+
 #include <ros/time.h>
 
 #include "extendedKalmanFilter.h"
 #include "stabilizer_types.h"
 #include "parameters.h"
 #include "common.h"
+
+using namespace std;
 
 
 
@@ -101,6 +106,17 @@ class PositionControllerParameters {
         private:
             bool controller_active_;
 
+            //Sting vectors used to stare data
+            std::vector<string> listControlSignals_;
+            std::vector<string> listControlMixerTerms_;
+            std::vector<string> listPropellersAngularVelocities_;
+            std::vector<string> listReferenceAngles_;
+            std::vector<string> listVelocityErrors_;
+            std::vector<string> listDroneAttitude_;
+            std::vector<string> listTrajectoryErrors_;
+            std::vector<string> listAttitudeErrors_;
+            std::vector<string> listDerivativeAttitudeErrors_;
+          
             //Controller gains
             double beta_x_, beta_y_, beta_z_;
             double beta_phi_, beta_theta_, beta_psi_;
@@ -134,12 +150,15 @@ class PositionControllerParameters {
             
             ros::NodeHandle n1_;
             ros::NodeHandle n2_;
+            ros::NodeHandle n3_;
             ros::Timer timer1_;
             ros::Timer timer2_;
+            ros::Timer timer3_;
 
             //Callback functions to compute the errors among axis and angles
             void CallbackAttitude(const ros::TimerEvent& event);
             void CallbackPosition(const ros::TimerEvent& event);
+            void CallbackSaveData(const ros::TimerEvent& event);
 
 	    state_t state_;
             mav_msgs::EigenTrajectoryPoint command_trajectory_;
