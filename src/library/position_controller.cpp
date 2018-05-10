@@ -247,6 +247,36 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
 
     listControlSignals_.push_back(tempControlSignals.str());
 
+    //Saving drone attitude in a file
+    std::stringstream tempDroneAttitude;
+    tempDroneAttitude << state_.attitude.roll << "," << state_.attitude.pitch << "," << state_.attitude.yaw << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+
+    listDroneAttitude_.push_back(tempDroneAttitude.str());
+
+    //Saving velocity errors in a file
+    std::stringstream tempVelocityErrors;
+    tempVelocityErrors << dot_e_x_ << "," << dot_e_y_ << "," << dot_e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+
+    listVelocityErrors_.push_back(tempVelocityErrors.str());
+
+    //Saving trajectory errors in a file
+    std::stringstream tempTrajectoryErrors;
+    tempTrajectoryErrors << e_x_ << "," << e_y_ << "," << e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+
+    listTrajectoryErrors_.push_back(tempTrajectoryErrors.str());
+
+    //Saving attitude derivate errors in a file
+    std::stringstream tempDerivativeAttitudeErrors;
+    tempDerivativeAttitudeErrors << dot_e_phi_ << "," << dot_e_theta_ << "," << dot_e_psi_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+
+    //Saving attitude errors in a file    
+    std::stringstream tempAttitudeErrors;
+    tempAttitudeErrors << e_phi_ << "," << e_theta_ << "," << e_psi_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+
+    listAttitudeErrors_.push_back(tempAttitudeErrors.str());
+
+    listDerivativeAttitudeErrors_.push_back(tempDerivativeAttitudeErrors.str());
+
     
     double first, second, third, fourth;
     first = (1/ ( 4 * bf_ )) * u_T;
@@ -371,18 +401,6 @@ void PositionController::VelocityErrors(double* dot_e_x, double* dot_e_y, double
    *dot_e_x = - dot_x;
    *dot_e_y = - dot_y; 
    *dot_e_z = - dot_z;
-
-    //Saving velocity errors in a file
-    std::stringstream tempVelocityErrors;
-    tempVelocityErrors << *dot_e_x << "," << *dot_e_y << "," << *dot_e_z << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
-
-    listVelocityErrors_.push_back(tempVelocityErrors.str());
-
-    //Saving drone attitude in a file
-    std::stringstream tempDroneAttitude;
-    tempDroneAttitude << phi << "," << theta << "," << psi << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
-
-    listDroneAttitude_.push_back(tempDroneAttitude.str());
    
 }
 
@@ -399,12 +417,6 @@ void PositionController::PositionErrors(double* e_x, double* e_y, double* e_z){
    *e_x = x_r - state_.position.x;
    *e_y = y_r - state_.position.y;
    *e_z = z_r - state_.position.z;
-
-    //Saving trajectory errors in a file
-    std::stringstream tempTrajectoryErrors;
-    tempTrajectoryErrors << *e_x << "," << *e_y << "," << *e_z << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
-
-    listTrajectoryErrors_.push_back(tempTrajectoryErrors.str());
 
 }
 
@@ -436,12 +448,6 @@ void PositionController::AttitudeErrors(double* e_phi, double* e_theta, double* 
    *e_theta = theta_r - state_.attitude.pitch;
    *e_psi = psi_r - state_.attitude.yaw;
 
-    //Saving attitude errors in a file    
-    std::stringstream tempAttitudeErrors;
-    tempAttitudeErrors << *e_phi << "," << *e_theta << "," << *e_psi << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
-
-    listAttitudeErrors_.push_back(tempAttitudeErrors.str());
-
 }
 
 void PositionController::AngularVelocityErrors(double* dot_e_phi, double* dot_e_theta, double* dot_e_psi){
@@ -468,12 +474,6 @@ void PositionController::AngularVelocityErrors(double* dot_e_phi, double* dot_e_
    *dot_e_phi =  - dot_phi;
    *dot_e_theta = - dot_theta;
    *dot_e_psi = - dot_psi;
-
-    //Saving attitude derivate errors in a file
-    std::stringstream tempDerivativeAttitudeErrors;
-    tempDerivativeAttitudeErrors << *dot_e_phi << "," << *dot_e_theta << "," << *dot_e_psi << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
-
-    listDerivativeAttitudeErrors_.push_back(tempDerivativeAttitudeErrors.str());
 
 }
 
