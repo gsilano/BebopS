@@ -84,8 +84,6 @@ void ExtendedKalmanFilter::Quaternion2Euler(double* roll, double* pitch, double*
     tf::Matrix3x3 m(q);
     m.getRPY(*roll, *pitch, *yaw);
 
-    //We need to change the sign becase the conversion is along XYZ and not ZYX, on wich the control algorithms has been designed
-    *roll=-1 * *roll;
 
 }
 
