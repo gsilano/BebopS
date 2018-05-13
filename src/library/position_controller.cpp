@@ -40,6 +40,7 @@
 #define M_PI                      3.14159265358979323846  /* pi */
 #define TsP                       10e-3  /* Position control sampling time */
 #define TsA                       5e-3 /* Attitude control sampling time */
+#define storeTime                 3  /* Store time*/
 
 using namespace std;
 
@@ -47,6 +48,7 @@ namespace teamsannio_med_control {
 
 PositionController::PositionController()
     : controller_active_(false),
+	  dataStoring_active_(false),
       e_x_(0),
       e_y_(0),
       e_z_(0),
@@ -62,19 +64,25 @@ PositionController::PositionController()
 
             timer1_ = n1_.createTimer(ros::Duration(TsA), &PositionController::CallbackAttitude, this, false, true);
             timer2_ = n2_.createTimer(ros::Duration(TsP), &PositionController::CallbackPosition, this, false, true); 
-            timer3_ = n3_.createTimer(ros::Duration(3.0), &PositionController::CallbackSaveData, this, false, true);
+			    //this serves to inactivate the controller if we don't recieve a trajectory
+    
+	        if(dataStoring_active_){
+               timer3_ = n3_.createTimer(ros::Duration(storeTime), &PositionController::CallbackSaveData, this, false, true);
 
-            //Cleaning the string vector contents
-            listControlSignals_.clear();
-			listControlSignals_.clear();
-            listControlMixerTerms_.clear();
-            listPropellersAngularVelocities_.clear();
-            listReferenceAngles_.clear();
-            listVelocityErrors_.clear();
-            listDroneAttitude_.clear();
-            listTrajectoryErrors_.clear();
-            listAttitudeErrors_.clear();
-            listDerivativeAttitudeErrors_.clear();
+                //Cleaning the string vector contents
+                listControlSignals_.clear();
+			    listControlSignals_.clear();
+                listControlMixerTerms_.clear();
+                listPropellersAngularVelocities_.clear();
+                listReferenceAngles_.clear();
+                listVelocityErrors_.clear();
+                listDroneAttitude_.clear();
+                listTrajectoryErrors_.clear();
+                listAttitudeErrors_.clear();
+                listDerivativeAttitudeErrors_.clear(); 
+            }
+			
+            
 
 }
 
@@ -249,43 +257,44 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     double u_x, u_y, u_Terr;
     AttitudeController(&u_phi, &u_theta, &u_psi);
     PosController(&u_x, &u_y, &u_T, &u_Terr);
+    
+	if(dataStoring_active_){
+		//Saving control signals in a file
+		std::stringstream tempControlSignals;
+		tempControlSignals << u_T << "," << u_phi << "," << u_theta << "," << u_psi << "," << u_x << "," << u_y << "," << u_Terr << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
-    //Saving control signals in a file
-    std::stringstream tempControlSignals;
-    tempControlSignals << u_T << "," << u_phi << "," << u_theta << "," << u_psi << "," << u_x << "," << u_y << "," << u_Terr << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+		listControlSignals_.push_back(tempControlSignals.str());
 
-    listControlSignals_.push_back(tempControlSignals.str());
+		//Saving drone attitude in a file
+		std::stringstream tempDroneAttitude;
+		tempDroneAttitude << state_.attitude.roll << "," << state_.attitude.pitch << "," << state_.attitude.yaw << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
-    //Saving drone attitude in a file
-    std::stringstream tempDroneAttitude;
-    tempDroneAttitude << state_.attitude.roll << "," << state_.attitude.pitch << "," << state_.attitude.yaw << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+		listDroneAttitude_.push_back(tempDroneAttitude.str());
 
-    listDroneAttitude_.push_back(tempDroneAttitude.str());
+		//Saving velocity errors in a file
+		std::stringstream tempVelocityErrors;
+		tempVelocityErrors << dot_e_x_ << "," << dot_e_y_ << "," << dot_e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
-    //Saving velocity errors in a file
-    std::stringstream tempVelocityErrors;
-    tempVelocityErrors << dot_e_x_ << "," << dot_e_y_ << "," << dot_e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+		listVelocityErrors_.push_back(tempVelocityErrors.str());
 
-    listVelocityErrors_.push_back(tempVelocityErrors.str());
+		//Saving trajectory errors in a file
+		std::stringstream tempTrajectoryErrors;
+		tempTrajectoryErrors << e_x_ << "," << e_y_ << "," << e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
-    //Saving trajectory errors in a file
-    std::stringstream tempTrajectoryErrors;
-    tempTrajectoryErrors << e_x_ << "," << e_y_ << "," << e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+		listTrajectoryErrors_.push_back(tempTrajectoryErrors.str());
 
-    listTrajectoryErrors_.push_back(tempTrajectoryErrors.str());
+		//Saving attitude derivate errors in a file
+		std::stringstream tempDerivativeAttitudeErrors;
+		tempDerivativeAttitudeErrors << dot_e_phi_ << "," << dot_e_theta_ << "," << dot_e_psi_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
-    //Saving attitude derivate errors in a file
-    std::stringstream tempDerivativeAttitudeErrors;
-    tempDerivativeAttitudeErrors << dot_e_phi_ << "," << dot_e_theta_ << "," << dot_e_psi_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+		//Saving attitude errors in a file    
+		std::stringstream tempAttitudeErrors;
+		tempAttitudeErrors << e_phi_ << "," << e_theta_ << "," << e_psi_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
-    //Saving attitude errors in a file    
-    std::stringstream tempAttitudeErrors;
-    tempAttitudeErrors << e_phi_ << "," << e_theta_ << "," << e_psi_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+		listAttitudeErrors_.push_back(tempAttitudeErrors.str());
 
-    listAttitudeErrors_.push_back(tempAttitudeErrors.str());
-
-    listDerivativeAttitudeErrors_.push_back(tempDerivativeAttitudeErrors.str());
-
+		listDerivativeAttitudeErrors_.push_back(tempDerivativeAttitudeErrors.str());
+    }
     
     double first, second, third, fourth;
     first = (1/ ( 4 * bf_ )) * u_T;
@@ -293,11 +302,14 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     third = (1/ (4 * bf_ * l_ * cos(M_PI/4) ) ) * u_theta;
     fourth = (1/ ( 4 * bf_ * bm_)) * u_psi;
 
-    //Saving the control mixer terms in a file
-    std::stringstream tempControlMixerTerms;
-    tempControlMixerTerms << first << "," << second << "," << third << "," << fourth << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+	
+	if(dataStoring_active_){
+		//Saving the control mixer terms in a file
+		std::stringstream tempControlMixerTerms;
+		tempControlMixerTerms << first << "," << second << "," << third << "," << fourth << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
-    listControlMixerTerms_.push_back(tempControlMixerTerms.str());
+		listControlMixerTerms_.push_back(tempControlMixerTerms.str());
+	}
 
     double not_sat1, not_sat2, not_sat3, not_sat4;
     not_sat1 = first - second - third - fourth;
@@ -347,11 +359,13 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     if(omega_4 > maxRotorsVelocity)
        omega_4 = maxRotorsVelocity;
 
-    //Saving propellers angular velocities in a file
-    std::stringstream tempPropellersAngularVelocities;
-    tempPropellersAngularVelocities << omega_1 << "," << omega_2 << "," << omega_3 << "," << omega_4 << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+    if(dataStoring_active_){
+		//Saving propellers angular velocities in a file
+		std::stringstream tempPropellersAngularVelocities;
+		tempPropellersAngularVelocities << omega_1 << "," << omega_2 << "," << omega_3 << "," << omega_4 << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
-    listPropellersAngularVelocities_.push_back(tempPropellersAngularVelocities.str());
+		listPropellersAngularVelocities_.push_back(tempPropellersAngularVelocities.str());
+    }
     
     *rotor_velocities = Eigen::Vector4d(omega_1, omega_2, omega_3, omega_4);
 }
@@ -370,11 +384,13 @@ void PositionController::ReferenceAngles(double* phi_r, double* theta_r){
    *theta_r = atan( ( (u_x * cos(psi_r) ) + ( u_y * sin(psi_r) ) )  / u_Terr );
    *phi_r = atan( cos(*theta_r) * ( ( (u_x * sin(psi_r)) - (u_y * cos(psi_r)) ) / (u_Terr) ) );
 
-    //Saving reference angles in a file
-    std::stringstream tempReferenceAngles;
-    tempReferenceAngles << *theta_r << "," << *phi_r << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+   	if(dataStoring_active_){
+		//Saving reference angles in a file
+		std::stringstream tempReferenceAngles;
+		tempReferenceAngles << *theta_r << "," << *phi_r << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
-    listReferenceAngles_.push_back(tempReferenceAngles.str());
+		listReferenceAngles_.push_back(tempReferenceAngles.str());
+	}
     
 }
 

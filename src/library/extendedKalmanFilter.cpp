@@ -83,8 +83,7 @@ void ExtendedKalmanFilter::Quaternion2Euler(double* roll, double* pitch, double*
     tf::Quaternion q(x, y, z, w);
     tf::Matrix3x3 m(q);
     m.getRPY(*roll, *pitch, *yaw);
-
-
+	
 }
 
 }

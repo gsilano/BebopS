@@ -105,6 +105,7 @@ class PositionControllerParameters {
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         private:
             bool controller_active_;
+			bool dataStoring_active_;
 
             //Sting vectors used to stare data
             std::vector<string> listControlSignals_;
