@@ -56,14 +56,14 @@ The RotorS basic world (`rotors_gazebo/worlds/basic.world`) has been used as the
 Furthermore, the sensors noise in the `med_uav_description/urd/bebop.urdf.xacro` file has been removed. Below the new (`+` symbol) and the previous version (`-` symbol) of the changed row lines are reported.
 
 ```
--		noise_normal_position="0.01 0.01 0.01"
--		noise_normal_quaternion="0.017 0.017 0.017"
--		noise_normal_linear_velocity="0.01 0.01 0.01"
--		noise_normal_angular_velocity="0.01 0.01 0.01"
-+		noise_normal_position="0.0 0.0 0.0"
-+		noise_normal_quaternion="0.0 0.0 0.0"
-+		noise_normal_linear_velocity="0.0 0.0 0.0"
-+		noise_normal_angular_velocity="0.0 0.0 0.0"
+- noise_normal_position="0.01 0.01 0.01"
+- noise_normal_quaternion="0.017 0.017 0.017"
+- noise_normal_linear_velocity="0.01 0.01 0.01"
+- noise_normal_angular_velocity="0.01 0.01 0.01"
++ noise_normal_position="0.0 0.0 0.0"
++ noise_normal_quaternion="0.0 0.0 0.0"
++ noise_normal_linear_velocity="0.0 0.0 0.0"
++ noise_normal_angular_velocity="0.0 0.0 0.0"
 ```
 
 Running the code
