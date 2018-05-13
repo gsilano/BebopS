@@ -82,6 +82,6 @@ A YouTube video showing as the platform works is reported. The chosen sampling t
 
 A waypoint composed by unit components along the axes and the yaw angle equal to zero has been used to test the control system performance. As is shown at the end of the video, the waypoint is reached with a very small error. The RotorS hovering example node has been used to this aim replacing the coordinates in the 3D vector `desired_position` and modifying the Gazebo GUI show up time from 5s to 0.1s.
 
-[![MED18_Industrial_Challenge, teamsannio proposal](https://github.com/gsilano/teamsannio_med_control/wiki/images/Miniature_YouTube_MED18_Industrial_Challenge_Proposal.png)](https://youtu.be/GzA3hle3lZU "MED18_Industrial_Challenge, teamsannio proposal")
+[![MED18_Industrial_Challenge, teamsannio proposal](https://github.com/gsilano/teamsannio_med_control/wiki/images/Miniature_YouTube_MED18_Industrial_Challenge_Proposal.png)](https://youtu.be/BvsEA0zH7bU "MED18_Industrial_Challenge, teamsannio proposal")
 
 
