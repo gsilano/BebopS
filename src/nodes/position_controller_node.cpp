@@ -150,8 +150,6 @@ void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& 
 	       actuator_msg->angular_velocities.push_back(ref_rotor_velocities[i]);
 	    actuator_msg->header.stamp = odometry_msg->header.stamp;
 
-	    //ROS_INFO("M0: %f, M1: %f, M2: %f, M3: %f", actuator_msg->angular_velocities[0], actuator_msg->angular_velocities[1], actuator_msg->angular_velocities[2], actuator_msg->angular_velocities[3]);
-
 	    motor_velocity_reference_pub_.publish(actuator_msg);
     }	 
 }
