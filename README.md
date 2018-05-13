@@ -76,7 +76,7 @@ To run the developed task 1, you have to use the launch file provided in the `te
    ```
 
 
-YouTube videos
+YouTube video
 ---------------------------------------------------------
 A YouTube video showing as the platform works is reported. The chosen sampling time (0.01ms) makes the simulation very slow. Indeed, to simulate only 10 seconds (`Sim Time` box in GAZEBO), 1 hour (`Real Time` box) is needed. Thus, the video has been speeded up at thirty-two times. Such behavior is determined by numerical issues occurring when the Euler's method with the 0.01ms sampling time is employed. It may be due to the iterative method (forward Euler) used to approximate the solution of the differential equations describing the aircraft dynamics. 
 
