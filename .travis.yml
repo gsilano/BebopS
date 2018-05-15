@@ -72,9 +72,7 @@ before_install:
   - sudo dpkg --configure -a
   - sudo apt-get update
   - sudo apt-get install ros-$ROS_DISTRO-desktop-full ros-$ROS_DISTRO-joy ros-$ROS_DISTRO-octomap-ros python-wstool python-catkin-tools
-  - sudo apt-get install protobuf-compiler libgoogle-glog-dev ros-$ROS_DISTRO-mavlink python-wstool python-catkin-tools protobuf-compiler 
-  - sudo apt-get install libgoogle-glog-dev ros-$ROS_DISTRO-control-toolbox python-pip ros-$ROS_DISTRO-dynamic-reconfigure
-  - sudo pip install numpy
+  - sudo apt-get install protobuf-compiler libgoogle-glog-dev
  # Prepare rosdep to install dependencies.  
   - sudo rosdep init 
   - rosdep update
