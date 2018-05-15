@@ -90,7 +90,7 @@ install:
   - git clone https://github.com/gsilano/med_uav_description.git
   - git clone https://github.com/gsilano/rotors_simulator.git
   - git clone https://github.com/gsilano/mav_comm.git
-  - cd ~/catkin_ws/src/rotors_simulator & git checkout med2018
+  - cd ~/catkin_ws/src/rotors_simulator & git checkout med18
   - cd ~/catkin_ws/src/mav_comm & git checkout med18
   - cd ~/catkin_ws
   - catkin build
