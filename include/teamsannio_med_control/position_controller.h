@@ -32,6 +32,8 @@
 #include "parameters.h"
 #include "common.h"
 
+#include <gazebo_msgs/GetWorldProperties.h>
+
 using namespace std;
 
 
@@ -104,8 +106,13 @@ class PositionControllerParameters {
 
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         private:
+            //Boolean variables to active/unactive the controller and the data storage
             bool controller_active_;
-			bool dataStoring_active_;
+	    bool dataStoring_active_;
+
+            //Gazebo Message for attitude and position
+            gazebo_msgs::GetWorldProperties my_messageAttitude_;
+            gazebo_msgs::GetWorldProperties my_messagePosition_;
 
             //Sting vectors used to stare data
             std::vector<string> listControlSignals_;
@@ -117,6 +124,8 @@ class PositionControllerParameters {
             std::vector<string> listTrajectoryErrors_;
             std::vector<string> listAttitudeErrors_;
             std::vector<string> listDerivativeAttitudeErrors_;
+            std::vector<string> listTimeAttitudeErrors_;
+            std::vector<string> listTimePositionErrors_;
           
             //Controller gains
             double beta_x_, beta_y_, beta_z_;
