@@ -72,7 +72,7 @@ PositionController::PositionController()
 
                 //Cleaning the string vector contents
                 listControlSignals_.clear();
-			    listControlSignals_.clear();
+		listControlSignals_.clear();
                 listControlMixerTerms_.clear();
                 listPropellersAngularVelocities_.clear();
                 listReferenceAngles_.clear();
@@ -83,6 +83,11 @@ PositionController::PositionController()
                 listDerivativeAttitudeErrors_.clear();
                 listTimeAttitudeErrors_.clear();
                 listTimePositionErrors_.clear(); 
+
+                //the client needed to get information about the Gazebo simulation environment both the attitude and position errors
+                clientAttitude_ = clientHandleAttitude_.serviceClient<gazebo_msgs::GetWorldProperties>("/gazebo/get_world_properties");
+                clientPosition_ = clientHandlePosition_.serviceClient<gazebo_msgs::GetWorldProperties>("/gazebo/get_world_properties");
+         
             }
 			
             
@@ -175,7 +180,7 @@ void PositionController::CallbackSaveData(const ros::TimerEvent& event){
           fileDerivativeAttitudeErrors << listDerivativeAttitudeErrors_.at( n );
       }
 
-      //Saving the position and attitude errors times
+      //Saving the position and attitude errors along the time
       for (unsigned n=0; n < listTimeAttitudeErrors_.size(); ++n) {
           fileTimeAttitudeErrors << listTimeAttitudeErrors_.at( n );
       }
@@ -288,34 +293,25 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
 
 	listDroneAttitude_.push_back(tempDroneAttitude.str());
 
-        //Saving the attitude and position computing errors time
-	std::stringstream tempTimeAttitudeErrors;
-	std::stringstream tempTimePositionErrors;
-	tempTimeAttitudeErrors << my_messageAttitude_.response.sim_time << "\n";
-	tempTimePositionErrors << my_messagePosition_.response.sim_time << "\n";
-
-        listTimeAttitudeErrors_.push_back(tempTimePositionErrors.str());
-	listTimeAttitudeErrors_.push_back(tempTimeAttitudeErrors.str());
-
 	//Saving velocity errors in a file
 	std::stringstream tempVelocityErrors;
-	tempVelocityErrors << dot_e_x_ << "," << dot_e_y_ << "," << dot_e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+	tempVelocityErrors << dot_e_x_ << "," << dot_e_y_ << "," << dot_e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messagePosition_.response.sim_time << "\n";
 
 	listVelocityErrors_.push_back(tempVelocityErrors.str());
 
 	//Saving trajectory errors in a file
 	std::stringstream tempTrajectoryErrors;
-	tempTrajectoryErrors << e_x_ << "," << e_y_ << "," << e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+	tempTrajectoryErrors << e_x_ << "," << e_y_ << "," << e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messagePosition_.response.sim_time <<"\n";
 
 	listTrajectoryErrors_.push_back(tempTrajectoryErrors.str());
 
 	//Saving attitude derivate errors in a file
 	std::stringstream tempDerivativeAttitudeErrors;
-	tempDerivativeAttitudeErrors << dot_e_phi_ << "," << dot_e_theta_ << "," << dot_e_psi_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+	tempDerivativeAttitudeErrors << dot_e_phi_ << "," << dot_e_theta_ << "," << dot_e_psi_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messageAttitude_.response.sim_time << "\n";
 
 	//Saving attitude errors in a file    
 	std::stringstream tempAttitudeErrors;
-	tempAttitudeErrors << e_phi_ << "," << e_theta_ << "," << e_psi_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+	tempAttitudeErrors << e_phi_ << "," << e_theta_ << "," << e_psi_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messageAttitude_.response.sim_time << "\n";
 
 	listAttitudeErrors_.push_back(tempAttitudeErrors.str());
 	listDerivativeAttitudeErrors_.push_back(tempDerivativeAttitudeErrors.str());
@@ -542,18 +538,33 @@ void PositionController::CallbackAttitude(const ros::TimerEvent& event){
      
      AttitudeErrors(&e_phi_, &e_theta_, &e_psi_);
      AngularVelocityErrors(&dot_e_phi_, &dot_e_theta_, &dot_e_psi_);
-     ros::NodeHandle clientHandleAttitude;
-     ros::ServiceClient clientAttitude = clientHandleAttitude.serviceClient<gazebo_msgs::GetWorldProperties>("/gazebo/get_world_properties");
-     clientAttitude.call(my_messageAttitude_);
+     
+     //Saving the time instant when the attitude errors are computed
+     if(dataStoring_active_){	
+
+	clientAttitude_.call(my_messageAttitude_);
+
+        std::stringstream tempTimeAttitudeErrors;
+	tempTimeAttitudeErrors << my_messageAttitude_.response.sim_time << "\n";	
+        listTimeAttitudeErrors_.push_back(tempTimeAttitudeErrors.str());
+
+      }
 }
 
 void PositionController::CallbackPosition(const ros::TimerEvent& event){
  
      PositionErrors(&e_x_, &e_y_, &e_z_);
      VelocityErrors(&dot_e_x_, &dot_e_y_, &dot_e_z_);
-     ros::NodeHandle clientHandlePosition;
-     ros::ServiceClient clientPosition = clientHandlePosition.serviceClient<gazebo_msgs::GetWorldProperties>("/gazebo/get_world_properties");
-     clientPosition.call(my_messagePosition_);
+     
+     //Saving the time instant when the position errors are computed
+     if(dataStoring_active_){
+         clientPosition_.call(my_messagePosition_);
+
+         std::stringstream tempTimePositionErrors;
+         tempTimePositionErrors << my_messagePosition_.response.sim_time << "\n";
+	 listTimePositionErrors_.push_back(tempTimePositionErrors.str());
+
+     }
 }
 
 

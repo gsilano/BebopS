@@ -111,8 +111,14 @@ class PositionControllerParameters {
 	    bool dataStoring_active_;
 
             //Gazebo Message for attitude and position
-            gazebo_msgs::GetWorldProperties my_messageAttitude_;
             gazebo_msgs::GetWorldProperties my_messagePosition_;
+            ros::NodeHandle clientHandlePosition_;
+            ros::ServiceClient clientPosition_;
+
+            ros::NodeHandle clientHandleAttitude_;
+            ros::ServiceClient clientAttitude_;
+            gazebo_msgs::GetWorldProperties my_messageAttitude_;
+                         
 
             //Sting vectors used to stare data
             std::vector<string> listControlSignals_;
