@@ -110,6 +110,9 @@ class PositionControllerParameters {
             bool controller_active_;
 	    bool dataStoring_active_;
 
+            //Wall clock time offset variable
+            double wallSecsOffset_;
+
             //Gazebo Message for attitude and position
             gazebo_msgs::GetWorldProperties my_messagePosition_;
             ros::NodeHandle clientHandlePosition_;

@@ -23,6 +23,7 @@
 #include "teamsannio_med_control/stabilizer_types.h"
 
 #include <math.h> 
+#include <time.h>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -87,6 +88,9 @@ PositionController::PositionController()
                 //the client needed to get information about the Gazebo simulation environment both the attitude and position errors
                 clientAttitude_ = clientHandleAttitude_.serviceClient<gazebo_msgs::GetWorldProperties>("/gazebo/get_world_properties");
                 clientPosition_ = clientHandlePosition_.serviceClient<gazebo_msgs::GetWorldProperties>("/gazebo/get_world_properties");
+
+                 ros::WallTime beginWallOffset = ros::WallTime::now();
+                 wallSecsOffset_ = beginWallOffset.toSec();
          
             }
 			
@@ -293,25 +297,28 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
 
 	listDroneAttitude_.push_back(tempDroneAttitude.str());
 
+        ros::WallTime beginWall = ros::WallTime::now();
+        double wallSecs = beginWall.toSec() - wallSecsOffset_;	
+
 	//Saving velocity errors in a file
 	std::stringstream tempVelocityErrors;
-	tempVelocityErrors << dot_e_x_ << "," << dot_e_y_ << "," << dot_e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messagePosition_.response.sim_time << "\n";
+	tempVelocityErrors << dot_e_x_ << "," << dot_e_y_ << "," << dot_e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messagePosition_.response.sim_time << "," << wallSecs << "\n";
 
 	listVelocityErrors_.push_back(tempVelocityErrors.str());
 
 	//Saving trajectory errors in a file
 	std::stringstream tempTrajectoryErrors;
-	tempTrajectoryErrors << e_x_ << "," << e_y_ << "," << e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messagePosition_.response.sim_time <<"\n";
+	tempTrajectoryErrors << e_x_ << "," << e_y_ << "," << e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messagePosition_.response.sim_time << "," << wallSecs << "\n";
 
 	listTrajectoryErrors_.push_back(tempTrajectoryErrors.str());
 
 	//Saving attitude derivate errors in a file
 	std::stringstream tempDerivativeAttitudeErrors;
-	tempDerivativeAttitudeErrors << dot_e_phi_ << "," << dot_e_theta_ << "," << dot_e_psi_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messageAttitude_.response.sim_time << "\n";
+	tempDerivativeAttitudeErrors << dot_e_phi_ << "," << dot_e_theta_ << "," << dot_e_psi_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messageAttitude_.response.sim_time << "," << wallSecs << "\n";
 
 	//Saving attitude errors in a file    
 	std::stringstream tempAttitudeErrors;
-	tempAttitudeErrors << e_phi_ << "," << e_theta_ << "," << e_psi_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messageAttitude_.response.sim_time << "\n";
+	tempAttitudeErrors << e_phi_ << "," << e_theta_ << "," << e_psi_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messageAttitude_.response.sim_time << "," << wallSecs << "\n";
 
 	listAttitudeErrors_.push_back(tempAttitudeErrors.str());
 	listDerivativeAttitudeErrors_.push_back(tempDerivativeAttitudeErrors.str());
@@ -325,13 +332,13 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     fourth = (1/ ( 4 * bf_ * bm_)) * u_psi;
 
 	
-	if(dataStoring_active_){
-		//Saving the control mixer terms in a file
-		std::stringstream tempControlMixerTerms;
-		tempControlMixerTerms << first << "," << second << "," << third << "," << fourth << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+    if(dataStoring_active_){
+	//Saving the control mixer terms in a file
+	std::stringstream tempControlMixerTerms;
+	tempControlMixerTerms << first << "," << second << "," << third << "," << fourth << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
-		listControlMixerTerms_.push_back(tempControlMixerTerms.str());
-	}
+	listControlMixerTerms_.push_back(tempControlMixerTerms.str());
+    }
 
     double not_sat1, not_sat2, not_sat3, not_sat4;
     not_sat1 = first - second - third - fourth;
@@ -541,7 +548,6 @@ void PositionController::CallbackAttitude(const ros::TimerEvent& event){
      
      //Saving the time instant when the attitude errors are computed
      if(dataStoring_active_){	
-
 	clientAttitude_.call(my_messageAttitude_);
 
         std::stringstream tempTimeAttitudeErrors;

@@ -4,7 +4,7 @@ Changelog for package teamsannio_med_control
 
 0.1.3 (2018-05-25)
 -----------
-* added the data storage section. Such section inserted in the position controller node allows to storage, in csv files, the aircraft and controller state.
+* added the data storage section. Such section has been inserted in the position controller node and allows to storage, in defined csv files, the aircraft and controller state.
 * bug fixing
 * the sim time has been added in the launch file. Now the position controller node uses the simulation and not wall clock time.
 * Contributors: Giuseppe Silano, Luigi Iannelli
