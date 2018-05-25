@@ -297,32 +297,6 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
 
 	listDroneAttitude_.push_back(tempDroneAttitude.str());
 
-        ros::WallTime beginWall = ros::WallTime::now();
-        double wallSecs = beginWall.toSec() - wallSecsOffset_;	
-
-	//Saving velocity errors in a file
-	std::stringstream tempVelocityErrors;
-	tempVelocityErrors << dot_e_x_ << "," << dot_e_y_ << "," << dot_e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messagePosition_.response.sim_time << "," << wallSecs << "\n";
-
-	listVelocityErrors_.push_back(tempVelocityErrors.str());
-
-	//Saving trajectory errors in a file
-	std::stringstream tempTrajectoryErrors;
-	tempTrajectoryErrors << e_x_ << "," << e_y_ << "," << e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messagePosition_.response.sim_time << "," << wallSecs << "\n";
-
-	listTrajectoryErrors_.push_back(tempTrajectoryErrors.str());
-
-	//Saving attitude derivate errors in a file
-	std::stringstream tempDerivativeAttitudeErrors;
-	tempDerivativeAttitudeErrors << dot_e_phi_ << "," << dot_e_theta_ << "," << dot_e_psi_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messageAttitude_.response.sim_time << "," << wallSecs << "\n";
-
-	//Saving attitude errors in a file    
-	std::stringstream tempAttitudeErrors;
-	tempAttitudeErrors << e_phi_ << "," << e_theta_ << "," << e_psi_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messageAttitude_.response.sim_time << "," << wallSecs << "\n";
-
-	listAttitudeErrors_.push_back(tempAttitudeErrors.str());
-	listDerivativeAttitudeErrors_.push_back(tempDerivativeAttitudeErrors.str());
-
     }
     
     double first, second, third, fourth;
@@ -554,6 +528,24 @@ void PositionController::CallbackAttitude(const ros::TimerEvent& event){
 	tempTimeAttitudeErrors << my_messageAttitude_.response.sim_time << "\n";	
         listTimeAttitudeErrors_.push_back(tempTimeAttitudeErrors.str());
 
+        ros::WallTime beginWall = ros::WallTime::now();
+        double wallSecs = beginWall.toSec() - wallSecsOffset_;	
+
+        ros::Time begin = ros::Time::now();
+        double secs = begin.toSec();
+
+	//Saving attitude derivate errors in a file
+	std::stringstream tempDerivativeAttitudeErrors;
+	tempDerivativeAttitudeErrors << dot_e_phi_ << "," << dot_e_theta_ << "," << dot_e_psi_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messageAttitude_.response.sim_time << "," << wallSecs << "," << secs << "\n";
+
+	listDerivativeAttitudeErrors_.push_back(tempDerivativeAttitudeErrors.str());
+
+	//Saving attitude errors in a file    
+	std::stringstream tempAttitudeErrors;
+	tempAttitudeErrors << e_phi_ << "," << e_theta_ << "," << e_psi_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messageAttitude_.response.sim_time << "," << wallSecs << "," << secs << "\n";
+
+	listAttitudeErrors_.push_back(tempAttitudeErrors.str());
+
       }
 }
 
@@ -564,11 +556,29 @@ void PositionController::CallbackPosition(const ros::TimerEvent& event){
      
      //Saving the time instant when the position errors are computed
      if(dataStoring_active_){
-         clientPosition_.call(my_messagePosition_);
+        clientPosition_.call(my_messagePosition_);
 
-         std::stringstream tempTimePositionErrors;
-         tempTimePositionErrors << my_messagePosition_.response.sim_time << "\n";
-	 listTimePositionErrors_.push_back(tempTimePositionErrors.str());
+        std::stringstream tempTimePositionErrors;
+        tempTimePositionErrors << my_messagePosition_.response.sim_time << "\n";
+	listTimePositionErrors_.push_back(tempTimePositionErrors.str());
+
+        ros::WallTime beginWall = ros::WallTime::now();
+        double wallSecs = beginWall.toSec() - wallSecsOffset_;	
+
+        ros::Time begin = ros::Time::now();
+        double secs = begin.toSec();	
+
+	//Saving velocity errors in a file
+	std::stringstream tempVelocityErrors;
+	tempVelocityErrors << dot_e_x_ << "," << dot_e_y_ << "," << dot_e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messagePosition_.response.sim_time << "," << wallSecs << "," << secs << "\n";
+
+	listVelocityErrors_.push_back(tempVelocityErrors.str());
+
+	//Saving trajectory errors in a file
+	std::stringstream tempTrajectoryErrors;
+	tempTrajectoryErrors << e_x_ << "," << e_y_ << "," << e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messagePosition_.response.sim_time << "," << wallSecs << "," << secs << "\n";
+
+	listTrajectoryErrors_.push_back(tempTrajectoryErrors.str());
 
      }
 }
