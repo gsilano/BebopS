@@ -47,4 +47,7 @@
        <node name="hovering_example" pkg="rotors_gazebo" type="hovering_example" output="screen"/>   
     </group>
 
+    <!-- Launch the trajectory plot -->
+    <node name="position_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/odometry/pose/pose/position" output="screen" />
+
 </launch>
