@@ -70,20 +70,110 @@ void ExtendedKalmanFilter::Estimator(state_t *state_, EigenOdometry* odometry_){
 }
 
 void ExtendedKalmanFilter::Quaternion2Euler(double* roll, double* pitch, double* yaw) const {
+    
+	
+}
+
+
+
+  void Ekf::Predict(double* u_T, double* hatx, double* Pp)
+  {
     assert(roll);
     assert(pitch);
     assert(yaw);
 
-    double x, y, z, w;
+    double x, y, z, dx, dy, dz, w;
     x = odometry_private_.orientation.x();
     y = odometry_private_.orientation.y();
     z = odometry_private_.orientation.z();
+	dx = odometry_private_.velocity[0];
+	dy = odometry_private_.velocity[1];
+	dz = odometry_private_.velocity[2];
+	
     w = odometry_private_.orientation.w();
     
     tf::Quaternion q(x, y, z, w);
     tf::Matrix3x3 m(q);
     m.getRPY(*roll, *pitch, *yaw);
 	
-}
+	// Non linear Position model discretized with forward Euler
+	x = x + Tsp_ * dx;
+	y = y + Tsp_ * dy;
+	z = z + Tsp_ * dz;
+	dx = dx + Tsp_ * (*u_T/m_ * (cos(state_.attitude.yaw) * sin(state_.attitude.pitch) * cos(state_.attitude.roll) + sin(state_.attitude.yaw) * sin(state_.attitude.pitch)));
+	dy = dy + Tsp_ * (*u_T/m_ * (sin(state_.attitude.yaw) * sin(state_.attitude.pitch) * cos(state_.attitude.roll) - cos(state_.attitude.yaw) * sin(state_.attitude.roll)));
+	dx = dx + Tsp_ * (-g_ + *u_T/m_ * (cos(state_.attitude.pitch) * cos(state_.attitude.roll));
+	
+	// Jacobian Matrix
+	Matrix6f A;
+	
+	A <<  1, 0, 0,  Tsp_,    0,    0,
+		  0, 1, 0,     0, Tsp_,    0,
+		  0, 0, 1, 	  0,    0, Tsp_,
+		  0, 0, 0,     1,    0,    0,
+		  0, 0, 0,     0,    1,    0,
+		  0, 0, 0,     0,    0,    1;
+		  
+	Matrix6f Qp;
+	
+	Qp << 0.000001,			0,			0,			0,			0,			0,
+				 0,	 0.000001,			0,			0,			0,			0,
+				 0,			0,   0.000001,			0,			0,			0,
+				 0,			0,			0,   0.000001,			0,			0,
+				 0,			0,			0,			0,   0.000001, 			0,
+				 0,			0,			0,			0,			0,	 0.000001;
+				 
+	Qp = pow(Qp,2);
+	
+	// Prediction error Matrix
+	P = A * Pp * A.transpose() + Qp;
+	
+	VectorXd xp(6);
+	
+	xp(1) = x;
+	xp(2) = y;
+	xp(3) = z;
+	xp(4) = dx;
+	xp(5) = dy;
+	xp(6) = dz;
+				 
+}	
 
+
+void EKF::Correct(double* xp, double* P){
+	
+	double x, y, z, dx, dy, dz, w;
+    x = odometry_private_.orientation.x();
+    y = odometry_private_.orientation.y();
+    z = odometry_private_.orientation.z();
+	dx = odometry_private_.velocity[0];
+	dy = odometry_private_.velocity[1];
+	dz = odometry_private_.velocity[2];
+	
+	Matrix6f Hp;
+	
+	Hp << 1, 0, 0, 0, 0, 0,
+		  0, 1, 0, 0, 0, 0,
+		  0, 0, 1, 0, 0, 0,
+		  0, 0, 0, 1, 0, 0,
+		  0, 0, 0, 0, 1, 0,
+		  0, 0, 0, 0, 0, 1;
+	
+	Matrix6f Rp;
+	
+	Rp << 0.01,    0,    0,    0,    0,    0,
+			 0, 0.01,    0,    0,    0,    0,
+			 0,    0, 0.01,    0,    0,    0,
+			 0,    0,    0, 0.01,    0,    0,
+			 0,    0,    0,    0, 0.01,    0,
+			 0,    0,    0,    0,    0, 0.01;
+	
+	Rp = pow(Rp,2);
+	
+	K = P * Hp * (Hp.transpose() * P * Hp + Rp).inverse();
+	
+	pe = P - K * Hp.transpose() * P;
+	xe = xp + K * (y - Hp * xp);
+	
+	
 }
