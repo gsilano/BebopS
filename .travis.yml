@@ -94,6 +94,8 @@ install:
   - git checkout med18
   - cd ~/catkin_ws/src/mav_comm 
   - git checkout med18
+  - cd ~/catkin_ws/src/teamsannio_med_control 
+  - git checkout feature/kalman_filter
   - cd ~/catkin_ws
   - catkin build
   - echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
