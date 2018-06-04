@@ -100,3 +100,8 @@ install:
   - catkin build
   - echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
   - source ~/.bashrc
+  
+notifications:
+  email:
+    - giuseppe.silano@unisannio.it
+    - pasquale.oppido@unisannio.it
