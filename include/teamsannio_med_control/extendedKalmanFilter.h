@@ -42,9 +42,18 @@ class ExtendedKalmanFilter {
   private:
 
     EigenOdometry odometry_private_;
+	
+	
+	
+	ros::NodeHandle n11_;
+	ros::Timer t11_;
+	
+	void ExtendedKalmanFilter::CallbackEstimate(const ros::TimerEvent& event)
 
     void Quaternion2Euler(double* roll, double* pitch, double* yaw) const;
     void SetOdometry(const EigenOdometry& odometry);
+	void ExtendedKalmanFilter::correct(Eigen::Matrix6f* xe, Eigen::Matrix6f* pe);
+	void ExtendedKalmanFilter::predict(Eigen::Vector6f* xp, Eigen::Matrix6f* P);
 
 };
 
