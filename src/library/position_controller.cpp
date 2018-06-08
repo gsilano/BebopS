@@ -23,6 +23,7 @@
 #include "teamsannio_med_control/stabilizer_types.h"
 
 #include <math.h> 
+#include <time.h>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -40,7 +41,7 @@
 #define M_PI                      3.14159265358979323846  /* pi */
 #define TsP                       10e-3  /* Position control sampling time */
 #define TsA                       5e-3 /* Attitude control sampling time */
-#define storeTime                 3  /* Store time*/
+#define storeTime                 15  /* Store time*/
 
 using namespace std;
 
@@ -48,7 +49,7 @@ namespace teamsannio_med_control {
 
 PositionController::PositionController()
     : controller_active_(false),
-	  dataStoring_active_(false),
+      dataStoring_active_(false),
       e_x_(0),
       e_y_(0),
       e_z_(0),
@@ -64,14 +65,15 @@ PositionController::PositionController()
 
             timer1_ = n1_.createTimer(ros::Duration(TsA), &PositionController::CallbackAttitude, this, false, true);
             timer2_ = n2_.createTimer(ros::Duration(TsP), &PositionController::CallbackPosition, this, false, true); 
-			    //this serves to inactivate the controller if we don't recieve a trajectory
-    
-	        if(dataStoring_active_){
-               timer3_ = n3_.createTimer(ros::Duration(storeTime), &PositionController::CallbackSaveData, this, false, true);
+			    
+
+            //this serves to inactivate the logging if we wan't to save the simulated data     
+	    if(dataStoring_active_){
+                timer3_ = n3_.createTimer(ros::Duration(storeTime), &PositionController::CallbackSaveData, this, false, true);
 
                 //Cleaning the string vector contents
                 listControlSignals_.clear();
-			    listControlSignals_.clear();
+		listControlSignals_.clear();
                 listControlMixerTerms_.clear();
                 listPropellersAngularVelocities_.clear();
                 listReferenceAngles_.clear();
@@ -79,7 +81,17 @@ PositionController::PositionController()
                 listDroneAttitude_.clear();
                 listTrajectoryErrors_.clear();
                 listAttitudeErrors_.clear();
-                listDerivativeAttitudeErrors_.clear(); 
+                listDerivativeAttitudeErrors_.clear();
+                listTimeAttitudeErrors_.clear();
+                listTimePositionErrors_.clear(); 
+
+                //the client needed to get information about the Gazebo simulation environment both the attitude and position errors
+                clientAttitude_ = clientHandleAttitude_.serviceClient<gazebo_msgs::GetWorldProperties>("/gazebo/get_world_properties");
+                clientPosition_ = clientHandlePosition_.serviceClient<gazebo_msgs::GetWorldProperties>("/gazebo/get_world_properties");
+
+                 ros::WallTime beginWallOffset = ros::WallTime::now();
+                 wallSecsOffset_ = beginWallOffset.toSec();
+         
             }
 			
             
@@ -101,21 +113,25 @@ void PositionController::CallbackSaveData(const ros::TimerEvent& event){
       ofstream fileTrajectoryErrors;
       ofstream fileAttitudeErrors;
       ofstream fileDerivativeAttitudeErrors;
+      ofstream fileTimeAttitudeErrors;
+      ofstream fileTimePositionErrors;
 
     
       ROS_INFO("CallbackSavaData function is working. Time: %f seconds, %f nanoseconds", odometry_.timeStampSec, odometry_.timeStampNsec);
     
-      fileControllerGains.open ("/home/giuseppe/Scrivania/controllerGains.csv", std::ios_base::app);
-      fileVehicleParameters.open ("/home/giuseppe/Scrivania/vehicleParamters.csv", std::ios_base::app);
-      fileControlSignals.open ("/home/giuseppe/Scrivania/controlSignals.csv", std::ios_base::app);
-      fileControlMixerTerms.open ("/home/giuseppe/Scrivania/controlMixer.csv", std::ios_base::app);
-      filePropellersAngularVelocities.open ("/home/giuseppe/Scrivania/propellersAngularVelocities.csv", std::ios_base::app);
-      fileReferenceAngles.open ("/home/giuseppe/Scrivania/referenceAngles.csv", std::ios_base::app);
-      fileVelocityErrors.open ("/home/giuseppe/Scrivania/velocityErrors.csv", std::ios_base::app);
-      fileDroneAttiude.open ("/home/giuseppe/Scrivania/droneAttitude.csv", std::ios_base::app);
-      fileTrajectoryErrors.open ("/home/giuseppe/Scrivania/trajectoryErrors.csv", std::ios_base::app);
-      fileAttitudeErrors.open ("/home/giuseppe/Scrivania/attitudeErrors.csv", std::ios_base::app);
-      fileDerivativeAttitudeErrors.open ("/home/giuseppe/Scrivania/derivativeAttitudeErrors.csv", std::ios_base::app);
+      fileControllerGains.open ("/home/giuseppe/controllerGains.csv", std::ios_base::app);
+      fileVehicleParameters.open ("/home/giuseppe/vehicleParamters.csv", std::ios_base::app);
+      fileControlSignals.open ("/home/giuseppe/controlSignals.csv", std::ios_base::app);
+      fileControlMixerTerms.open ("/home/giuseppe/controlMixer.csv", std::ios_base::app);
+      filePropellersAngularVelocities.open ("/home/giuseppe/propellersAngularVelocities.csv", std::ios_base::app);
+      fileReferenceAngles.open ("/home/giuseppe/referenceAngles.csv", std::ios_base::app);
+      fileVelocityErrors.open ("/home/giuseppe/velocityErrors.csv", std::ios_base::app);
+      fileDroneAttiude.open ("/home/giuseppe/droneAttitude.csv", std::ios_base::app);
+      fileTrajectoryErrors.open ("/home/giuseppe/trajectoryErrors.csv", std::ios_base::app);
+      fileAttitudeErrors.open ("/home/giuseppe/attitudeErrors.csv", std::ios_base::app);
+      fileDerivativeAttitudeErrors.open ("/home/giuseppe/derivativeAttitudeErrors.csv", std::ios_base::app);
+      fileTimeAttitudeErrors.open ("/home/giuseppe/timeAttitudeErrors.csv", std::ios_base::app);
+      fileTimePositionErrors.open ("/home/giuseppe/timePositionErrors.csv", std::ios_base::app);
 
       //Saving vehicle parameters in a file
       fileControllerGains << beta_x_ << "," << beta_y_ << "," << beta_z_ << "," << alpha_x_ << "," << alpha_y_ << "," << alpha_z_ << "," << beta_phi_ << "," << beta_theta_ << "," << beta_psi_ << "," << alpha_phi_ << "," << alpha_theta_ << "," << alpha_psi_ << "," << mu_x_ << "," << mu_y_ << "," << mu_z_ << "," << mu_phi_ << "," << mu_theta_ << "," << mu_psi_ << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
@@ -143,7 +159,7 @@ void PositionController::CallbackSaveData(const ros::TimerEvent& event){
           fileReferenceAngles << listReferenceAngles_.at( n );
       }
 
-      //Saving the velcoty errors in a file
+      //Saving the velocity errors in a file
       for (unsigned n=0; n < listVelocityErrors_.size(); ++n) {
           fileVelocityErrors << listVelocityErrors_.at( n );
       }
@@ -168,6 +184,14 @@ void PositionController::CallbackSaveData(const ros::TimerEvent& event){
           fileDerivativeAttitudeErrors << listDerivativeAttitudeErrors_.at( n );
       }
 
+      //Saving the position and attitude errors along the time
+      for (unsigned n=0; n < listTimeAttitudeErrors_.size(); ++n) {
+          fileTimeAttitudeErrors << listTimeAttitudeErrors_.at( n );
+      }
+
+      for (unsigned n=0; n < listTimePositionErrors_.size(); ++n) {
+          fileTimePositionErrors << listTimePositionErrors_.at( n );
+      }
 
       //Closing all opened files
       fileControllerGains.close ();
@@ -181,6 +205,8 @@ void PositionController::CallbackSaveData(const ros::TimerEvent& event){
       fileTrajectoryErrors.close();
       fileAttitudeErrors.close();
       fileDerivativeAttitudeErrors.close();
+      fileTimeAttitudeErrors.close();
+      fileTimePositionErrors.close();
 
 }
 
@@ -223,12 +249,42 @@ void PositionController::SetVehicleParameters(){
       Iy_ = vehicle_parameters_.inertia_(1,1);
       Iz_ = vehicle_parameters_.inertia_(2,2);
 
+      extended_kalman_filter_bebop_.SetVehicleParameters(m_, g_);
+
+}
+
+void PositionController::SetFilterParameters(){
+
+      extended_kalman_filter_bebop_.SetFilterParameters(&filter_parameters_);
+
+}
+
+void PositionController::Quaternion2Euler(double* roll, double* pitch, double* yaw) const {
+    assert(roll);
+    assert(pitch);
+    assert(yaw);
+
+    double x, y, z, w;
+    x = odometry_.orientation.x();
+    y = odometry_.orientation.y();
+    z = odometry_.orientation.z();
+    w = odometry_.orientation.w();
+    
+    tf::Quaternion q(x, y, z, w);
+    tf::Matrix3x3 m(q);
+    m.getRPY(*roll, *pitch, *yaw);
+	
 }
 
 void PositionController::SetOdometry(const EigenOdometry& odometry) {
     
     odometry_ = odometry; 
-    SetOdometryEstimated();
+
+    Quaternion2Euler(&state_.attitude.roll, &state_.attitude.pitch, &state_.attitude.yaw);
+
+    state_.angularVelocity.x = odometry_.angular_velocity[0];
+    state_.angularVelocity.y = odometry_.angular_velocity[1];
+    state_.angularVelocity.z = odometry_.angular_velocity[2];
 
 }
 
@@ -242,6 +298,7 @@ void PositionController::SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint
 void PositionController::SetOdometryEstimated() {
 
     extended_kalman_filter_bebop_.Estimator(&state_, &odometry_);
+
 }
 
 void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocities) {
@@ -257,43 +314,22 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     double u_x, u_y, u_Terr;
     AttitudeController(&u_phi, &u_theta, &u_psi);
     PosController(&u_x, &u_y, &u_T, &u_Terr);
+
+    extended_kalman_filter_bebop_.SetThrustCommand(u_T);
     
-	if(dataStoring_active_){
-		//Saving control signals in a file
-		std::stringstream tempControlSignals;
-		tempControlSignals << u_T << "," << u_phi << "," << u_theta << "," << u_psi << "," << u_x << "," << u_y << "," << u_Terr << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+    if(dataStoring_active_){
+	//Saving control signals in a file
+	std::stringstream tempControlSignals;
+	tempControlSignals << u_T << "," << u_phi << "," << u_theta << "," << u_psi << "," << u_x << "," << u_y << "," << u_Terr << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
-		listControlSignals_.push_back(tempControlSignals.str());
+	listControlSignals_.push_back(tempControlSignals.str());
 
-		//Saving drone attitude in a file
-		std::stringstream tempDroneAttitude;
-		tempDroneAttitude << state_.attitude.roll << "," << state_.attitude.pitch << "," << state_.attitude.yaw << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+	//Saving drone attitude in a file
+	std::stringstream tempDroneAttitude;
+	tempDroneAttitude << state_.attitude.roll << "," << state_.attitude.pitch << "," << state_.attitude.yaw << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
-		listDroneAttitude_.push_back(tempDroneAttitude.str());
+	listDroneAttitude_.push_back(tempDroneAttitude.str());
 
-		//Saving velocity errors in a file
-		std::stringstream tempVelocityErrors;
-		tempVelocityErrors << dot_e_x_ << "," << dot_e_y_ << "," << dot_e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
-
-		listVelocityErrors_.push_back(tempVelocityErrors.str());
-
-		//Saving trajectory errors in a file
-		std::stringstream tempTrajectoryErrors;
-		tempTrajectoryErrors << e_x_ << "," << e_y_ << "," << e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
-
-		listTrajectoryErrors_.push_back(tempTrajectoryErrors.str());
-
-		//Saving attitude derivate errors in a file
-		std::stringstream tempDerivativeAttitudeErrors;
-		tempDerivativeAttitudeErrors << dot_e_phi_ << "," << dot_e_theta_ << "," << dot_e_psi_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
-
-		//Saving attitude errors in a file    
-		std::stringstream tempAttitudeErrors;
-		tempAttitudeErrors << e_phi_ << "," << e_theta_ << "," << e_psi_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
-
-		listAttitudeErrors_.push_back(tempAttitudeErrors.str());
-
-		listDerivativeAttitudeErrors_.push_back(tempDerivativeAttitudeErrors.str());
     }
     
     double first, second, third, fourth;
@@ -303,13 +339,13 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     fourth = (1/ ( 4 * bf_ * bm_)) * u_psi;
 
 	
-	if(dataStoring_active_){
-		//Saving the control mixer terms in a file
-		std::stringstream tempControlMixerTerms;
-		tempControlMixerTerms << first << "," << second << "," << third << "," << fourth << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+    if(dataStoring_active_){
+	//Saving the control mixer terms in a file
+	std::stringstream tempControlMixerTerms;
+	tempControlMixerTerms << first << "," << second << "," << third << "," << fourth << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
-		listControlMixerTerms_.push_back(tempControlMixerTerms.str());
-	}
+	listControlMixerTerms_.push_back(tempControlMixerTerms.str());
+    }
 
     double not_sat1, not_sat2, not_sat3, not_sat4;
     not_sat1 = first - second - third - fourth;
@@ -403,29 +439,10 @@ void PositionController::VelocityErrors(double* dot_e_x, double* dot_e_y, double
    x_r = command_trajectory_.position_W[0];
    y_r = command_trajectory_.position_W[1]; 
    z_r = command_trajectory_.position_W[2];
-   
-   //The linear velocities are expressed in the inertial body frame.
-   double dot_x, dot_y, dot_z, theta, psi, phi;
 
-   theta = state_.attitude.pitch;
-   psi = state_.attitude.yaw;
-   phi = state_.attitude.roll;
-   
-   dot_x = (cos(theta) * cos(psi) * state_.linearVelocity.x) + 
-           ( ( (sin(phi) * sin(theta) * cos(psi) ) - ( cos(phi) * sin(psi) ) ) * state_.linearVelocity.y) + 
-           ( ( (cos(phi) * sin(theta) * cos(psi) ) + ( sin(phi) * sin(psi) ) ) *  state_.linearVelocity.z); 
-
-   dot_y = (cos(theta) * sin(psi) * state_.linearVelocity.x) +
-           ( ( (sin(phi) * sin(theta) * sin(psi) ) + ( cos(phi) * cos(psi) ) ) * state_.linearVelocity.y) +
-           ( ( (cos(phi) * sin(theta) * sin(psi) ) - ( sin(phi) * cos(psi) ) ) *  state_.linearVelocity.z);
-
-   dot_z = (-sin(theta) * state_.linearVelocity.x) + ( sin(phi) * cos(theta) * state_.linearVelocity.y) +
-           (cos(phi) * cos(theta) * state_.linearVelocity.z);
-   
-
-   *dot_e_x = - dot_x;
-   *dot_e_y = - dot_y; 
-   *dot_e_z = - dot_z;
+   *dot_e_x = - state_.linearVelocity.x;
+   *dot_e_y = - state_.linearVelocity.y;
+   *dot_e_z = - state_.linearVelocity.z;
    
 }
 
@@ -516,12 +533,70 @@ void PositionController::CallbackAttitude(const ros::TimerEvent& event){
      
      AttitudeErrors(&e_phi_, &e_theta_, &e_psi_);
      AngularVelocityErrors(&dot_e_phi_, &dot_e_theta_, &dot_e_psi_);
+     
+     //Saving the time instant when the attitude errors are computed
+     if(dataStoring_active_){	
+	clientAttitude_.call(my_messageAttitude_);
+
+        std::stringstream tempTimeAttitudeErrors;
+	tempTimeAttitudeErrors << my_messageAttitude_.response.sim_time << "\n";	
+        listTimeAttitudeErrors_.push_back(tempTimeAttitudeErrors.str());
+
+        ros::WallTime beginWall = ros::WallTime::now();
+        double wallSecs = beginWall.toSec() - wallSecsOffset_;	
+
+        ros::Time begin = ros::Time::now();
+        double secs = begin.toSec();
+
+	//Saving attitude derivate errors in a file
+	std::stringstream tempDerivativeAttitudeErrors;
+	tempDerivativeAttitudeErrors << dot_e_phi_ << "," << dot_e_theta_ << "," << dot_e_psi_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messageAttitude_.response.sim_time << "," << wallSecs << "," << secs << "\n";
+
+	listDerivativeAttitudeErrors_.push_back(tempDerivativeAttitudeErrors.str());
+
+	//Saving attitude errors in a file    
+	std::stringstream tempAttitudeErrors;
+	tempAttitudeErrors << e_phi_ << "," << e_theta_ << "," << e_psi_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messageAttitude_.response.sim_time << "," << wallSecs << "," << secs << "\n";
+
+	listAttitudeErrors_.push_back(tempAttitudeErrors.str());
+
+      }
 }
 
 void PositionController::CallbackPosition(const ros::TimerEvent& event){
- 
+  
+     SetOdometryEstimated();
      PositionErrors(&e_x_, &e_y_, &e_z_);
      VelocityErrors(&dot_e_x_, &dot_e_y_, &dot_e_z_);
+
+     
+     //Saving the time instant when the position errors are computed
+     if(dataStoring_active_){
+        clientPosition_.call(my_messagePosition_);
+
+        std::stringstream tempTimePositionErrors;
+        tempTimePositionErrors << my_messagePosition_.response.sim_time << "\n";
+	listTimePositionErrors_.push_back(tempTimePositionErrors.str());
+
+        ros::WallTime beginWall = ros::WallTime::now();
+        double wallSecs = beginWall.toSec() - wallSecsOffset_;	
+
+        ros::Time begin = ros::Time::now();
+        double secs = begin.toSec();	
+
+	//Saving velocity errors in a file
+	std::stringstream tempVelocityErrors;
+	tempVelocityErrors << dot_e_x_ << "," << dot_e_y_ << "," << dot_e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messagePosition_.response.sim_time << "," << wallSecs << "," << secs << "\n";
+
+	listVelocityErrors_.push_back(tempVelocityErrors.str());
+
+	//Saving trajectory errors in a file
+	std::stringstream tempTrajectoryErrors;
+	tempTrajectoryErrors << e_x_ << "," << e_y_ << "," << e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messagePosition_.response.sim_time << "," << wallSecs << "," << secs << "\n";
+
+	listTrajectoryErrors_.push_back(tempTrajectoryErrors.str());
+
+     }
 }
 
 

@@ -117,8 +117,71 @@ void PositionControllerNode::InitializeParams() {
 
   GetVehicleParameters(pnh, &position_controller_.vehicle_parameters_);
 
+  GetRosParameter(pnh, "dev_x",
+                  position_controller_.filter_parameters_.dev_x_,
+                  &position_controller_.filter_parameters_.dev_x_);
+   
+  GetRosParameter(pnh, "dev_y",
+                  position_controller_.filter_parameters_.dev_y_,
+                  &position_controller_.filter_parameters_.dev_y_);
+
+  GetRosParameter(pnh, "dev_z",
+                  position_controller_.filter_parameters_.dev_z_,
+                  &position_controller_.filter_parameters_.dev_z_);
+
+  GetRosParameter(pnh, "dev_vx",
+                  position_controller_.filter_parameters_.dev_vx_,
+                  &position_controller_.filter_parameters_.dev_vx_);
+
+  GetRosParameter(pnh, "dev_vy",
+                  position_controller_.filter_parameters_.dev_vy_,
+                  &position_controller_.filter_parameters_.dev_vy_);
+
+  GetRosParameter(pnh, "dev_vz",
+                  position_controller_.filter_parameters_.dev_vz_,
+                  &position_controller_.filter_parameters_.dev_vz_);
+
+  GetRosParameter(pnh, "Qp/aa",
+                  position_controller_.filter_parameters_.Qp_x_,
+                  &position_controller_.filter_parameters_.Qp_x_);
+   
+  GetRosParameter(pnh, "Qp/bb",
+                  position_controller_.filter_parameters_.Qp_y_,
+                  &position_controller_.filter_parameters_.Qp_y_);
+
+  GetRosParameter(pnh, "Qp/cc",
+                  position_controller_.filter_parameters_.Qp_z_,
+                  &position_controller_.filter_parameters_.Qp_z_);
+
+  GetRosParameter(pnh, "Qp/dd",
+                  position_controller_.filter_parameters_.Qp_vx_,
+                  &position_controller_.filter_parameters_.Qp_vx_);
+
+  GetRosParameter(pnh, "Qp/ee",
+                  position_controller_.filter_parameters_.Qp_vy_,
+                  &position_controller_.filter_parameters_.Qp_vy_);
+
+  GetRosParameter(pnh, "Qp/ff",
+                  position_controller_.filter_parameters_.Qp_vz_,
+                  &position_controller_.filter_parameters_.Qp_vz_);
+
+  position_controller_.filter_parameters_.Rp_(0,0) = position_controller_.filter_parameters_.dev_x_; 
+  position_controller_.filter_parameters_.Rp_(1,1) = position_controller_.filter_parameters_.dev_y_; 
+  position_controller_.filter_parameters_.Rp_(2,2) = position_controller_.filter_parameters_.dev_z_;
+  position_controller_.filter_parameters_.Rp_(3,3) = position_controller_.filter_parameters_.dev_vx_; 
+  position_controller_.filter_parameters_.Rp_(4,4) = position_controller_.filter_parameters_.dev_vy_;                     
+  position_controller_.filter_parameters_.Rp_(5,5) = position_controller_.filter_parameters_.dev_vz_;
+
+  position_controller_.filter_parameters_.Qp_(0,0) = position_controller_.filter_parameters_.Qp_x_; 
+  position_controller_.filter_parameters_.Qp_(1,1) = position_controller_.filter_parameters_.Qp_y_; 
+  position_controller_.filter_parameters_.Qp_(2,2) = position_controller_.filter_parameters_.Qp_z_;
+  position_controller_.filter_parameters_.Qp_(3,3) = position_controller_.filter_parameters_.Qp_vx_; 
+  position_controller_.filter_parameters_.Qp_(4,4) = position_controller_.filter_parameters_.Qp_vy_;                     
+  position_controller_.filter_parameters_.Qp_(5,5) = position_controller_.filter_parameters_.Qp_vz_;
+
   position_controller_.SetControllerGains();
   position_controller_.SetVehicleParameters();
+  position_controller_.SetFilterParameters();
 
 }
 

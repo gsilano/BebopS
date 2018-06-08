@@ -28,13 +28,14 @@
 #include <ros/time.h>
 
 #include "extendedKalmanFilter.h"
+#include "filter_parameters.h"
 #include "stabilizer_types.h"
 #include "parameters.h"
 #include "common.h"
 
+#include <gazebo_msgs/GetWorldProperties.h>
+
 using namespace std;
-
-
 
 namespace teamsannio_med_control {
 
@@ -53,8 +54,6 @@ static const double MuDefaultAltitudeController = 0.12;
 static const double MuDefaultRollController = 0.09;
 static const double MuDefaultPitchController = 0.26;
 static const double MuDefaultYawRateController = 0.04;
-
-
 
 class PositionControllerParameters {
  public:
@@ -97,15 +96,31 @@ class PositionControllerParameters {
             void SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory);
             void SetControllerGains();
             void SetVehicleParameters();
+            void SetFilterParameters();
             
             PositionControllerParameters controller_parameters_;
             ExtendedKalmanFilter extended_kalman_filter_bebop_;
             VehicleParameters vehicle_parameters_;
+            FilterParameters filter_parameters_;
 
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         private:
+            //Boolean variables to active/unactive the controller and the data storage
             bool controller_active_;
-			bool dataStoring_active_;
+	    bool dataStoring_active_;
+
+            //Wall clock time offset variable
+            double wallSecsOffset_;
+
+            //Gazebo Message for attitude and position
+            gazebo_msgs::GetWorldProperties my_messagePosition_;
+            ros::NodeHandle clientHandlePosition_;
+            ros::ServiceClient clientPosition_;
+
+            ros::NodeHandle clientHandleAttitude_;
+            ros::ServiceClient clientAttitude_;
+            gazebo_msgs::GetWorldProperties my_messageAttitude_;
+                         
 
             //Sting vectors used to stare data
             std::vector<string> listControlSignals_;
@@ -117,6 +132,8 @@ class PositionControllerParameters {
             std::vector<string> listTrajectoryErrors_;
             std::vector<string> listAttitudeErrors_;
             std::vector<string> listDerivativeAttitudeErrors_;
+            std::vector<string> listTimeAttitudeErrors_;
+            std::vector<string> listTimePositionErrors_;
           
             //Controller gains
             double beta_x_, beta_y_, beta_z_;
@@ -166,6 +183,7 @@ class PositionControllerParameters {
             EigenOdometry odometry_;
 
             void SetOdometryEstimated();
+            void Quaternion2Euler(double* roll, double* pitch, double* yaw) const;
             void AttitudeController(double* u_phi, double* u_theta, double* u_psi);
             void AngularVelocityErrors(double* dot_e_phi_, double* dot_e_theta_, double* dot_e_psi_);
             void AttitudeErrors(double* e_phi_, double* e_theta_, double* e_psi_);

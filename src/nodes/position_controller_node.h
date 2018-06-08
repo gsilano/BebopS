@@ -64,11 +64,7 @@ namespace teamsannio_med_control {
             std::deque<ros::Duration> command_waiting_times_;
             ros::Timer command_timer_;
 
-            void TimedCommandCallback(const ros::TimerEvent& e);
-
             void MultiDofJointTrajectoryCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& trajectory_reference_msg);
-
-            void CommandPoseCallback(const geometry_msgs::PoseStampedConstPtr& pose_msg);
 
             void OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg);
 

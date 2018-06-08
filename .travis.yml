@@ -19,12 +19,13 @@
 #     `wstool`, and should be listed in a file named dependencies.rosinstall.
 #
 # There are two variables you may want to change:
-#   - ROS_DISTRO (default is indigo). Note that packages must be available for
-#     ubuntu 14.04 trusty.
+#   - ROS_DISTRO (default is kinetic). Note that packages must be available for
+#     ubuntu 16.04 trusty.
 #
 # See the README.md for more information.
 #
 # Author: Felix Duvallet <felixd@gmail.com>
+# Author: Giuseppe Silano <g.silano89@gmail.com>
 
 # NOTE: The build lifecycle on Travis.ci is something like this:
 #    before_install
@@ -94,8 +95,6 @@ install:
   - git checkout med18
   - cd ~/catkin_ws/src/mav_comm 
   - git checkout med18
-  - cd ~/catkin_ws/src/teamsannio_med_control 
-  - git checkout feature/kalman_filter
   - cd ~/catkin_ws
   - catkin build
   - echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
@@ -104,4 +103,3 @@ install:
 notifications:
   email:
     - giuseppe.silano@unisannio.it
-    - pasquale.oppido@unisannio.it
