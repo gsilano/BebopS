@@ -179,6 +179,7 @@ class PositionControllerParameters {
             void CallbackSaveData(const ros::TimerEvent& event);
 
 	    state_t state_;
+            control_t control_;
             mav_msgs::EigenTrajectoryPoint command_trajectory_;
             EigenOdometry odometry_;
 

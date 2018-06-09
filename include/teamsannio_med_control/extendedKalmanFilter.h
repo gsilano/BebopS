@@ -49,7 +49,6 @@ class ExtendedKalmanFilter {
   private:
 
      EigenOdometry odometry_private_;
-     VehicleParameters vehic_param_;
 
      //Filter Vectors
      Eigen::VectorXf Xp_, Xe_, Hatx_;
@@ -60,7 +59,6 @@ class ExtendedKalmanFilter {
  
      //Vehicle parameters
      double m_private_, g_private_;
-     double phi_, theta_, psi_;
      double u_T_private_;
 
      void Quaternion2Euler(double* roll, double* pitch, double* yaw) const;

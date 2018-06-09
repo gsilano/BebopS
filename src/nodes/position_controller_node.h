@@ -34,6 +34,8 @@
 
 #include "teamsannio_med_control/common.h"
 #include "teamsannio_med_control/position_controller.h"
+#include "teamsannio_med_control/parameters_ros.h"
+#include "teamsannio_med_control/parameters.h"
 
 namespace teamsannio_med_control {
 

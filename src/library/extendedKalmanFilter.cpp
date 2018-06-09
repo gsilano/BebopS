@@ -41,7 +41,14 @@ ExtendedKalmanFilter::ExtendedKalmanFilter()
         Pe_(Eigen::MatrixXf::Zero(6,6)),
         Hatx_(Eigen::VectorXf::Zero(6)),
         u_T_private_(0),
-        Hp_(Eigen::MatrixXf::Identity(6,6)){
+        m_private_(0),
+        g_private_(0),
+        A_private_(Eigen::MatrixXf::Zero(6,6)),
+        Hp_(Eigen::MatrixXf::Identity(6,6)),
+        Rp_private_(Eigen::MatrixXf::Zero(6,6)),
+        Qp_private_(Eigen::MatrixXf::Identity(6,6)),
+        Qp_std_(Eigen::MatrixXf::Zero(6,6)),
+        Rp_std_(Eigen::MatrixXf::Zero(6,6)){
 
               	
 		A_private_ <<   1, 0, 0,  TsP,    0,    0,
@@ -51,11 +58,6 @@ ExtendedKalmanFilter::ExtendedKalmanFilter()
 				0, 0, 0,     0,    1,    0,
 				0, 0, 0,     0,    0,    1;
 
-		Qp_std_ = Qp_private_.transpose()*Qp_private_;
-                 	
-                Rp_std_ = Rp_private_.transpose()*Rp_private_;
-	
-	
 }
 
 ExtendedKalmanFilter::~ExtendedKalmanFilter() {}
@@ -69,6 +71,10 @@ void ExtendedKalmanFilter::SetFilterParameters(FilterParameters *filter_paramete
 
      Rp_private_ = filter_parameters_->Rp_; 
      Qp_private_ = filter_parameters_->Qp_;
+
+     Qp_std_ = Qp_private_.transpose()*Qp_private_;
+                 	
+     Rp_std_ = Rp_private_.transpose()*Rp_private_;
 }
 
 void ExtendedKalmanFilter::Estimator(state_t *state_, EigenOdometry* odometry_){
@@ -123,7 +129,8 @@ void ExtendedKalmanFilter::SetVehicleParameters(double m, double g){
 
 void ExtendedKalmanFilter::Predict(){
 
-    Quaternion2Euler(&phi_, &theta_, &psi_);
+    double phi, theta, psi;
+    Quaternion2Euler(&phi, &theta, &psi);
 
     double x, y, z, dx, dy, dz;
     x  = Hatx_(0);
@@ -136,25 +143,25 @@ void ExtendedKalmanFilter::Predict(){
 
     double dx_ENU, dy_ENU, dz_ENU;
 	
-    dx_ENU = (cos(theta_) * cos(psi_) * dx) + 
-	     ( ( (sin(phi_) * sin(theta_) * cos(psi_) ) - ( cos(phi_) * sin(psi_) ) ) * dy) + 
-	     ( ( (cos(phi_) * sin(theta_) * cos(psi_) ) + ( sin(phi_) * sin(psi_) ) ) * dz); 
+    dx_ENU = (cos(theta) * cos(psi) * dx) + 
+	     ( ( (sin(phi) * sin(theta) * cos(psi) ) - ( cos(phi) * sin(psi) ) ) * dy) + 
+	     ( ( (cos(phi) * sin(theta) * cos(psi) ) + ( sin(phi) * sin(psi) ) ) * dz); 
 
-    dy_ENU = (cos(theta_) * sin(psi_) * dx) +
-	     ( ( (sin(phi_) * sin(theta_) * sin(psi_) ) + ( cos(phi_) * cos(psi_) ) ) * dy) +
-	     ( ( (cos(phi_) * sin(theta_) * sin(psi_) ) - ( sin(phi_) * cos(psi_) ) ) * dz);
+    dy_ENU = (cos(theta) * sin(psi) * dx) +
+	     ( ( (sin(phi) * sin(theta) * sin(psi) ) + ( cos(phi) * cos(psi) ) ) * dy) +
+	     ( ( (cos(phi) * sin(theta) * sin(psi) ) - ( sin(phi) * cos(psi) ) ) * dz);
 
-    dz_ENU = (-sin(theta_) * dx) + ( sin(phi_) * cos(theta_) * dy) +
-	     (cos(phi_) * cos(theta_) * dz);
+    dz_ENU = (-sin(theta) * dx) + ( sin(phi) * cos(theta) * dy) +
+	     (cos(phi) * cos(theta) * dz);
 
 
      //Nonlinear state propagation 
      x = x + TsP * dx_ENU;
      y = y + TsP * dy_ENU;
      z = z + TsP * dz_ENU;
-     dx_ENU = dx_ENU + TsP * (u_T_private_ * (1/m_private_) * (cos(psi_) * sin(theta_) * cos(phi_) + sin(psi_) * sin(theta_)));
-     dy_ENU = dy_ENU + TsP * (u_T_private_ * (1/m_private_) * (sin(psi_) * sin(theta_) * cos(phi_) - cos(psi_) * sin(phi_)));
-     dz_ENU = dz_ENU + TsP * (-g_private_ + u_T_private_ * (1/m_private_) * (cos(theta_) * cos(phi_)));
+     dx_ENU = dx_ENU + TsP * (u_T_private_ * (1/m_private_) * (cos(psi) * sin(theta) * cos(phi) + sin(psi) * sin(theta)));
+     dy_ENU = dy_ENU + TsP * (u_T_private_ * (1/m_private_) * (sin(psi) * sin(theta) * cos(phi) - cos(psi) * sin(phi)));
+     dz_ENU = dz_ENU + TsP * (-g_private_ + u_T_private_ * (1/m_private_) * (cos(theta) * cos(phi)));
 	
 		 				 
      // Prediction error Matrix
@@ -185,9 +192,7 @@ void ExtendedKalmanFilter::Correct(){
 		
        Xe_ = Xp_ + K * (Meas - Hp_ * Xp_);
 	
-	
 }
-
 
 
 }
