@@ -16,22 +16,18 @@
  * limitations under the License.
  */
 
-#ifndef BEBOP_CONTROL_POSITION_CONTROLLER_H
-#define BEBOP_CONTROL_POSITION_CONTROLLER_H
-
-#include <mav_msgs/conversions.h>
-#include <mav_msgs/eigen_mav_msgs.h>
+#ifndef ARDRONE_CONTROL_POSITION_CONTROLLER_H
+#define ARDRONE_CONTROL_POSITION_CONTROLLER_H
 
 #include <string>
 
 #include <ros/time.h>
+#include <std_msgs/Empty.h>
 
 #include "extendedKalmanFilter.h"
 #include "stabilizer_types.h"
 #include "parameters.h"
 #include "common.h"
-
-#include <gazebo_msgs/GetWorldProperties.h>
 
 using namespace std;
 
@@ -52,7 +48,6 @@ static const double MuDefaultAltitudeController = 0.12;
 static const double MuDefaultRollController = 0.09;
 static const double MuDefaultPitchController = 0.26;
 static const double MuDefaultYawRateController = 0.04;
-
 
 
 class PositionControllerParameters {
@@ -86,52 +81,29 @@ class PositionControllerParameters {
   double mu_psi_;
 };
     
-    class PositionController{
+    class PositionControllerWithBebop{
         public:
-            PositionController();
-            ~PositionController();
-            void CalculateRotorVelocities(Eigen::Vector4d* rotor_velocities);
+            PositionControllerWithBebop();
+            ~PositionControllerWithBebop();
+            void CalculateCommandSignals(geometry_msgs::Twist* ref_command_signals);
 
-            void SetOdometry(const EigenOdometry& odometry);
+            void SetOdom(const EigenOdometry& odometry);
             void SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory);
             void SetControllerGains();
             void SetVehicleParameters();
             
             PositionControllerParameters controller_parameters_;
-            ExtendedKalmanFilter extended_kalman_filter_bebop_;
+            ExtendedKalmanFilter extended_kalman_filter_ardrone_;
             VehicleParameters vehicle_parameters_;
 
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         private:
             //Boolean variables to active/unactive the controller and the data storage
             bool controller_active_;
-	    bool dataStoring_active_;
 
-            //Wall clock time offset variable
-            double wallSecsOffset_;
-
-            //Gazebo Message for attitude and position
-            gazebo_msgs::GetWorldProperties my_messagePosition_;
-            ros::NodeHandle clientHandlePosition_;
-            ros::ServiceClient clientPosition_;
-
-            ros::NodeHandle clientHandleAttitude_;
-            ros::ServiceClient clientAttitude_;
-            gazebo_msgs::GetWorldProperties my_messageAttitude_;
-                         
-
-            //Sting vectors used to stare data
-            std::vector<string> listControlSignals_;
-            std::vector<string> listControlMixerTerms_;
-            std::vector<string> listPropellersAngularVelocities_;
-            std::vector<string> listReferenceAngles_;
-            std::vector<string> listVelocityErrors_;
-            std::vector<string> listDroneAttitude_;
-            std::vector<string> listTrajectoryErrors_;
-            std::vector<string> listAttitudeErrors_;
-            std::vector<string> listDerivativeAttitudeErrors_;
-            std::vector<string> listTimeAttitudeErrors_;
-            std::vector<string> listTimePositionErrors_;
+            //publisher
+            ros::Publisher land_pub_;
+            ros::Publisher reset_pub_;
           
             //Controller gains
             double beta_x_, beta_y_, beta_z_;
@@ -169,17 +141,18 @@ class PositionControllerParameters {
             ros::NodeHandle n3_;
             ros::Timer timer1_;
             ros::Timer timer2_;
-            ros::Timer timer3_;
 
             //Callback functions to compute the errors among axis and angles
             void CallbackAttitude(const ros::TimerEvent& event);
             void CallbackPosition(const ros::TimerEvent& event);
-            void CallbackSaveData(const ros::TimerEvent& event);
 
 	    state_t state_;
+            control_t control_;
             mav_msgs::EigenTrajectoryPoint command_trajectory_;
             EigenOdometry odometry_;
 
+            void Emergency();
+            void Land();
             void SetOdometryEstimated();
             void AttitudeController(double* u_phi, double* u_theta, double* u_psi);
             void AngularVelocityErrors(double* dot_e_phi_, double* dot_e_theta_, double* dot_e_psi_);
