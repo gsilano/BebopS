@@ -97,6 +97,7 @@ class PositionControllerParameters {
             void SetControllerGains();
             void SetVehicleParameters();
             void SetFilterParameters();
+            void GetOdometry(nav_msgs::Odometry* odometry_filtered);
             
             PositionControllerParameters controller_parameters_;
             ExtendedKalmanFilter extended_kalman_filter_bebop_;
@@ -177,6 +178,8 @@ class PositionControllerParameters {
             void CallbackAttitude(const ros::TimerEvent& event);
             void CallbackPosition(const ros::TimerEvent& event);
             void CallbackSaveData(const ros::TimerEvent& event);
+
+            nav_msgs::Odometry odometry_filtered_private_;
 
 	    state_t state_;
             control_t control_;

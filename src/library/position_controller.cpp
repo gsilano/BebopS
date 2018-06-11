@@ -310,10 +310,16 @@ void PositionController::SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint
 
 }
 
+void PositionController::GetOdometry(nav_msgs::Odometry* odometry_filtered){
+
+   *odometry_filtered = odometry_filtered_private_;
+
+}
+
 void PositionController::SetOdometryEstimated() {
 
     extended_kalman_filter_bebop_.SetThrustCommand(control_.thrust);
-    extended_kalman_filter_bebop_.Estimator(&state_, &odometry_);
+    extended_kalman_filter_bebop_.Estimator(&state_, &odometry_, &odometry_filtered_private_);
 
 }
 

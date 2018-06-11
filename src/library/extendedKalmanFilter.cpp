@@ -25,10 +25,13 @@
 
 #include <math.h> 
 #include <ros/ros.h>
+#include <chrono>
 
 #include <nav_msgs/Odometry.h>
 #include <mav_msgs/conversions.h>
 #include <ros/console.h>
+
+#include <random>
 
 #define TsP                       10e-3  /* Position control sampling time */
 
@@ -58,6 +61,9 @@ ExtendedKalmanFilter::ExtendedKalmanFilter()
 				0, 0, 0,     0,    1,    0,
 				0, 0, 0,     0,    0,    1;
 
+                double mean = 0, std = 0.017;
+                std::normal_distribution<double>  distribution_(mean, std);
+
 }
 
 ExtendedKalmanFilter::~ExtendedKalmanFilter() {}
@@ -75,9 +81,10 @@ void ExtendedKalmanFilter::SetFilterParameters(FilterParameters *filter_paramete
      Qp_std_ = Qp_private_.transpose()*Qp_private_;
                  	
      Rp_std_ = Rp_private_.transpose()*Rp_private_;
+
 }
 
-void ExtendedKalmanFilter::Estimator(state_t *state_, EigenOdometry* odometry_){
+void ExtendedKalmanFilter::Estimator(state_t *state_, EigenOdometry* odometry_, nav_msgs::Odometry* odometry_filtered){
    assert(state_);
    assert(odometry_);
 
@@ -92,8 +99,18 @@ void ExtendedKalmanFilter::Estimator(state_t *state_, EigenOdometry* odometry_){
 
    state_->linearVelocity.x = Xe_(3);
    state_->linearVelocity.x = Xe_(4);
-   state_->linearVelocity.x = Xe_(5);   
- 
+   state_->linearVelocity.x = Xe_(5); 
+
+   Hatx_ = Xe_;
+
+   *odometry_filtered;
+   odometry_filtered->pose.pose.position.x = Xe_(0);
+   odometry_filtered->pose.pose.position.y = Xe_(1);
+   odometry_filtered->pose.pose.position.z = Xe_(2);
+   odometry_filtered->twist.twist.linear.x = Xe_(3);
+   odometry_filtered->twist.twist.linear.y = Xe_(4);
+   odometry_filtered->twist.twist.linear.z = Xe_(5);
+
 }
 
 void ExtendedKalmanFilter::Quaternion2Euler(double* roll, double* pitch, double* yaw) const {
@@ -132,6 +149,9 @@ void ExtendedKalmanFilter::Predict(){
     double phi, theta, psi;
     Quaternion2Euler(&phi, &theta, &psi);
 
+    double phin, thetan, psin;
+    AttitudeAddingNoise(&phin, &thetan, &psin, phi, theta, psi);
+
     double x, y, z, dx, dy, dz;
     x  = Hatx_(0);
     y  = Hatx_(1);
@@ -143,32 +163,50 @@ void ExtendedKalmanFilter::Predict(){
 
     double dx_ENU, dy_ENU, dz_ENU;
 	
-    dx_ENU = (cos(theta) * cos(psi) * dx) + 
-	     ( ( (sin(phi) * sin(theta) * cos(psi) ) - ( cos(phi) * sin(psi) ) ) * dy) + 
-	     ( ( (cos(phi) * sin(theta) * cos(psi) ) + ( sin(phi) * sin(psi) ) ) * dz); 
+    dx_ENU = (cos(thetan) * cos(psin) * dx) + 
+	     ( ( (sin(phin) * sin(thetan) * cos(psin) ) - ( cos(phin) * sin(psin) ) ) * dy) + 
+	     ( ( (cos(phin) * sin(thetan) * cos(psin) ) + ( sin(phin) * sin(psin) ) ) * dz); 
 
-    dy_ENU = (cos(theta) * sin(psi) * dx) +
-	     ( ( (sin(phi) * sin(theta) * sin(psi) ) + ( cos(phi) * cos(psi) ) ) * dy) +
-	     ( ( (cos(phi) * sin(theta) * sin(psi) ) - ( sin(phi) * cos(psi) ) ) * dz);
+    dy_ENU = (cos(thetan) * sin(psin) * dx) +
+	     ( ( (sin(phin) * sin(thetan) * sin(psin) ) + ( cos(phin) * cos(psin) ) ) * dy) +
+	     ( ( (cos(phin) * sin(thetan) * sin(psin) ) - ( sin(phin) * cos(psin) ) ) * dz);
 
-    dz_ENU = (-sin(theta) * dx) + ( sin(phi) * cos(theta) * dy) +
-	     (cos(phi) * cos(theta) * dz);
+    dz_ENU = (-sin(thetan) * dx) + ( sin(phin) * cos(thetan) * dy) +
+	     (cos(phin) * cos(thetan) * dz);
 
 
      //Nonlinear state propagation 
      x = x + TsP * dx_ENU;
      y = y + TsP * dy_ENU;
      z = z + TsP * dz_ENU;
-     dx_ENU = dx_ENU + TsP * (u_T_private_ * (1/m_private_) * (cos(psi) * sin(theta) * cos(phi) + sin(psi) * sin(theta)));
-     dy_ENU = dy_ENU + TsP * (u_T_private_ * (1/m_private_) * (sin(psi) * sin(theta) * cos(phi) - cos(psi) * sin(phi)));
-     dz_ENU = dz_ENU + TsP * (-g_private_ + u_T_private_ * (1/m_private_) * (cos(theta) * cos(phi)));
-	
-		 				 
+     dx_ENU = dx_ENU + TsP * (u_T_private_ * (1/m_private_) * (cos(psin) * sin(thetan) * cos(phin) + sin(psin) * sin(thetan)));
+     dy_ENU = dy_ENU + TsP * (u_T_private_ * (1/m_private_) * (sin(psin) * sin(thetan) * cos(phin) - cos(psin) * sin(phin)));
+     dz_ENU = dz_ENU + TsP * (-g_private_ + u_T_private_ * (1/m_private_) * (cos(thetan) * cos(phin)));
+			 
      // Prediction error Matrix
      P_ = A_private_*(P_)*A_private_.transpose() + Qp_std_;
-		
+ 		
      //The predicted state
      Xp_ << x, y, z, dx, dy, dz;
+
+}
+
+void ExtendedKalmanFilter::AttitudeAddingNoise(double *phin, double *thetan, double* psin, double phi, double theta, double psi){
+    assert(phi);
+    assert(theta);
+    assert(psi);
+
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::default_random_engine generatorPhi (seed);
+    *phin = phi + distribution_(generatorPhi);
+
+    seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::default_random_engine generatorTheta (seed);
+    *thetan = theta + distribution_(generatorTheta);
+   
+    seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::default_random_engine generatorPsi (seed);
+    *psin = psi + distribution_(generatorPsi);
 
 }	
 

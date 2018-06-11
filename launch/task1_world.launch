@@ -40,6 +40,9 @@
       <param name="use_sim_time" value="$(arg use_sim_time)" />
       <remap from="/command/motor_speed" to="/gazebo/command/motor_speed" />
       <remap from="/odometry" to="/bebop/odometry" />
+      <remap from="/odometry_gt" to="/bebop/odometry_gt" />
+      <remap from="/filteredOutput" to="/bebop/filteredOutput" />
+      <remap from="/stateErrors" to="/bebop/stateErrors" />
       <remap from="/command/trajectory" to="/bebop/command/trajectory" />
     </node>
 
@@ -50,5 +53,12 @@
 
     <!-- Launch the trajectory plot -->
     <node name="position_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/odometry/pose/pose/position" output="screen" />
+
+    <!-- Launch the filtered output -->
+    <node name="position_plot_gt" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/filteredOutput/pose/pose/position" output="screen" />
+
+    <!-- Launch the state errors -->
+    <node name="state_errors_position_plot_gt" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/stateErrors/pose/pose/position" output="screen" />
+    <node name="state_errors_velocity_plot_gt" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/stateErrors/twist/twist/linear" output="screen" />
 
 </launch>

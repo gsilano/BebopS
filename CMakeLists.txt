@@ -61,6 +61,7 @@ install(TARGETS position_controller
 
 install(
   DIRECTORY include/${PROJECT_NAME}/
+  DIRECTORY include/teamsannio_msgs/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
   FILES_MATCHING PATTERN "*.h"
 )
