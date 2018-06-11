@@ -19,32 +19,58 @@
 #ifndef _ESTIMATOR_EXTENDED_KALMAN_FILTER_H_
 #define _ESTIMATOR_EXTENDED_KALMAN_FILTER_H_
 
-#include <mav_msgs/eigen_mav_msgs.h>
 #include "teamsannio_med_control/transform_datatypes.h"
 #include "teamsannio_med_control/Matrix3x3.h"
 #include "teamsannio_med_control/Quaternion.h"
+
 #include <nav_msgs/Odometry.h>
 #include <mav_msgs/conversions.h>
+#include <Eigen/Eigen>
+#include <mav_msgs/eigen_mav_msgs.h>
+
+#include <random>
+#include <cmath>
 
 #include "stabilizer_types.h"
+#include "filter_parameters.h"
 #include "common.h"
-
+#include "parameters_ros.h"
 
 namespace teamsannio_med_control {
 
 class ExtendedKalmanFilter {
   public:
-    ExtendedKalmanFilter();
-    ~ExtendedKalmanFilter();
+     
+     ExtendedKalmanFilter();
+     ~ExtendedKalmanFilter();
 
-    void Estimator(state_t *state_, EigenOdometry* odometry_);
+     void Estimator(state_t *state_, EigenOdometry* odometry_, nav_msgs::Odometry* odometry_filtered);
+     void SetThrustCommand(double u_T);
+     void SetVehicleParameters(double m, double g);
+     void SetFilterParameters(FilterParameters *filter_parameters_);
 
   private:
 
-    EigenOdometry odometry_private_;
+     EigenOdometry odometry_private_;
 
-    void Quaternion2Euler(double* roll, double* pitch, double* yaw) const;
-    void SetOdometry(const EigenOdometry& odometry);
+     //Filter Vectors
+     Eigen::VectorXf Xp_, Xe_, Hatx_;
+     Eigen::MatrixXf P_, Pe_;
+     Eigen::MatrixXf Rp_private_, Qp_private_;
+
+     Eigen::MatrixXf A_private_, Qp_std_, Rp_std_, Hp_;
+
+     std::normal_distribution<double> distribution_;
+ 
+     //Vehicle parameters
+     double m_private_, g_private_;
+     double u_T_private_;
+
+     void Quaternion2Euler(double* roll, double* pitch, double* yaw) const;
+     void AttitudeAddingNoise(double *phin, double *thetan, double* psin, double phi, double theta, double psi);
+     void SetOdometry(const EigenOdometry& odometry);
+     void Correct();
+     void Predict();
 
 };
 

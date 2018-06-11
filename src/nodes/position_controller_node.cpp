@@ -23,6 +23,7 @@
 #include "position_controller_node.h"
 
 #include "teamsannio_med_control/parameters_ros.h"
+#include "teamsannio_msgs/default_topics.h"
 
 namespace teamsannio_med_control {
 
@@ -39,6 +40,12 @@ PositionControllerNode::PositionControllerNode() {
     odometry_sub_ = nh.subscribe(mav_msgs::default_topics::ODOMETRY, 1, &PositionControllerNode::OdometryCallback, this);
 
     motor_velocity_reference_pub_ = nh.advertise<mav_msgs::Actuators>(mav_msgs::default_topics::COMMAND_ACTUATORS, 1);
+
+    odometry_sub_gt_ = nh.subscribe(teamsannio_msgs::default_topics::ODOMETRY_GT, 1, &PositionControllerNode::OdometryGTCallback, this);
+
+    odometry_filtered_pub_ = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::FILTERED_OUTPUT, 1);
+
+    filtered_errors_pub_ = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::STATE_ERRORS, 1);
 
 }
 
@@ -117,12 +124,94 @@ void PositionControllerNode::InitializeParams() {
 
   GetVehicleParameters(pnh, &position_controller_.vehicle_parameters_);
 
+  GetRosParameter(pnh, "dev_x",
+                  position_controller_.filter_parameters_.dev_x_,
+                  &position_controller_.filter_parameters_.dev_x_);
+   
+  GetRosParameter(pnh, "dev_y",
+                  position_controller_.filter_parameters_.dev_y_,
+                  &position_controller_.filter_parameters_.dev_y_);
+
+  GetRosParameter(pnh, "dev_z",
+                  position_controller_.filter_parameters_.dev_z_,
+                  &position_controller_.filter_parameters_.dev_z_);
+
+  GetRosParameter(pnh, "dev_vx",
+                  position_controller_.filter_parameters_.dev_vx_,
+                  &position_controller_.filter_parameters_.dev_vx_);
+
+  GetRosParameter(pnh, "dev_vy",
+                  position_controller_.filter_parameters_.dev_vy_,
+                  &position_controller_.filter_parameters_.dev_vy_);
+
+  GetRosParameter(pnh, "dev_vz",
+                  position_controller_.filter_parameters_.dev_vz_,
+                  &position_controller_.filter_parameters_.dev_vz_);
+
+  GetRosParameter(pnh, "Qp/aa",
+                  position_controller_.filter_parameters_.Qp_x_,
+                  &position_controller_.filter_parameters_.Qp_x_);
+   
+  GetRosParameter(pnh, "Qp/bb",
+                  position_controller_.filter_parameters_.Qp_y_,
+                  &position_controller_.filter_parameters_.Qp_y_);
+
+  GetRosParameter(pnh, "Qp/cc",
+                  position_controller_.filter_parameters_.Qp_z_,
+                  &position_controller_.filter_parameters_.Qp_z_);
+
+  GetRosParameter(pnh, "Qp/dd",
+                  position_controller_.filter_parameters_.Qp_vx_,
+                  &position_controller_.filter_parameters_.Qp_vx_);
+
+  GetRosParameter(pnh, "Qp/ee",
+                  position_controller_.filter_parameters_.Qp_vy_,
+                  &position_controller_.filter_parameters_.Qp_vy_);
+
+  GetRosParameter(pnh, "Qp/ff",
+                  position_controller_.filter_parameters_.Qp_vz_,
+                  &position_controller_.filter_parameters_.Qp_vz_);
+
+  position_controller_.filter_parameters_.Rp_(0,0) = position_controller_.filter_parameters_.dev_x_; 
+  position_controller_.filter_parameters_.Rp_(1,1) = position_controller_.filter_parameters_.dev_y_; 
+  position_controller_.filter_parameters_.Rp_(2,2) = position_controller_.filter_parameters_.dev_z_;
+  position_controller_.filter_parameters_.Rp_(3,3) = position_controller_.filter_parameters_.dev_vx_; 
+  position_controller_.filter_parameters_.Rp_(4,4) = position_controller_.filter_parameters_.dev_vy_;                     
+  position_controller_.filter_parameters_.Rp_(5,5) = position_controller_.filter_parameters_.dev_vz_;
+
+  position_controller_.filter_parameters_.Qp_(0,0) = position_controller_.filter_parameters_.Qp_x_; 
+  position_controller_.filter_parameters_.Qp_(1,1) = position_controller_.filter_parameters_.Qp_y_; 
+  position_controller_.filter_parameters_.Qp_(2,2) = position_controller_.filter_parameters_.Qp_z_;
+  position_controller_.filter_parameters_.Qp_(3,3) = position_controller_.filter_parameters_.Qp_vx_; 
+  position_controller_.filter_parameters_.Qp_(4,4) = position_controller_.filter_parameters_.Qp_vy_;                     
+  position_controller_.filter_parameters_.Qp_(5,5) = position_controller_.filter_parameters_.Qp_vz_;
+
   position_controller_.SetControllerGains();
   position_controller_.SetVehicleParameters();
+  position_controller_.SetFilterParameters();
 
 }
 
 void PositionControllerNode::Publish(){
+}
+
+void PositionControllerNode::OdometryGTCallback(const nav_msgs::OdometryConstPtr& odometry_msg_gt) {
+
+    ROS_INFO_ONCE("PositionController got first odometry ground truth message.");
+
+    if (waypointHasBeenPublished_){
+
+       EigenOdometry odometry_gt;
+       eigenOdometryFromMsg(odometry_msg_gt, &odometry_gt);
+
+       odometry_gt_.pose.pose.position.x = odometry_gt.position[0];
+       odometry_gt_.pose.pose.position.y = odometry_gt.position[1];
+       odometry_gt_.pose.pose.position.z = odometry_gt.position[2];
+       odometry_gt_.twist.twist.linear.x = odometry_gt.velocity[0];
+       odometry_gt_.twist.twist.linear.y = odometry_gt.velocity[1];
+       odometry_gt_.twist.twist.linear.z = odometry_gt.velocity[2];
+
+    }
 }
 
 void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg) {
@@ -151,6 +240,23 @@ void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& 
 	    actuator_msg->header.stamp = odometry_msg->header.stamp;
 
 	    motor_velocity_reference_pub_.publish(actuator_msg);
+
+            nav_msgs::Odometry odometry_filtered;
+            position_controller_.GetOdometry(&odometry_filtered);
+            odometry_filtered.header.stamp = odometry_msg->header.stamp;
+            odometry_filtered_pub_.publish(odometry_filtered);
+
+            nav_msgs::Odometry filtered_errors;
+            filtered_errors.pose.pose.position.x = odometry_filtered.pose.pose.position.x - odometry_gt_.pose.pose.position.x;
+            filtered_errors.pose.pose.position.y = odometry_filtered.pose.pose.position.y - odometry_gt_.pose.pose.position.y;
+            filtered_errors.pose.pose.position.z = odometry_filtered.pose.pose.position.z - odometry_gt_.pose.pose.position.z;
+            filtered_errors.twist.twist.linear.x = odometry_filtered.twist.twist.linear.x - odometry_gt_.twist.twist.linear.x;
+            filtered_errors.twist.twist.linear.y = odometry_filtered.twist.twist.linear.y - odometry_gt_.twist.twist.linear.y;
+            filtered_errors.twist.twist.linear.z = odometry_filtered.twist.twist.linear.z - odometry_gt_.twist.twist.linear.z;
+
+            filtered_errors.header.stamp = odometry_msg->header.stamp;
+            filtered_errors_pub_.publish(filtered_errors);
+
     }	 
 }
 
