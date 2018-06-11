@@ -336,8 +336,6 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     double u_x, u_y, u_Terr;
     AttitudeController(&u_phi, &u_theta, &u_psi);
     PosController(&u_x, &u_y, &control_.thrust, &u_Terr);
-
-
     
     if(dataStoring_active_){
 	//Saving control signals in a file
@@ -590,7 +588,6 @@ void PositionController::CallbackPosition(const ros::TimerEvent& event){
      SetOdometryEstimated();
      PositionErrors(&e_x_, &e_y_, &e_z_);
      VelocityErrors(&dot_e_x_, &dot_e_y_, &dot_e_z_);
-
      
      //Saving the time instant when the position errors are computed
      if(dataStoring_active_){

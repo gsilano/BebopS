@@ -2,7 +2,6 @@
 Changelog for package teamsannio_med_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-
 0.1.4 (2018-06-11)
 ------------------
 * added the Kalman filter
@@ -12,7 +11,7 @@ Changelog for package teamsannio_med_control
 * Contributors: Pasquale Oppido, Giuseppe Silano, Luigi Iannelli
 
 0.1.3 (2018-05-25)
-------------------
+-----------
 * added the data storage section. Such section has been inserted in the position controller node and allows to storage, in defined csv files, the aircraft and controller state.
 * bug fixing
 * the sim time has been added in the launch file. Now the position controller node uses the simulation and not wall clock time.
