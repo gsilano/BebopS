@@ -61,7 +61,22 @@ PositionController::PositionController()
       e_psi_(0),
       dot_e_phi_(0),
       dot_e_theta_(0), 
-      dot_e_psi_(0){  
+      dot_e_psi_(0),
+      control_({0,0,0,0}), //pitch, roll, yaw rate, thrust
+      state_({0,  //Position.x 
+              0,  //Position.y
+              0,  //Position.z
+              0,  //Linear velocity x
+              0,  //Linear velocity y
+              0,  //Linear velocity z
+              0,  //Quaternion x
+              0,  //Quaternion y
+              0,  //Quaternion z
+              0,  //Quaternion w
+              0,  //Angular velocity x
+              0,  //Angular velocity y
+              0}) //Angular velocity z)
+              {  
 
             timer1_ = n1_.createTimer(ros::Duration(TsA), &PositionController::CallbackAttitude, this, false, true);
             timer2_ = n2_.createTimer(ros::Duration(TsP), &PositionController::CallbackPosition, this, false, true); 
@@ -89,8 +104,8 @@ PositionController::PositionController()
                 clientAttitude_ = clientHandleAttitude_.serviceClient<gazebo_msgs::GetWorldProperties>("/gazebo/get_world_properties");
                 clientPosition_ = clientHandlePosition_.serviceClient<gazebo_msgs::GetWorldProperties>("/gazebo/get_world_properties");
 
-                 ros::WallTime beginWallOffset = ros::WallTime::now();
-                 wallSecsOffset_ = beginWallOffset.toSec();
+                ros::WallTime beginWallOffset = ros::WallTime::now();
+                wallSecsOffset_ = beginWallOffset.toSec();
          
             }
 			
@@ -249,12 +264,42 @@ void PositionController::SetVehicleParameters(){
       Iy_ = vehicle_parameters_.inertia_(1,1);
       Iz_ = vehicle_parameters_.inertia_(2,2);
 
+      extended_kalman_filter_bebop_.SetVehicleParameters(m_, g_);
+
+}
+
+void PositionController::SetFilterParameters(){
+
+      extended_kalman_filter_bebop_.SetFilterParameters(&filter_parameters_);
+
+}
+
+void PositionController::Quaternion2Euler(double* roll, double* pitch, double* yaw) const {
+    assert(roll);
+    assert(pitch);
+    assert(yaw);
+
+    double x, y, z, w;
+    x = odometry_.orientation.x();
+    y = odometry_.orientation.y();
+    z = odometry_.orientation.z();
+    w = odometry_.orientation.w();
+    
+    tf::Quaternion q(x, y, z, w);
+    tf::Matrix3x3 m(q);
+    m.getRPY(*roll, *pitch, *yaw);
+	
 }
 
 void PositionController::SetOdometry(const EigenOdometry& odometry) {
     
     odometry_ = odometry; 
-    SetOdometryEstimated();
+
+    Quaternion2Euler(&state_.attitude.roll, &state_.attitude.pitch, &state_.attitude.yaw);
+
+    state_.angularVelocity.x = odometry_.angular_velocity[0];
+    state_.angularVelocity.y = odometry_.angular_velocity[1];
+    state_.angularVelocity.z = odometry_.angular_velocity[2];
 
 }
 
@@ -265,9 +310,17 @@ void PositionController::SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint
 
 }
 
+void PositionController::GetOdometry(nav_msgs::Odometry* odometry_filtered){
+
+   *odometry_filtered = odometry_filtered_private_;
+
+}
+
 void PositionController::SetOdometryEstimated() {
 
-    extended_kalman_filter_bebop_.Estimator(&state_, &odometry_);
+    extended_kalman_filter_bebop_.SetThrustCommand(control_.thrust);
+    extended_kalman_filter_bebop_.Estimator(&state_, &odometry_, &odometry_filtered_private_);
+
 }
 
 void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocities) {
@@ -279,15 +332,15 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     return;
     }
 
-    double u_T, u_phi, u_theta, u_psi;
+    double u_phi, u_theta, u_psi;
     double u_x, u_y, u_Terr;
     AttitudeController(&u_phi, &u_theta, &u_psi);
-    PosController(&u_x, &u_y, &u_T, &u_Terr);
+    PosController(&u_x, &u_y, &control_.thrust, &u_Terr);
     
     if(dataStoring_active_){
 	//Saving control signals in a file
 	std::stringstream tempControlSignals;
-	tempControlSignals << u_T << "," << u_phi << "," << u_theta << "," << u_psi << "," << u_x << "," << u_y << "," << u_Terr << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+	tempControlSignals << control_.thrust << "," << u_phi << "," << u_theta << "," << u_psi << "," << u_x << "," << u_y << "," << u_Terr << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
 	listControlSignals_.push_back(tempControlSignals.str());
 
@@ -300,7 +353,7 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     }
     
     double first, second, third, fourth;
-    first = (1/ ( 4 * bf_ )) * u_T;
+    first = (1/ ( 4 * bf_ )) * control_.thrust;
     second = (1/ (4 * bf_ * l_ * cos(M_PI/4) ) ) * u_phi;
     third = (1/ (4 * bf_ * l_ * cos(M_PI/4) ) ) * u_theta;
     fourth = (1/ ( 4 * bf_ * bm_)) * u_psi;
@@ -406,29 +459,10 @@ void PositionController::VelocityErrors(double* dot_e_x, double* dot_e_y, double
    x_r = command_trajectory_.position_W[0];
    y_r = command_trajectory_.position_W[1]; 
    z_r = command_trajectory_.position_W[2];
-   
-   //The linear velocities are expressed in the inertial body frame.
-   double dot_x, dot_y, dot_z, theta, psi, phi;
 
-   theta = state_.attitude.pitch;
-   psi = state_.attitude.yaw;
-   phi = state_.attitude.roll;
-   
-   dot_x = (cos(theta) * cos(psi) * state_.linearVelocity.x) + 
-           ( ( (sin(phi) * sin(theta) * cos(psi) ) - ( cos(phi) * sin(psi) ) ) * state_.linearVelocity.y) + 
-           ( ( (cos(phi) * sin(theta) * cos(psi) ) + ( sin(phi) * sin(psi) ) ) *  state_.linearVelocity.z); 
-
-   dot_y = (cos(theta) * sin(psi) * state_.linearVelocity.x) +
-           ( ( (sin(phi) * sin(theta) * sin(psi) ) + ( cos(phi) * cos(psi) ) ) * state_.linearVelocity.y) +
-           ( ( (cos(phi) * sin(theta) * sin(psi) ) - ( sin(phi) * cos(psi) ) ) *  state_.linearVelocity.z);
-
-   dot_z = (-sin(theta) * state_.linearVelocity.x) + ( sin(phi) * cos(theta) * state_.linearVelocity.y) +
-           (cos(phi) * cos(theta) * state_.linearVelocity.z);
-   
-
-   *dot_e_x = - dot_x;
-   *dot_e_y = - dot_y; 
-   *dot_e_z = - dot_z;
+   *dot_e_x = - state_.linearVelocity.x;
+   *dot_e_y = - state_.linearVelocity.y;
+   *dot_e_z = - state_.linearVelocity.z;
    
 }
 
@@ -550,7 +584,8 @@ void PositionController::CallbackAttitude(const ros::TimerEvent& event){
 }
 
 void PositionController::CallbackPosition(const ros::TimerEvent& event){
- 
+  
+     SetOdometryEstimated();
      PositionErrors(&e_x_, &e_y_, &e_z_);
      VelocityErrors(&dot_e_x_, &dot_e_y_, &dot_e_z_);
      

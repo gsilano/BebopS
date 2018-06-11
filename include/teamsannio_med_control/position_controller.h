@@ -22,11 +22,13 @@
 #include <mav_msgs/conversions.h>
 #include <mav_msgs/eigen_mav_msgs.h>
 
+
 #include <string>
 
 #include <ros/time.h>
 
 #include "extendedKalmanFilter.h"
+#include "filter_parameters.h"
 #include "stabilizer_types.h"
 #include "parameters.h"
 #include "common.h"
@@ -52,8 +54,6 @@ static const double MuDefaultAltitudeController = 0.12;
 static const double MuDefaultRollController = 0.09;
 static const double MuDefaultPitchController = 0.26;
 static const double MuDefaultYawRateController = 0.04;
-
-
 
 class PositionControllerParameters {
  public:
@@ -96,10 +96,13 @@ class PositionControllerParameters {
             void SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory);
             void SetControllerGains();
             void SetVehicleParameters();
+            void SetFilterParameters();
+            void GetOdometry(nav_msgs::Odometry* odometry_filtered);
             
             PositionControllerParameters controller_parameters_;
             ExtendedKalmanFilter extended_kalman_filter_bebop_;
             VehicleParameters vehicle_parameters_;
+            FilterParameters filter_parameters_;
 
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         private:
@@ -176,11 +179,15 @@ class PositionControllerParameters {
             void CallbackPosition(const ros::TimerEvent& event);
             void CallbackSaveData(const ros::TimerEvent& event);
 
+            nav_msgs::Odometry odometry_filtered_private_;
+
 	    state_t state_;
+            control_t control_;
             mav_msgs::EigenTrajectoryPoint command_trajectory_;
             EigenOdometry odometry_;
 
             void SetOdometryEstimated();
+            void Quaternion2Euler(double* roll, double* pitch, double* yaw) const;
             void AttitudeController(double* u_phi, double* u_theta, double* u_psi);
             void AngularVelocityErrors(double* dot_e_phi_, double* dot_e_theta_, double* dot_e_psi_);
             void AttitudeErrors(double* e_phi_, double* e_theta_, double* e_psi_);

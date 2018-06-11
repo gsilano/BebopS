@@ -134,7 +134,7 @@ void PositionControllerWithBebop::SetTrajectoryPoint(const mav_msgs::EigenTrajec
 
 void PositionControllerWithBebop::SetOdometryEstimated() {
 
-    extended_kalman_filter_ardrone_.Estimator(&state_, &odometry_);
+    extended_kalman_filter_bebop_.Estimator(&state_, &odometry_, &odometry_filtered_private_);
 }
 
 void PositionControllerWithBebop::ReferenceAngles(double* phi_r, double* theta_r){

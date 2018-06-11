@@ -1,7 +1,7 @@
 <package>
 
   <name>teamsannio_med_control</name>
-  <version>0.1.3</version>
+  <version>0.1.5</version>
   <description>This package provides the Bebop control algorithm.</description>
 
   <maintainer email="giuseppe.silano@unisannio.it">Giuseppe Silano</maintainer>
@@ -14,14 +14,17 @@
 
   <license>Apache</license>
 
+  <url type="website">https://github.com/gsilano/teamsannio_med_control</url>
+  <url type="bugtracker">https://github.com/gsilano/teamsannio_med_control/issues</url>
+
   <buildtool_depend>catkin</buildtool_depend>
 
   <!-- Dependencies needed to compile this package. -->
   <build_depend>geometry_msgs</build_depend>
   <build_depend>mav_msgs</build_depend>
   <build_depend>nav_msgs</build_depend>
-  <build_depend>bebop_driver</build_depend>
   <build_depend>std_msgs</build_depend>
+  <build_depend>bebop_driver</build_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>cmake_modules</build_depend>
@@ -32,9 +35,9 @@
   <run_depend>dynamic_reconfigure</run_depend>
   <run_depend>geometry_msgs</run_depend>
   <run_depend>mav_msgs</run_depend>
+  <run_depend>std_msgs</run_depend>
   <run_depend>nav_msgs</run_depend>
   <run_depend>bebop_driver</run_depend>
-  <run_depend>std_msgs</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>tf2</run_depend>

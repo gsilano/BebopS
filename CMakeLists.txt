@@ -21,8 +21,9 @@ catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
   LIBRARIES position_controller extendedKalmanFilter position_controller_with_bebop
   CATKIN_DEPENDS geometry_msgs mav_msgs nav_msgs roscpp sensor_msgs std_msgs
-  DEPENDS Eigen
+  DEPENDS Eigen 
 )
+
 
 include_directories(
   include
@@ -65,7 +66,7 @@ install(TARGETS position_controller extendedKalmanFilter position_controller_wit
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
-install(TARGETS position_controller_node position_controller_with_bebop_node
+install(TARGETS position_controller position_controller_with_bebop_node
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -73,7 +74,8 @@ install(TARGETS position_controller_node position_controller_with_bebop_node
 
 install(
   DIRECTORY include/${PROJECT_NAME}/
-  DIRECTORY include/ardrone_msgs/
+  DIRECTORY include/teamsannio_msgs/
+  DIRECTORY include/bebop_msgs/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
   FILES_MATCHING PATTERN "*.h"
 )

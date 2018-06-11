@@ -93,7 +93,7 @@ class PositionControllerParameters {
             void SetVehicleParameters();
             
             PositionControllerParameters controller_parameters_;
-            ExtendedKalmanFilter extended_kalman_filter_ardrone_;
+            ExtendedKalmanFilter extended_kalman_filter_bebop_;
             VehicleParameters vehicle_parameters_;
 
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -150,6 +150,7 @@ class PositionControllerParameters {
             control_t control_;
             mav_msgs::EigenTrajectoryPoint command_trajectory_;
             EigenOdometry odometry_;
+            nav_msgs::Odometry odometry_filtered_private_;
 
             void Emergency();
             void Land();
