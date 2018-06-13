@@ -91,15 +91,18 @@ class PositionControllerParameters {
             void SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory);
             void SetControllerGains();
             void SetVehicleParameters();
+            void SetFilterParameters();
             
             PositionControllerParameters controller_parameters_;
             ExtendedKalmanFilter extended_kalman_filter_bebop_;
             VehicleParameters vehicle_parameters_;
+            FilterParameters filter_parameters_;
 
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         private:
             //Boolean variables to active/unactive the controller and the data storage
             bool controller_active_;
+            bool stateEmergency_;
 
             //publisher
             ros::Publisher land_pub_;
@@ -131,30 +134,40 @@ class PositionControllerParameters {
             double dot_e_theta_; 
             double dot_e_psi_;
 
+	    //Global u_T
+	    double u_T_;
+
             //Vehicle parameters
             double bf_, m_, g_;
             double l_, bm_;
             double Ix_, Iy_, Iz_;
+
+            //Controller interface with Bebop paramters
+            double e_z_sum_, vel_command_;
             
             ros::NodeHandle n1_;
             ros::NodeHandle n2_;
             ros::NodeHandle n3_;
+            ros::NodeHandle n4_;
             ros::Timer timer1_;
             ros::Timer timer2_;
+            ros::Timer timer3_;
 
             //Callback functions to compute the errors among axis and angles
             void CallbackAttitude(const ros::TimerEvent& event);
             void CallbackPosition(const ros::TimerEvent& event);
+            void CallbackLand(const ros::TimerEvent& event);
 
 	    state_t state_;
             control_t control_;
             mav_msgs::EigenTrajectoryPoint command_trajectory_;
             EigenOdometry odometry_;
-            nav_msgs::Odometry odometry_filtered_private_;
 
             void Emergency();
-            void Land();
+            void LandEmergency();
             void SetOdometryEstimated();
+            void CommandVelocity(double* vel_command);
+            void Quaternion2Euler(double* roll, double* pitch, double* yaw) const;
             void AttitudeController(double* u_phi, double* u_theta, double* u_psi);
             void AngularVelocityErrors(double* dot_e_phi_, double* dot_e_theta_, double* dot_e_psi_);
             void AttitudeErrors(double* e_phi_, double* e_theta_, double* e_psi_);

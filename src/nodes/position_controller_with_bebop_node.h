@@ -26,11 +26,14 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Twist.h>
 #include <ros/callback_queue.h>
+#include <nav_msgs/Odometry.h>
 #include <ros/ros.h>
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
 
 #include "teamsannio_med_control/common.h"
 #include "teamsannio_med_control/position_controller_with_bebop.h"
+#include "teamsannio_med_control/parameters_ros.h"
+#include "teamsannio_med_control/parameters.h"
 
 namespace teamsannio_med_control {
 

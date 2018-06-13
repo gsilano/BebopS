@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <launch>
     <arg name="name" default="bebop"/>
     <arg name="x" default="0.0" />

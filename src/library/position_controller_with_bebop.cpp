@@ -43,19 +43,27 @@
 #define M_PI                      3.14159265358979323846  /* pi */
 #define TsP                       10e-3  /* Position control sampling time */
 #define TsA                       5e-3 /* Attitude control sampling time */
-#define MAX_THRUST                2175625 /* It is equal to pow(max_rotor_velocity,2) */
+#define TsE                           5 /* Refresh landing time*/
 
-#define MAX_TILT_ANGLE            180 /* Current tilt max in degree */
-#define MAX_VERT_SPEED            10  /* Current max vertical speed in m/s */
-#define MAX_ROT_SPEED             900 /* Current max rotation speed in degree/s */
+#define MAX_TILT_ANGLE            20  /* Current tilt max in degree */
+#define MAX_VERT_SPEED            1  /* Current max vertical speed in m/s */
+#define MAX_ROT_SPEED             100 /* Current max rotation speed in degree/s */
+
+#define MAX_POS_X                     1 /* Max position before emergency state along x-axis */
+#define MAX_POS_Y                     1 /* Max position before emergency state along y-axis */
+#define MAX_POS_Z                     1 /* Max position before emergency state along z-axis */
+#define MAX_VEL_ERR                   1 /* Max velocity error before emergency state */
 
 namespace teamsannio_med_control {
 
 PositionControllerWithBebop::PositionControllerWithBebop()
     : controller_active_(false),
+      stateEmergency_(false),
       e_x_(0),
       e_y_(0),
       e_z_(0),
+      e_z_sum_(0),
+      vel_command_(0),
       dot_e_x_(0),
       dot_e_y_(0), 
       dot_e_z_(0),
@@ -64,10 +72,26 @@ PositionControllerWithBebop::PositionControllerWithBebop()
       e_psi_(0),
       dot_e_phi_(0),
       dot_e_theta_(0), 
-      dot_e_psi_(0){  
+      dot_e_psi_(0),
+      u_T_(0),
+      control_({0,0,0,0}), //pitch, roll, yaw rate, thrust
+      state_({0,  //Position.x 
+              0,  //Position.y
+              0,  //Position.z
+              0,  //Linear velocity x
+              0,  //Linear velocity y
+              0,  //Linear velocity z
+              0,  //Quaternion x
+              0,  //Quaternion y
+              0,  //Quaternion z
+              0,  //Quaternion w
+              0,  //Angular velocity x
+              0,  //Angular velocity y
+              0}) //Angular velocity z)
+              {  
 
-            land_pub_ = n3_.advertise<std_msgs::Empty>(bebop_msgs::default_topics::LAND, 1);
-            reset_pub_ = n3_.advertise<std_msgs::Empty>(bebop_msgs::default_topics::RESET, 1);
+            land_pub_ = n4_.advertise<std_msgs::Empty>(bebop_msgs::default_topics::LAND, 1);
+            reset_pub_ = n4_.advertise<std_msgs::Empty>(bebop_msgs::default_topics::RESET, 1);
 
             timer1_ = n1_.createTimer(ros::Duration(TsA), &PositionControllerWithBebop::CallbackAttitude, this, false, true);
             timer2_ = n2_.createTimer(ros::Duration(TsP), &PositionControllerWithBebop::CallbackPosition, this, false, true); 
@@ -115,13 +139,43 @@ void PositionControllerWithBebop::SetVehicleParameters(){
       Iy_ = vehicle_parameters_.inertia_(1,1);
       Iz_ = vehicle_parameters_.inertia_(2,2);
 
+      extended_kalman_filter_bebop_.SetVehicleParameters(m_, g_);
+
+}
+
+void PositionControllerWithBebop::SetFilterParameters(){
+
+      extended_kalman_filter_bebop_.SetFilterParameters(&filter_parameters_);
+
+}
+
+void PositionControllerWithBebop::Quaternion2Euler(double* roll, double* pitch, double* yaw) const {
+    assert(roll);
+    assert(pitch);
+    assert(yaw);
+
+    double x, y, z, w;
+    x = odometry_.orientation.x();
+    y = odometry_.orientation.y();
+    z = odometry_.orientation.z();
+    w = odometry_.orientation.w();
+    
+    tf::Quaternion q(x, y, z, w);
+    tf::Matrix3x3 m(q);
+    m.getRPY(*roll, *pitch, *yaw);
+	
 }
 
 void PositionControllerWithBebop::SetOdom(const EigenOdometry& odometry) {
 
    //+x forward, +y left, +z up, +yaw CCW
     odometry_ = odometry; 
-    SetOdometryEstimated();
+
+    Quaternion2Euler(&state_.attitude.roll, &state_.attitude.pitch, &state_.attitude.yaw);
+
+    state_.angularVelocity.x = odometry_.angular_velocity[0];
+    state_.angularVelocity.y = odometry_.angular_velocity[1];
+    state_.angularVelocity.z = odometry_.angular_velocity[2];
 
 }
 
@@ -134,7 +188,95 @@ void PositionControllerWithBebop::SetTrajectoryPoint(const mav_msgs::EigenTrajec
 
 void PositionControllerWithBebop::SetOdometryEstimated() {
 
-    extended_kalman_filter_bebop_.Estimator(&state_, &odometry_, &odometry_filtered_private_);
+    extended_kalman_filter_bebop_.SetThrustCommand(u_T_);
+    extended_kalman_filter_bebop_.Estimator(&state_, &odometry_);
+
+}
+
+void PositionControllerWithBebop::CalculateCommandSignals(geometry_msgs::Twist* ref_command_signals) {
+    assert(ref_command_signals);
+    
+    //this serves to inactivate the controller if we don't recieve a trajectory
+    if(!controller_active_){
+        ref_command_signals->linear.x = 0;
+        ref_command_signals->linear.y = 0;
+        ref_command_signals->linear.z = 0;
+        ref_command_signals->angular.z = 0; 
+        return;
+    }
+    
+    double u_phi, u_theta;
+    AttitudeController(&u_phi, &u_theta, &control_.yawRate);
+    
+    //The commands are normalized to take into account the real commands that can be send to the drone
+    //Them range is between -1 and 1.
+    double theta_ref_degree, phi_ref_degree, yawRate_ref_degree;
+    theta_ref_degree = control_.pitch * (180/M_PI);
+    phi_ref_degree = control_.roll * (180/M_PI);
+    yawRate_ref_degree = control_.yawRate * (180/M_PI);
+
+    double linearX, linearY, linearZ, angularZ;
+    linearX = phi_ref_degree/MAX_TILT_ANGLE;
+    linearY = theta_ref_degree/MAX_TILT_ANGLE;
+    CommandVelocity(&linearZ);
+    angularZ = yawRate_ref_degree/MAX_ROT_SPEED;  
+
+    //The command signals are saturated to take into the SDK constrains in sending commands
+    if(!(linearZ > -1 && linearZ < 1))
+        if(linearZ > 1)
+           linearZ = 1;
+        else
+           linearZ = -1;
+
+    if(!(linearX > -1 && linearX < 1))
+        if(linearX > 1)
+           linearX = 1;
+        else
+           linearX = -1;
+
+    if(!(linearY > -1 && linearY < 1))
+        if(linearY > 1)
+           linearY = 1;
+        else
+           linearY = -1;
+
+    if(!(angularZ > -1 && angularZ < 1))
+        if(angularZ > 1)
+           angularZ = 1;
+        else
+           angularZ = -1;
+
+    ref_command_signals->linear.x = linearX;
+    ref_command_signals->linear.y = linearY;
+    ref_command_signals->linear.z = linearZ;
+    ref_command_signals->angular.z = angularZ; 
+
+}
+
+void PositionControllerWithBebop::CommandVelocity(double* vel_command){
+
+    e_z_sum_ = e_z_sum_ + e_z_ * TsP;
+
+    *vel_command = (( (alpha_z_/mu_z_) * e_z_) - ( (beta_z_/pow(mu_z_,2)) * e_z_sum_))/MAX_VERT_SPEED;
+
+}
+
+
+void PositionControllerWithBebop::LandEmergency(){
+
+    if(stateEmergency_){
+       std_msgs::Empty empty_msg;
+       land_pub_.publish(empty_msg);
+    }
+}
+
+void PositionControllerWithBebop::Emergency(){
+
+    stateEmergency_ = true;
+    timer3_ = n3_.createTimer(ros::Duration(TsE), &PositionControllerWithBebop::CallbackLand, this, false, true); 
+    std_msgs::Empty empty_msg;
+    reset_pub_.publish(empty_msg);
+
 }
 
 void PositionControllerWithBebop::ReferenceAngles(double* phi_r, double* theta_r){
@@ -145,7 +287,7 @@ void PositionControllerWithBebop::ReferenceAngles(double* phi_r, double* theta_r
    psi_r = command_trajectory_.getYaw();
 
    double u_x, u_y, u_Terr;
-   PosController(&u_x, &u_y, &control_.thrust, &u_Terr);
+   PosController(&u_x, &u_y, &u_T_, &u_Terr);
 
    *theta_r = atan( ( (u_x * cos(psi_r) ) + ( u_y * sin(psi_r) ) )  / u_Terr );
    *phi_r = atan( cos(*theta_r) * ( ( (u_x * sin(psi_r)) - (u_y * cos(psi_r)) ) / (u_Terr) ) );
@@ -183,9 +325,6 @@ void PositionControllerWithBebop::AngularVelocityErrors(double* dot_e_phi, doubl
    double psi_r;
    psi_r = command_trajectory_.getYaw();
    
-   double phi_r, theta_r;
-   ReferenceAngles(&phi_r, &theta_r);
-   
    double dot_phi, dot_theta, dot_psi;
 
    dot_phi = state_.angularVelocity.x + (sin(state_.attitude.roll)*tan(state_.attitude.pitch)*state_.angularVelocity.y)
@@ -202,87 +341,6 @@ void PositionControllerWithBebop::AngularVelocityErrors(double* dot_e_phi, doubl
 
 }
 
-void PositionControllerWithBebop::CalculateCommandSignals(geometry_msgs::Twist* ref_command_signals) {
-    assert(ref_command_signals);
-    
-    //this serves to inactivate the controller if we don't recieve a trajectory
-    if(!controller_active_){
-        ref_command_signals->linear.x = 0;
-        ref_command_signals->linear.y = 0;
-        ref_command_signals->linear.z = 0;
-        ref_command_signals->angular.z = 0; 
-        return;
-    }
-    
-    double u_phi, u_theta;
-    ReferenceAngles(&control_.roll, &control_.pitch);
-    AttitudeController(&u_phi, &u_theta, &control_.yawRate);
-
-    //The commands are normalized to take into account the real commands that can be send to the drone
-    //Them range is between -1 and 1.
-    double thrustNormalized, rollNormalized, pitchNormalized, yawRateNormalized;
-    thrustNormalized = control_.thrust/MAX_VERT_SPEED;
-    rollNormalized = control_.roll/MAX_TILT_ANGLE;
-    pitchNormalized = control_.pitch/MAX_TILT_ANGLE;
-    yawRateNormalized = control_.yawRate/MAX_ROT_SPEED;
-
-    //The command signals are saturated to take into the SDK constrains in sending commands
-    if(!(thrustNormalized > -1 && thrustNormalized < 1))
-        if(thrustNormalized > 1)
-           thrustNormalized = 1;
-        else
-           thrustNormalized = -1;
-
-    if(!(rollNormalized > -1 && rollNormalized < 1))
-        if(rollNormalized > 1)
-           rollNormalized = 1;
-        else
-           rollNormalized = -1;
-
-    if(!(pitchNormalized > -1 && pitchNormalized < 1))
-        if(pitchNormalized > 1)
-           pitchNormalized = 1;
-        else
-           pitchNormalized = -1;
-
-    if(!(yawRateNormalized > -1 && yawRateNormalized < 1))
-        if(yawRateNormalized > 1)
-           yawRateNormalized = 1;
-        else
-           yawRateNormalized = -1;
-
-	/*
-	Tieni a mente per strutturazione legge di controllo
-	roll_degree       = linear.y  * max_tilt_angle
-	pitch_degree      = linear.x  * max_tilt_angle
-	ver_vel_m_per_s   = linear.z  * max_vert_speed
-	rot_vel_deg_per_s = angular.z * max_rot_speed
-	*/
-    ref_command_signals->linear.x = pitchNormalized;
-    ref_command_signals->linear.y = rollNormalized;
-    ref_command_signals->linear.z = thrustNormalized;
-    ref_command_signals->angular.z = yawRateNormalized; 
-
-}
-
-void PositionControllerWithBebop::Land(){
-
-    //DEVI GESTIRE QUANDO ATTERRARE, SOTTO QUALE CONDIZIONE
-    
-    std_msgs::Empty empty_msg;
-    land_pub_.publish(empty_msg);
-
-}
-
-void PositionControllerWithBebop::Emergency(){
-
-    //DEVI REALIZZARE UNA CONDIZIONE CHE, SUPERATO UN DETERMINATO VALORE DI VELOCITA' DELL'ERRORE LO PORTA IN PROTEZIONE
-
-    std_msgs::Empty empty_msg;
-    reset_pub_.publish(empty_msg);
-
-}
-
 void PositionControllerWithBebop::VelocityErrors(double* dot_e_x, double* dot_e_y, double* dot_e_z){
    assert(dot_e_x);
    assert(dot_e_y);
@@ -293,28 +351,9 @@ void PositionControllerWithBebop::VelocityErrors(double* dot_e_x, double* dot_e_
    y_r = command_trajectory_.position_W[1]; 
    z_r = command_trajectory_.position_W[2];
    
-   //The linear velocities are expressed in the inertial body frame.
-   double dot_x, dot_y, dot_z, theta, psi, phi;
-
-   theta = state_.attitude.pitch;
-   psi = state_.attitude.yaw;
-   phi = state_.attitude.roll;
-   
-   dot_x = (cos(theta) * cos(psi) * state_.linearVelocity.x) + 
-           ( ( (sin(phi) * sin(theta) * cos(psi) ) - ( cos(phi) * sin(psi) ) ) * state_.linearVelocity.y) + 
-           ( ( (cos(phi) * sin(theta) * cos(psi) ) + ( sin(phi) * sin(psi) ) ) *  state_.linearVelocity.z); 
-
-   dot_y = (cos(theta) * sin(psi) * state_.linearVelocity.x) +
-           ( ( (sin(phi) * sin(theta) * sin(psi) ) + ( cos(phi) * cos(psi) ) ) * state_.linearVelocity.y) +
-           ( ( (cos(phi) * sin(theta) * sin(psi) ) - ( sin(phi) * cos(psi) ) ) *  state_.linearVelocity.z);
-
-   dot_z = (-sin(theta) * state_.linearVelocity.x) + ( sin(phi) * cos(theta) * state_.linearVelocity.y) +
-           (cos(phi) * cos(theta) * state_.linearVelocity.z);
-   
-
-   *dot_e_x = - dot_x;
-   *dot_e_y = - dot_y; 
-   *dot_e_z = - dot_z;
+   *dot_e_x = - state_.linearVelocity.x;
+   *dot_e_y = - state_.linearVelocity.y;
+   *dot_e_z = - state_.linearVelocity.z;
    
 }
 
@@ -342,11 +381,10 @@ void PositionControllerWithBebop::AttitudeErrors(double* e_phi, double* e_theta,
    double psi_r;
    psi_r = command_trajectory_.getYaw();
    
-   double phi_r, theta_r;
-   ReferenceAngles(&phi_r, &theta_r);
+   ReferenceAngles(&control_.roll, &control_.pitch);
 
-   *e_phi = phi_r - state_.attitude.roll;
-   *e_theta = theta_r - state_.attitude.pitch;
+   *e_phi = control_.roll - state_.attitude.roll;
+   *e_theta = control_.pitch - state_.attitude.pitch;
    *e_psi = psi_r - state_.attitude.yaw;
 
 }
@@ -359,10 +397,21 @@ void PositionControllerWithBebop::CallbackAttitude(const ros::TimerEvent& event)
 }
 
 void PositionControllerWithBebop::CallbackPosition(const ros::TimerEvent& event){
- 
+
+     SetOdometryEstimated(); 
      PositionErrors(&e_x_, &e_y_, &e_z_);
      VelocityErrors(&dot_e_x_, &dot_e_y_, &dot_e_z_);
-     
+
+     if(abs(state_.position.x) > MAX_POS_X || abs(state_.position.y) > MAX_POS_Y || state_.position.z > MAX_POS_Z || abs(dot_e_z_) > MAX_VEL_ERR || abs(dot_e_y_) > MAX_VEL_ERR || abs(dot_e_x_) > MAX_VEL_ERR)
+        Emergency();
+
+ 
+}
+
+void PositionControllerWithBebop::CallbackLand(const ros::TimerEvent& event){
+
+     LandEmergency();
+   
 }
 
 

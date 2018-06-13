@@ -90,7 +90,7 @@ void ExtendedKalmanFilter::Estimator(state_t *state_, EigenOdometry* odometry_, 
 
    SetOdometry(*odometry_);
 
-   Predict();
+   PredictWithNoise();
    Correct();
 
    state_->position.x = Xe_(0);
@@ -110,6 +110,27 @@ void ExtendedKalmanFilter::Estimator(state_t *state_, EigenOdometry* odometry_, 
    odometry_filtered->twist.twist.linear.x = Xe_(3);
    odometry_filtered->twist.twist.linear.y = Xe_(4);
    odometry_filtered->twist.twist.linear.z = Xe_(5);
+
+}
+
+void ExtendedKalmanFilter::Estimator(state_t *state_, EigenOdometry* odometry_){
+   assert(state_);
+   assert(odometry_);
+
+   SetOdometry(*odometry_);
+
+   PredictWithoutNoise();
+   Correct();
+
+   state_->position.x = Xe_(0);
+   state_->position.y = Xe_(1);
+   state_->position.z = Xe_(2);
+
+   state_->linearVelocity.x = Xe_(3);
+   state_->linearVelocity.x = Xe_(4);
+   state_->linearVelocity.x = Xe_(5); 
+
+   Hatx_ = Xe_;
 
 }
 
@@ -144,7 +165,51 @@ void ExtendedKalmanFilter::SetVehicleParameters(double m, double g){
       
 }
 
-void ExtendedKalmanFilter::Predict(){
+void ExtendedKalmanFilter::PredictWithoutNoise(){
+
+    double phi, theta, psi;
+    Quaternion2Euler(&phi, &theta, &psi);
+
+    double x, y, z, dx, dy, dz;
+    x  = Hatx_(0);
+    y  = Hatx_(1);
+    z  = Hatx_(2);
+
+    dx = Hatx_(3);
+    dy = Hatx_(4);
+    dz = Hatx_(5);
+
+    double dx_ENU, dy_ENU, dz_ENU;
+	
+    dx_ENU = (cos(theta) * cos(psi) * dx) + 
+	     ( ( (sin(phi) * sin(theta) * cos(psi) ) - ( cos(phi) * sin(psi) ) ) * dy) + 
+	     ( ( (cos(phi) * sin(theta) * cos(psi) ) + ( sin(phi) * sin(psi) ) ) * dz); 
+
+    dy_ENU = (cos(theta) * sin(psi) * dx) +
+	     ( ( (sin(phi) * sin(theta) * sin(psi) ) + ( cos(phi) * cos(psi) ) ) * dy) +
+	     ( ( (cos(phi) * sin(theta) * sin(psi) ) - ( sin(phi) * cos(psi) ) ) * dz);
+
+    dz_ENU = (-sin(theta) * dx) + ( sin(phi) * cos(theta) * dy) +
+	     (cos(phi) * cos(theta) * dz);
+
+
+     //Nonlinear state propagation 
+     x = x + TsP * dx_ENU;
+     y = y + TsP * dy_ENU;
+     z = z + TsP * dz_ENU;
+     dx_ENU = dx_ENU + TsP * (u_T_private_ * (1/m_private_) * (cos(psi) * sin(theta) * cos(phi) + sin(psi) * sin(theta)));
+     dy_ENU = dy_ENU + TsP * (u_T_private_ * (1/m_private_) * (sin(psi) * sin(theta) * cos(phi) - cos(psi) * sin(phi)));
+     dz_ENU = dz_ENU + TsP * (-g_private_ + u_T_private_ * (1/m_private_) * (cos(theta) * cos(phi)));
+			 
+     // Prediction error Matrix
+     P_ = A_private_*(P_)*A_private_.transpose() + Qp_std_;
+ 		
+     //The predicted state
+     Xp_ << x, y, z, dx, dy, dz;
+
+}
+
+void ExtendedKalmanFilter::PredictWithNoise(){
 
     double phi, theta, psi;
     Quaternion2Euler(&phi, &theta, &psi);

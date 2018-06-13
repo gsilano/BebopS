@@ -520,9 +520,6 @@ void PositionController::AngularVelocityErrors(double* dot_e_phi, double* dot_e_
    double psi_r;
    psi_r = command_trajectory_.getYaw();
    
-   double phi_r, theta_r;
-   ReferenceAngles(&phi_r, &theta_r);
-   
    double dot_phi, dot_theta, dot_psi;
 
    dot_phi = state_.angularVelocity.x + (sin(state_.attitude.roll)*tan(state_.attitude.pitch)*state_.angularVelocity.y)

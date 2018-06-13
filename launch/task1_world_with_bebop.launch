@@ -7,16 +7,20 @@
   <arg name="config_file" default="$(find teamsannio_med_control)/config/defaults.yaml" />
   <arg name="camera_info_url" default="package://teamsannio_med_control/data/$(arg drone_type)_camera_calib.yaml" />
   
-   <!-- Launch the trajectory generator -->
-   <group ns="$(arg name)">
      <!-- Launch the controller  -->
      <node name="position_controller_node_with_bebop" pkg="teamsannio_med_control" type="position_controller_node_with_bebop" output="screen"> 
        <rosparam command="load" file="$(find teamsannio_med_control)/resource/controller_bebop.yaml" />
        <rosparam command="load" file="$(find teamsannio_med_control)/resource/bebop.yaml" />
+       <rosparam command="load" file="$(find teamsannio_med_control)/resource/EKF_matrix.yaml" />
        <param name="use_sim_time" value="$(arg use_sim_time)" />
+       <remap from="/odometry" to="/bebop/odometry" />
        <remap from="/command/trajectory" to="/bebop/command/trajectory" />
-     </node>
+      </node>
 
+
+   <group ns="$(arg name)">
+
+   <!-- Launch the trajectory generator -->
      <node name="hovering_example" pkg="rotors_gazebo" type="hovering_example" output="screen"/> 
 
      <node pkg="bebop_driver" name="bebop_driver" type="bebop_driver_node" output="screen">
@@ -29,6 +33,9 @@
      <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
 
    </group>
+
+    <!-- Launch the trajectory plot -->
+    <node name="position_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/odometry/pose/pose/position" output="screen" />
 
 </launch>
 

@@ -1,6 +1,12 @@
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Changelog for package teamsannio_med_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+0.1.5 (2018-06-13)
+------------------
+* The Node controller to exchange data and commands with Parrot Bebop2 has been developed. Such node is integrated with the Extended Kalman filter. The latter filters only the noisy position and the linear velocity.
+* The wind gusts have been integrated in the Gazebo 3D environment according to the task1 of the 26th MED aerial robotics and percepition challenge. 
+* Contributors: Pasquale Oppido, Giuseppe Silano, Luigi Iannelli
+
 
 0.1.4 (2018-06-11)
 ------------------

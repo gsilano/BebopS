@@ -22,6 +22,8 @@
 namespace bebop_msgs {
 	namespace default_topics {
 
+        static constexpr char BEBOP_PARAMETERS[] = "bebop_driver/parameter_updates";
+
         static constexpr char ODOM[] = "odom";
         static constexpr char IMAGE_RAW[] = "image_raw";
         static constexpr char BEBOP_FRONT[] = "bebop_front";

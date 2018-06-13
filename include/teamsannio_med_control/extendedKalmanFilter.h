@@ -45,6 +45,7 @@ class ExtendedKalmanFilter {
      ~ExtendedKalmanFilter();
 
      void Estimator(state_t *state_, EigenOdometry* odometry_, nav_msgs::Odometry* odometry_filtered);
+     void Estimator(state_t *state_, EigenOdometry* odometry_);
      void SetThrustCommand(double u_T);
      void SetVehicleParameters(double m, double g);
      void SetFilterParameters(FilterParameters *filter_parameters_);
@@ -70,7 +71,8 @@ class ExtendedKalmanFilter {
      void AttitudeAddingNoise(double *phin, double *thetan, double* psin, double phi, double theta, double psi);
      void SetOdometry(const EigenOdometry& odometry);
      void Correct();
-     void Predict();
+     void PredictWithoutNoise();
+     void PredictWithNoise();
 
 };
 
