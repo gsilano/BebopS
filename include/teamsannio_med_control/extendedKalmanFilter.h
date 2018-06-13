@@ -73,7 +73,6 @@ class ExtendedKalmanFilter {
      void Correct();
      void PredictWithoutNoise();
      void PredictWithNoise();
-     void Predict();
 
 };
 
