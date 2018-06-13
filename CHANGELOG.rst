@@ -16,6 +16,14 @@ Changelog for package teamsannio_med_control
 * The Kalman filter works with the noisy attitude (standard deviation 0.017). This function considers the nonideality of the attitude filter onboard the quadrotor.   
 * Contributors: Pasquale Oppido, Giuseppe Silano, Luigi Iannelli
 
+0.1.4 (2018-06-11)
+------------------
+* added the Kalman filter
+* added plots in the launch file to monitor the position and linear velocity errors between the Kalman filter output and the odometry ground truth values. In order to develop such functionality, the teamsannio messages have been created.
+* A yaml file needed to set up the Kalman filter has been created. Such file contains the tuning matrix of the filter and the standard deviations that characterize the odometry virtual sensor.
+* The Kalman filter works with the noisy attitude (standard deviation 0.017). This function considers the nonideality of the attitude filter onboard the quadrotor.   
+* Contributors: Pasquale Oppido, Giuseppe Silano, Luigi Iannelli
+
 0.1.3 (2018-05-25)
 -----------
 * added the data storage section. Such section has been inserted in the position controller node and allows to storage, in defined csv files, the aircraft and controller state.
