@@ -1,6 +1,20 @@
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Changelog for package teamsannio_med_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+0.1.5 (2018-06-13)
+------------------
+* The Node controller to exchange data and commands with Parrot Bebop2 has been developed. Such node is integrated with the Extended Kalman filter. The latter filters only the noisy position and the linear velocity.
+* The wind gusts have been integrated in the Gazebo 3D environment according to the task1 of the 26th MED aerial robotics and percepition challenge. 
+* Contributors: Pasquale Oppido, Giuseppe Silano, Luigi Iannelli
+
+
+0.1.4 (2018-06-11)
+------------------
+* added the Kalman filter
+* added plots in the launch file to monitor the position and linear velocity errors between the Kalman filter output and the odometry ground truth values. In order to develop such functionality, the teamsannio messages have been created.
+* A yaml file needed to set up the Kalman filter has been created. Such file contains the tuning matrix of the filter and the standard deviations that characterize the odometry virtual sensor.
+* The Kalman filter works with the noisy attitude (standard deviation 0.017). This function considers the nonideality of the attitude filter onboard the quadrotor.   
+* Contributors: Pasquale Oppido, Giuseppe Silano, Luigi Iannelli
 
 0.1.4 (2018-06-11)
 ------------------

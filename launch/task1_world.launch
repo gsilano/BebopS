@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <launch>
     <arg name="name" default="bebop"/>
     <arg name="x" default="0.0" />
@@ -5,9 +6,9 @@
     <arg name="z" default="0.02" />
     <arg name="use_sim_time" default="true"/>
     <arg name="world_name" default="basic"/>
-    <arg name="wind_force" default="0.0"/>
-    <arg name="wind_start" default="0.0"/>
-    <arg name="wind_duration" default="0.0"/>
+    <arg name="wind_force" default="0.5"/>
+    <arg name="wind_start" default="15.0"/>
+    <arg name="wind_duration" default="10.0"/>
     <arg name="wind_direction_x" default="0.0"/>
     <arg name="wind_direction_y" default="0.0"/>
     <arg name="wind_direction_z" default="1.0"/>
