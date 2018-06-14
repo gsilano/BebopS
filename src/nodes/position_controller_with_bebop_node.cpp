@@ -70,7 +70,7 @@ void PositionControllerWithBebopNode::MultiDofJointTrajectoryCallback(const traj
 
   if (n_commands >= 1) {
     waypointHasBeenPublished_ = true;
-    ROS_INFO("PositionController with AR.Drone node got first MultiDOFJointTrajectory message.");
+    ROS_INFO_ONCE("PositionController with AR.Drone node got first MultiDOFJointTrajectory message.");
   }
 }
 

@@ -74,7 +74,7 @@ void PositionControllerNode::MultiDofJointTrajectoryCallback(const trajectory_ms
 
   if (n_commands >= 1) {
     waypointHasBeenPublished_ = true;
-    ROS_INFO("PositionController got first MultiDOFJointTrajectory message.");
+    ROS_INFO_ONCE("PositionController got first MultiDOFJointTrajectory message.");
   }
 }
 

@@ -22,7 +22,7 @@ states:
   enable_gpsstate_numberofsatellitechanged: true
   enable_numberofsatellitechanged: true
 
-reset_settings: true
+reset_settings: false
 publish_odom_tf: true
 odom_frame_id: "odom"
 cmd_vel_timeout: 0.2

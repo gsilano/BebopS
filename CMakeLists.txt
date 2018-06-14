@@ -5,6 +5,7 @@ add_definitions(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
+  gazebo_msgs
   mav_msgs
   nav_msgs
   std_msgs
@@ -62,11 +63,23 @@ add_dependencies(position_controller_with_bebop_node ${catkin_EXPORTED_TARGETS})
 target_link_libraries(position_controller_with_bebop_node
   position_controller_with_bebop extendedKalmanFilter ${catkin_LIBRARIES})
 
+add_executable(hovering_example src/nodes/hovering_example.cpp)
+target_link_libraries(hovering_example ${catkin_LIBRARIES})
+add_dependencies(hovering_example ${catkin_EXPORTED_TARGETS})
+
+add_executable(waypoint_example src/nodes/waypoint_example.cpp)
+target_link_libraries(waypoint_example ${catkin_LIBRARIES})
+add_dependencies(waypoint_example ${catkin_EXPORTED_TARGETS})
+
+add_executable(quaternion_to_rpy src/nodes/quaternion_to_rpy.cpp)
+target_link_libraries(quaternion_to_rpy ${catkin_LIBRARIES})
+add_dependencies(quaternion_to_rpy ${catkin_EXPORTED_TARGETS})
+
 install(TARGETS position_controller extendedKalmanFilter position_controller_with_bebop
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
-install(TARGETS position_controller position_controller_with_bebop_node
+install(TARGETS position_controller position_controller_with_bebop_node hovering_example waypoint_example quaternion_to_rpy
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

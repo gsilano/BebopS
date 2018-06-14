@@ -1,7 +1,7 @@
 <package>
 
   <name>teamsannio_med_control</name>
-  <version>0.1.5</version>
+  <version>0.1.6</version>
   <description>This package provides the Bebop control algorithm.</description>
 
   <maintainer email="giuseppe.silano@unisannio.it">Giuseppe Silano</maintainer>
@@ -20,6 +20,9 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <!-- Dependencies needed to compile this package. -->
+  <build_depend>gazebo_plugins</build_depend>
+  <build_depend>rotors_gazebo_plugins</build_depend>
+  <build_depend>gazebo_msgs</build_depend>
   <build_depend>geometry_msgs</build_depend>
   <build_depend>mav_msgs</build_depend>
   <build_depend>nav_msgs</build_depend>
@@ -32,6 +35,9 @@
   <build_depend>tf</build_depend>
 
   <!-- Dependencies needed after this package is compiled. -->
+  <run_depend>gazebo_plugins</run_depend>
+  <run_depend>rotors_gazebo_plugins</run_depend>
+  <run_depend>gazebo_msgs</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
   <run_depend>geometry_msgs</run_depend>
   <run_depend>mav_msgs</run_depend>

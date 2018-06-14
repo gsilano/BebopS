@@ -6,12 +6,12 @@
     <arg name="z" default="0.02" />
     <arg name="use_sim_time" default="true"/>
     <arg name="world_name" default="basic"/>
-    <arg name="wind_force" default="0.5"/>
-    <arg name="wind_start" default="15.0"/>
-    <arg name="wind_duration" default="10.0"/>
+    <arg name="wind_force" default="0.0"/>
+    <arg name="wind_start" default="0.0"/>
+    <arg name="wind_duration" default="0.0"/>
     <arg name="wind_direction_x" default="0.0"/>
     <arg name="wind_direction_y" default="0.0"/>
-    <arg name="wind_direction_z" default="1.0"/>
+    <arg name="wind_direction_z" default="0.0"/>
     
   <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find teamsannio_med_control)/models"/>
   <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find teamsannio_med_control)/models"/>
@@ -49,7 +49,7 @@
 
     <!-- Launch the trajectory generator -->
    <group ns="$(arg name)">
-       <node name="hovering_example" pkg="teamsannio_med_control" type="hovering_example" output="screen"/>   
+       <node name="waypoint_example" pkg="teamsannio_med_control" type="waypoint_example" output="screen" args="$(find teamsannio_med_control)/resource/waypoints.txt"/>   
     </group>
 
     <!-- Launch the trajectory plot -->
@@ -59,6 +59,7 @@
        <remap from="/orientation_rpy" to="/bebop/orientation_rpy" />
     </node>
     <node name="orientation_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/orientation_rpy" output="screen" />
+
 
 
     <!-- Launch the filtered output -->

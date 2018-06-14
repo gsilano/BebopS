@@ -1,12 +1,19 @@
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Changelog for package teamsannio_med_control
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+0.1.6 (2018-06-14)
+------------------
+* A plot relating to the attitude of the aircraft has been included in the launch files of the task1 and task2 as descripted in the 26th MED18 Aerial Robotics and Perception Challenge.
+* The hovering and waypoints publishers have been inserted as nodes in the repository.
+* Task2 has been added. Such task models the drone the trajectory tracking (it is modeled by using a sequence of waypoints). The same task was integrated also with the Parrot Bebop2 control algorithm interface.
+* Contributors: Giuseppe Silano, Pasquale Opppido, Luigi Iannelli
+
 0.1.5 (2018-06-13)
 ------------------
 * The controller node able to reiceive data from and to send commands to the Parrot Bebop2 has been developed. Such node is integrated with the state estimator, i.e., the Extended Kalman filter, and the position control algorithm. The filters takes into account only the noisy position and linear velocity.
 * The wind gusts have been integrated into the Gazebo 3D environment according to the task1 of the 26th MED aerial robotics and perception challenge. 
 * Contributors: Pasquale Oppido, Giuseppe Silano, Luigi Iannelli
-
 
 0.1.4 (2018-06-11)
 ------------------

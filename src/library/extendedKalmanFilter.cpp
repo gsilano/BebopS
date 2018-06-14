@@ -61,7 +61,7 @@ ExtendedKalmanFilter::ExtendedKalmanFilter()
 				0, 0, 0,     0,    1,    0,
 				0, 0, 0,     0,    0,    1;
 
-                double mean = 0, std = 0.017;
+                double mean = 0, std = 0.005;
                 std::normal_distribution<double>  distribution_(mean, std);
 
 }
