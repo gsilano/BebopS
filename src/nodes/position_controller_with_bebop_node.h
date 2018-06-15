@@ -26,6 +26,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Twist.h>
 #include <ros/callback_queue.h>
+#include <mav_msgs/eigen_mav_msgs.h>
 #include <nav_msgs/Odometry.h>
 #include <ros/ros.h>
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
@@ -59,6 +60,9 @@ namespace teamsannio_med_control {
             //publisher
             ros::Publisher motor_velocity_reference_pub_;
             ros::Publisher takeoff_pub_;
+            ros::Publisher odometry_filtered_pub_;
+            ros::Publisher reference_angles_pub_;
+            ros::Publisher smoothed_reference_pub_;
 
             mav_msgs::EigenTrajectoryPointDeque commands_;
             std::deque<ros::Duration> command_waiting_times_;

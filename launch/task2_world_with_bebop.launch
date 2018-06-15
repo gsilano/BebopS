@@ -15,8 +15,11 @@
       <param name="use_sim_time" value="$(arg use_sim_time)" />
       <remap from="/odometry" to="/bebop/odometry" />
       <remap from="/command/trajectory" to="/bebop/command/trajectory" />
+      <remap from="/filteredOutput" to="/bebop/filteredOutput" />
+      <remap from="/referenceAngles" to="/bebop/referenceAngles" />
+      <remap from="/smoothedTrajectory" to="/bebop/smoothedTrajectory" />
+      <remap from="/command/trajectory" to="/bebop/command/trajectory" />
     </node>
-
 
    <group ns="$(arg name)">
 
@@ -38,6 +41,19 @@
 
     <!-- Launch the trajectory plot -->
     <node name="position_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/odometry/pose/pose/position" output="screen" />
+
+    <node name="quaternion_to_rpy" pkg="teamsannio_med_control" type="quaternion_to_rpy" output="screen" >
+       <remap from="/odometry" to="/bebop/odometry" />
+       <remap from="/orientation_rpy" to="/bebop/orientation_rpy" />
+    </node>
+    <node name="orientation_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/orientation_rpy" output="screen" />
+
+    <!-- Launch the reference angles plot -->
+    <node name="reference_angles_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/referenceAngles/pose/pose/position" output="screen" />
+    <node name="uXY_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/referenceAngles/twist/twist/linear" output="screen" />
+
+    <!-- Launch the smoothed trajectory plot -->
+    <node name="smoothed_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/smoothedTrajectory/pose/pose/position" output="screen" />
 
 
 </launch>

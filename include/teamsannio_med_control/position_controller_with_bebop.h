@@ -19,6 +19,8 @@
 #ifndef ARDRONE_CONTROL_POSITION_CONTROLLER_H
 #define ARDRONE_CONTROL_POSITION_CONTROLLER_H
 
+#include "waypoint_filter.h"
+
 #include <string>
 
 #include <ros/time.h>
@@ -88,15 +90,19 @@ class PositionControllerParameters {
             void CalculateCommandSignals(geometry_msgs::Twist* ref_command_signals);
 
             void SetOdom(const EigenOdometry& odometry);
-            void SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory);
+            void SetTrajectoryPoint();
             void SetControllerGains();
             void SetVehicleParameters();
             void SetFilterParameters();
+            void GetOdometry(nav_msgs::Odometry* odometry_filtered);
+            void GetReferenceAngles(nav_msgs::Odometry* reference_angles);
+            void GetTrajectory(nav_msgs::Odometry* smoothed_trajectory);
             
             PositionControllerParameters controller_parameters_;
             ExtendedKalmanFilter extended_kalman_filter_bebop_;
             VehicleParameters vehicle_parameters_;
             FilterParameters filter_parameters_;
+            WaypointFilter waypoint_filter_;
 
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         private:
@@ -157,6 +163,8 @@ class PositionControllerParameters {
             void CallbackAttitude(const ros::TimerEvent& event);
             void CallbackPosition(const ros::TimerEvent& event);
             void CallbackLand(const ros::TimerEvent& event);
+
+            nav_msgs::Odometry odometry_filtered_private_;
 
 	    state_t state_;
             control_t control_;

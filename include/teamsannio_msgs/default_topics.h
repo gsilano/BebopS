@@ -26,6 +26,9 @@ namespace teamsannio_msgs {
 
         static constexpr char ODOMETRY_GT[] = "odometry_gt";
 
+        static constexpr char REFERENCE_ANGLES[] = "referenceAngles";
+        static constexpr char SMOOTHED_TRAJECTORY[] = "smoothedTrajectory";
+
 
 	}  // end namespace default_topics
 }  // end namespace teamsannio_msgs

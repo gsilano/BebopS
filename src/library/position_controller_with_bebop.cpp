@@ -21,6 +21,7 @@
 #include "teamsannio_med_control/Matrix3x3.h"
 #include "teamsannio_med_control/Quaternion.h" 
 #include "teamsannio_med_control/stabilizer_types.h"
+
 #include "bebop_msgs/default_topics.h"
 
 #include <math.h> 
@@ -89,6 +90,11 @@ PositionControllerWithBebop::PositionControllerWithBebop()
               0,  //Angular velocity y
               0}) //Angular velocity z)
               {  
+
+            command_trajectory_.setFromYaw(0);
+            command_trajectory_.position_W[0] = 0;
+            command_trajectory_.position_W[1] = 0;
+            command_trajectory_.position_W[2] = 0;
 
             land_pub_ = n4_.advertise<std_msgs::Empty>(bebop_msgs::default_topics::LAND, 1);
             reset_pub_ = n4_.advertise<std_msgs::Empty>(bebop_msgs::default_topics::RESET, 1);
@@ -170,6 +176,7 @@ void PositionControllerWithBebop::SetOdom(const EigenOdometry& odometry) {
 
    //+x forward, +y left, +z up, +yaw CCW
     odometry_ = odometry; 
+    controller_active_= true;
 
     Quaternion2Euler(&state_.attitude.roll, &state_.attitude.pitch, &state_.attitude.yaw);
 
@@ -179,17 +186,45 @@ void PositionControllerWithBebop::SetOdom(const EigenOdometry& odometry) {
 
 }
 
-void PositionControllerWithBebop::SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory) {
+void PositionControllerWithBebop::SetTrajectoryPoint() {
 
-    command_trajectory_= command_trajectory;
-    controller_active_= true;
+    waypoint_filter_.GetTrajectoryPoint(&command_trajectory_);
+
+}
+
+void PositionControllerWithBebop::GetTrajectory(nav_msgs::Odometry* smoothed_trajectory){
+
+   smoothed_trajectory->pose.pose.position.x = command_trajectory_.position_W[0];
+   smoothed_trajectory->pose.pose.position.y = command_trajectory_.position_W[1];
+   smoothed_trajectory->pose.pose.position.z = command_trajectory_.position_W[2];
+
+}
+
+void PositionControllerWithBebop::GetOdometry(nav_msgs::Odometry* odometry_filtered){
+
+   *odometry_filtered = odometry_filtered_private_;
 
 }
 
 void PositionControllerWithBebop::SetOdometryEstimated() {
 
     extended_kalman_filter_bebop_.SetThrustCommand(u_T_);
-    extended_kalman_filter_bebop_.Estimator(&state_, &odometry_);
+    extended_kalman_filter_bebop_.EstimatorWithoutNoise(&state_, &odometry_, &odometry_filtered_private_);
+
+}
+
+void PositionControllerWithBebop::GetReferenceAngles(nav_msgs::Odometry* reference_angles){
+    assert(reference_angles);
+
+   reference_angles->pose.pose.position.x = control_.roll*180/M_PI;
+   reference_angles->pose.pose.position.y = control_.pitch*180/M_PI;
+
+   double u_x, u_y, u_T, u_Terr;
+   PosController(&u_x, &u_y, &u_T, &u_Terr);
+
+   reference_angles->twist.twist.linear.x = u_x;
+   reference_angles->twist.twist.linear.y = u_y;
+   reference_angles->twist.twist.linear.z = u_Terr;  
 
 }
 
@@ -398,6 +433,8 @@ void PositionControllerWithBebop::CallbackAttitude(const ros::TimerEvent& event)
 
 void PositionControllerWithBebop::CallbackPosition(const ros::TimerEvent& event){
 
+     waypoint_filter_.TrajectoryGeneration();
+     SetTrajectoryPoint();
      SetOdometryEstimated(); 
      PositionErrors(&e_x_, &e_y_, &e_z_);
      VelocityErrors(&dot_e_x_, &dot_e_y_, &dot_e_z_);

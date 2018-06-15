@@ -22,12 +22,12 @@
 #include <mav_msgs/conversions.h>
 #include <mav_msgs/eigen_mav_msgs.h>
 
-
 #include <string>
 
 #include <ros/time.h>
 
 #include "extendedKalmanFilter.h"
+#include "waypoint_filter.h"
 #include "filter_parameters.h"
 #include "stabilizer_types.h"
 #include "parameters.h"
@@ -93,16 +93,19 @@ class PositionControllerParameters {
             void CalculateRotorVelocities(Eigen::Vector4d* rotor_velocities);
 
             void SetOdometry(const EigenOdometry& odometry);
-            void SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory);
+            void SetTrajectoryPoint();
             void SetControllerGains();
             void SetVehicleParameters();
             void SetFilterParameters();
             void GetOdometry(nav_msgs::Odometry* odometry_filtered);
+            void GetReferenceAngles(nav_msgs::Odometry* reference_angles);
+            void GetTrajectory(nav_msgs::Odometry* smoothed_trajectory);
             
             PositionControllerParameters controller_parameters_;
             ExtendedKalmanFilter extended_kalman_filter_bebop_;
             VehicleParameters vehicle_parameters_;
             FilterParameters filter_parameters_;
+            WaypointFilter waypoint_filter_;
 
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         private:

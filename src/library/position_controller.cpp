@@ -78,6 +78,11 @@ PositionController::PositionController()
               0}) //Angular velocity z)
               {  
 
+            command_trajectory_.setFromYaw(0);
+            command_trajectory_.position_W[0] = 0;
+            command_trajectory_.position_W[1] = 0;
+            command_trajectory_.position_W[2] = 0;
+
             timer1_ = n1_.createTimer(ros::Duration(TsA), &PositionController::CallbackAttitude, this, false, true);
             timer2_ = n2_.createTimer(ros::Duration(TsP), &PositionController::CallbackPosition, this, false, true); 
 			    
@@ -294,6 +299,7 @@ void PositionController::Quaternion2Euler(double* roll, double* pitch, double* y
 void PositionController::SetOdometry(const EigenOdometry& odometry) {
     
     odometry_ = odometry; 
+    controller_active_= true;
 
     Quaternion2Euler(&state_.attitude.roll, &state_.attitude.pitch, &state_.attitude.yaw);
 
@@ -303,10 +309,17 @@ void PositionController::SetOdometry(const EigenOdometry& odometry) {
 
 }
 
-void PositionController::SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory) {
+void PositionController::SetTrajectoryPoint(){
 
-    command_trajectory_= command_trajectory;
-    controller_active_= true;
+    waypoint_filter_.GetTrajectoryPoint(&command_trajectory_);
+
+}
+
+void PositionController::GetTrajectory(nav_msgs::Odometry* smoothed_trajectory){
+
+   smoothed_trajectory->pose.pose.position.x = command_trajectory_.position_W[0];
+   smoothed_trajectory->pose.pose.position.y = command_trajectory_.position_W[1];
+   smoothed_trajectory->pose.pose.position.z = command_trajectory_.position_W[2];
 
 }
 
@@ -316,10 +329,25 @@ void PositionController::GetOdometry(nav_msgs::Odometry* odometry_filtered){
 
 }
 
+void PositionController::GetReferenceAngles(nav_msgs::Odometry* reference_angles){
+    assert(reference_angles);
+
+   reference_angles->pose.pose.position.x = control_.roll*180/M_PI;
+   reference_angles->pose.pose.position.y = control_.pitch*180/M_PI;
+
+   double u_x, u_y, u_T, u_Terr;
+   PosController(&u_x, &u_y, &u_T, &u_Terr);
+
+   reference_angles->twist.twist.linear.x = u_x;
+   reference_angles->twist.twist.linear.y = u_y;
+   reference_angles->twist.twist.linear.z = u_Terr;  
+
+}
+
 void PositionController::SetOdometryEstimated() {
 
     extended_kalman_filter_bebop_.SetThrustCommand(control_.thrust);
-    extended_kalman_filter_bebop_.Estimator(&state_, &odometry_, &odometry_filtered_private_);
+    extended_kalman_filter_bebop_.EstimatorWithNoise(&state_, &odometry_, &odometry_filtered_private_);
 
 }
 
@@ -440,13 +468,14 @@ void PositionController::ReferenceAngles(double* phi_r, double* theta_r){
    *theta_r = atan( ( (u_x * cos(psi_r) ) + ( u_y * sin(psi_r) ) )  / u_Terr );
    *phi_r = atan( cos(*theta_r) * ( ( (u_x * sin(psi_r)) - (u_y * cos(psi_r)) ) / (u_Terr) ) );
 
-   	if(dataStoring_active_){
-		//Saving reference angles in a file
-		std::stringstream tempReferenceAngles;
-		tempReferenceAngles << *theta_r << "," << *phi_r << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
-		listReferenceAngles_.push_back(tempReferenceAngles.str());
-	}
+   if(dataStoring_active_){
+	//Saving reference angles in a file
+	std::stringstream tempReferenceAngles;
+	tempReferenceAngles << *theta_r << "," << *phi_r << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+
+	listReferenceAngles_.push_back(tempReferenceAngles.str());
+    }
     
 }
 
@@ -503,11 +532,10 @@ void PositionController::AttitudeErrors(double* e_phi, double* e_theta, double* 
    double psi_r;
    psi_r = command_trajectory_.getYaw();
    
-   double phi_r, theta_r;
-   ReferenceAngles(&phi_r, &theta_r);
+   ReferenceAngles(&control_.roll, &control_.pitch);
 
-   *e_phi = phi_r - state_.attitude.roll;
-   *e_theta = theta_r - state_.attitude.pitch;
+   *e_phi = control_.roll - state_.attitude.roll;
+   *e_theta = control_.pitch - state_.attitude.pitch;
    *e_psi = psi_r - state_.attitude.yaw;
 
 }
@@ -582,6 +610,8 @@ void PositionController::CallbackAttitude(const ros::TimerEvent& event){
 
 void PositionController::CallbackPosition(const ros::TimerEvent& event){
   
+     waypoint_filter_.TrajectoryGeneration();
+     SetTrajectoryPoint();
      SetOdometryEstimated();
      PositionErrors(&e_x_, &e_y_, &e_z_);
      VelocityErrors(&dot_e_x_, &dot_e_y_, &dot_e_z_);

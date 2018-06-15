@@ -84,7 +84,7 @@ void ExtendedKalmanFilter::SetFilterParameters(FilterParameters *filter_paramete
 
 }
 
-void ExtendedKalmanFilter::Estimator(state_t *state_, EigenOdometry* odometry_, nav_msgs::Odometry* odometry_filtered){
+void ExtendedKalmanFilter::EstimatorWithNoise(state_t *state_, EigenOdometry* odometry_, nav_msgs::Odometry* odometry_filtered){
    assert(state_);
    assert(odometry_);
 
@@ -113,7 +113,7 @@ void ExtendedKalmanFilter::Estimator(state_t *state_, EigenOdometry* odometry_, 
 
 }
 
-void ExtendedKalmanFilter::Estimator(state_t *state_, EigenOdometry* odometry_){
+void ExtendedKalmanFilter::EstimatorWithoutNoise(state_t *state_, EigenOdometry* odometry_, nav_msgs::Odometry* odometry_filtered){
    assert(state_);
    assert(odometry_);
 
@@ -131,6 +131,14 @@ void ExtendedKalmanFilter::Estimator(state_t *state_, EigenOdometry* odometry_){
    state_->linearVelocity.x = Xe_(5); 
 
    Hatx_ = Xe_;
+
+   *odometry_filtered;
+   odometry_filtered->pose.pose.position.x = Xe_(0);
+   odometry_filtered->pose.pose.position.y = Xe_(1);
+   odometry_filtered->pose.pose.position.z = Xe_(2);
+   odometry_filtered->twist.twist.linear.x = Xe_(3);
+   odometry_filtered->twist.twist.linear.y = Xe_(4);
+   odometry_filtered->twist.twist.linear.z = Xe_(5);
 
 }
 
@@ -257,9 +265,9 @@ void ExtendedKalmanFilter::PredictWithNoise(){
 }
 
 void ExtendedKalmanFilter::AttitudeAddingNoise(double *phin, double *thetan, double* psin, double phi, double theta, double psi){
-    assert(phi);
-    assert(theta);
-    assert(psi);
+    assert(phin);
+    assert(thetan);
+    assert(psin);
 
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generatorPhi (seed);

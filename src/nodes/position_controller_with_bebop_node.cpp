@@ -22,7 +22,10 @@
 #include <std_msgs/Empty.h>
 
 #include "position_controller_with_bebop_node.h"
+
 #include "teamsannio_med_control/parameters_ros.h"
+
+#include "teamsannio_msgs/default_topics.h"
 #include "bebop_msgs/default_topics.h"
 
 namespace teamsannio_med_control {
@@ -42,6 +45,12 @@ PositionControllerWithBebopNode::PositionControllerWithBebopNode() {
     motor_velocity_reference_pub_ = nh.advertise<geometry_msgs::Twist>(bebop_msgs::default_topics::COMMAND_VEL, 1);
 
     takeoff_pub_ = nh.advertise<std_msgs::Empty>(bebop_msgs::default_topics::TAKE_OFF, 1);
+
+    odometry_filtered_pub_ = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::FILTERED_OUTPUT, 1);
+
+    reference_angles_pub_ = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::REFERENCE_ANGLES, 1);
+
+    smoothed_reference_pub_  = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::SMOOTHED_TRAJECTORY, 1);
 
 }
 
@@ -65,7 +74,7 @@ void PositionControllerWithBebopNode::MultiDofJointTrajectoryCallback(const traj
   commands_.push_front(eigen_reference);
 
   // We can trigger the first command immediately.
-  position_controller_.SetTrajectoryPoint(eigen_reference);
+  position_controller_.waypoint_filter_.SetTrajectoryPoint(eigen_reference);
   commands_.pop_front();
 
   if (n_commands >= 1) {
@@ -208,6 +217,22 @@ void PositionControllerWithBebopNode::OdomCallback(const nav_msgs::OdometryConst
 	    geometry_msgs::Twist ref_command_signals;
 	    position_controller_.CalculateCommandSignals(&ref_command_signals);
 	    motor_velocity_reference_pub_.publish(ref_command_signals);
+
+            nav_msgs::Odometry odometry_filtered;
+            position_controller_.GetOdometry(&odometry_filtered);
+            odometry_filtered.header.stamp = odom_msg->header.stamp;
+            odometry_filtered_pub_.publish(odometry_filtered);
+
+            nav_msgs::Odometry reference_angles;
+            position_controller_.GetReferenceAngles(&reference_angles);
+            reference_angles.header.stamp = odom_msg->header.stamp;
+            reference_angles_pub_.publish(reference_angles);
+
+            nav_msgs::Odometry smoothed_reference;
+            position_controller_.GetTrajectory(&smoothed_reference);
+            smoothed_reference.header.stamp = odom_msg->header.stamp;
+            smoothed_reference_pub_.publish(smoothed_reference);
+
     }	 
 }
 

@@ -44,8 +44,8 @@ class ExtendedKalmanFilter {
      ExtendedKalmanFilter();
      ~ExtendedKalmanFilter();
 
-     void Estimator(state_t *state_, EigenOdometry* odometry_, nav_msgs::Odometry* odometry_filtered);
-     void Estimator(state_t *state_, EigenOdometry* odometry_);
+     void EstimatorWithoutNoise(state_t *state_, EigenOdometry* odometry_, nav_msgs::Odometry* odometry_filtered);
+     void EstimatorWithNoise(state_t *state_, EigenOdometry* odometry_, nav_msgs::Odometry* odometry_filtered);
      void SetThrustCommand(double u_T);
      void SetVehicleParameters(double m, double g);
      void SetFilterParameters(FilterParameters *filter_parameters_);

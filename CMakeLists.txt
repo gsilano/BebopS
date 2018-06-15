@@ -20,7 +20,7 @@ find_package(
 
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
-  LIBRARIES position_controller extendedKalmanFilter position_controller_with_bebop
+  LIBRARIES position_controller extendedKalmanFilter position_controller_with_bebop waypoint_filter
   CATKIN_DEPENDS geometry_msgs mav_msgs nav_msgs roscpp sensor_msgs std_msgs
   DEPENDS Eigen 
 )
@@ -44,6 +44,10 @@ add_library(extendedKalmanFilter
    src/library/extendedKalmanFilter.cpp
 )
 
+add_library(waypoint_filter
+   src/library/waypoint_filter.cpp
+)
+
 target_link_libraries(position_controller ${catkin_LIBRARIES})
 add_dependencies(position_controller ${catkin_EXPORTED_TARGETS})
 
@@ -53,15 +57,18 @@ add_dependencies(position_controller_with_bebop ${catkin_EXPORTED_TARGETS})
 target_link_libraries(extendedKalmanFilter ${catkin_LIBRARIES})
 add_dependencies(extendedKalmanFilter ${catkin_EXPORTED_TARGETS})
 
+target_link_libraries(waypoint_filter ${catkin_LIBRARIES})
+add_dependencies(waypoint_filter ${catkin_EXPORTED_TARGETS})
+
 add_executable(position_controller_node src/nodes/position_controller_node.cpp)
 add_dependencies(position_controller_node ${catkin_EXPORTED_TARGETS})
 target_link_libraries(position_controller_node
-  position_controller extendedKalmanFilter ${catkin_LIBRARIES})
+  position_controller extendedKalmanFilter waypoint_filter ${catkin_LIBRARIES})
 
 add_executable(position_controller_with_bebop_node src/nodes/position_controller_with_bebop_node.cpp)
 add_dependencies(position_controller_with_bebop_node ${catkin_EXPORTED_TARGETS})
 target_link_libraries(position_controller_with_bebop_node
-  position_controller_with_bebop extendedKalmanFilter ${catkin_LIBRARIES})
+  position_controller_with_bebop extendedKalmanFilter waypoint_filter  ${catkin_LIBRARIES})
 
 add_executable(hovering_example src/nodes/hovering_example.cpp)
 target_link_libraries(hovering_example ${catkin_LIBRARIES})
@@ -75,7 +82,7 @@ add_executable(quaternion_to_rpy src/nodes/quaternion_to_rpy.cpp)
 target_link_libraries(quaternion_to_rpy ${catkin_LIBRARIES})
 add_dependencies(quaternion_to_rpy ${catkin_EXPORTED_TARGETS})
 
-install(TARGETS position_controller extendedKalmanFilter position_controller_with_bebop
+install(TARGETS position_controller extendedKalmanFilter position_controller_with_bebop waypoint_filter
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 

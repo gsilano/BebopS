@@ -42,8 +42,10 @@
       <remap from="/command/motor_speed" to="/gazebo/command/motor_speed" />
       <remap from="/odometry" to="/bebop/odometry" />
       <remap from="/odometry_gt" to="/bebop/odometry_gt" />
+      <remap from="/referenceAngles" to="/bebop/referenceAngles" />
       <remap from="/filteredOutput" to="/bebop/filteredOutput" />
       <remap from="/stateErrors" to="/bebop/stateErrors" />
+      <remap from="/smoothedTrajectory" to="/bebop/smoothedTrajectory" />
       <remap from="/command/trajectory" to="/bebop/command/trajectory" />
     </node>
 
@@ -60,11 +62,17 @@
     </node>
     <node name="orientation_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/orientation_rpy" output="screen" />
 
+    <!-- Launch the reference angles plot -->
+    <node name="reference_angles_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/referenceAngles/pose/pose/position" output="screen"  />
+    <node name="uXY_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/referenceAngles/twist/twist/linear" output="screen" />
 
-    <!-- Launch the filtered output -->
+    <!-- Launch the smoothed trajectory plot -->
+    <node name="smoothed_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/smoothedTrajectory/pose/pose/position" output="screen" />
+
+    <!-- Launch the filtered output plot -->
     <node name="position_plot_gt" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/filteredOutput/pose/pose/position" output="screen" />
 
-    <!-- Launch the state errors -->
+    <!-- Launch the state errors plot -->
     <node name="state_errors_position_plot_gt" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/stateErrors/pose/pose/position" output="screen" />
     <node name="state_errors_velocity_plot_gt" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/stateErrors/twist/twist/linear" output="screen" />
 
