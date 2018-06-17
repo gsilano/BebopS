@@ -251,8 +251,8 @@ void PositionControllerWithBebop::CalculateCommandSignals(geometry_msgs::Twist* 
     yawRate_ref_degree = control_.yawRate * (180/M_PI);
 
     double linearX, linearY, linearZ, angularZ;
-    linearX = phi_ref_degree/MAX_TILT_ANGLE;
-    linearY = theta_ref_degree/MAX_TILT_ANGLE;
+    linearX = thetha_ref_degree/MAX_TILT_ANGLE;
+    linearY = phi_ref_degree/MAX_TILT_ANGLE;
     CommandVelocity(&linearZ);
     angularZ = yawRate_ref_degree/MAX_ROT_SPEED;  
 
