@@ -83,6 +83,21 @@ PositionController::PositionController()
             command_trajectory_.position_W[1] = 0;
             command_trajectory_.position_W[2] = 0;
 
+	    filter_parameters_.dev_x_ = 0; 
+	    filter_parameters_.dev_y_ = 0; 
+	    filter_parameters_.dev_z_ = 0; 
+	    filter_parameters_.dev_vx_ = 0;  
+	    filter_parameters_.dev_vy_ = 0;
+	    filter_parameters_.dev_vz_ = 0;
+	    filter_parameters_.Qp_x_ = 0; 
+	    filter_parameters_.Qp_y_ = 0; 
+	    filter_parameters_.Qp_z_ = 0; 
+	    filter_parameters_.Qp_vx_ = 0;  
+	    filter_parameters_.Qp_vy_ = 0;
+	    filter_parameters_.Qp_vz_ = 0;
+	    filter_parameters_.Rp_ = Eigen::MatrixXf::Zero(6,6);
+	    filter_parameters_.Qp_ = Eigen::MatrixXf::Identity(6,6);
+
             timer1_ = n1_.createTimer(ros::Duration(TsA), &PositionController::CallbackAttitude, this, false, true);
             timer2_ = n2_.createTimer(ros::Duration(TsP), &PositionController::CallbackPosition, this, false, true); 
 			    
