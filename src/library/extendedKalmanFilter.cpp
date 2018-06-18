@@ -213,7 +213,7 @@ void ExtendedKalmanFilter::PredictWithoutNoise(){
      P_ = A_private_*(P_)*A_private_.transpose() + Qp_std_;
  		
      //The predicted state
-     Xp_ << x, y, z, dx, dy, dz;
+     Xp_ << x, y, z, dx_ENU, dy_ENU, dz_ENU;
 
 }
 
@@ -260,7 +260,7 @@ void ExtendedKalmanFilter::PredictWithNoise(){
      P_ = A_private_*(P_)*A_private_.transpose() + Qp_std_;
  		
      //The predicted state
-     Xp_ << x, y, z, dx, dy, dz;
+     Xp_ << x, y, z, dx_ENU, dy_ENU, dz_ENU;
 
 }
 

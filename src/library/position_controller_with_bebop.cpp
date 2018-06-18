@@ -96,6 +96,21 @@ PositionControllerWithBebop::PositionControllerWithBebop()
             command_trajectory_.position_W[1] = 0;
             command_trajectory_.position_W[2] = 0;
 
+	    filter_parameters_.dev_x_ = 0; 
+	    filter_parameters_.dev_y_ = 0; 
+	    filter_parameters_.dev_z_ = 0; 
+	    filter_parameters_.dev_vx_ = 0;  
+	    filter_parameters_.dev_vy_ = 0;
+	    filter_parameters_.dev_vz_ = 0;
+	    filter_parameters_.Qp_x_ = 0; 
+	    filter_parameters_.Qp_y_ = 0; 
+	    filter_parameters_.Qp_z_ = 0; 
+	    filter_parameters_.Qp_vx_ = 0;  
+	    filter_parameters_.Qp_vy_ = 0;
+	    filter_parameters_.Qp_vz_ = 0;
+	    filter_parameters_.Rp_ = Eigen::MatrixXf::Zero(6,6);
+	    filter_parameters_.Qp_ = Eigen::MatrixXf::Identity(6,6);
+
             land_pub_ = n4_.advertise<std_msgs::Empty>(bebop_msgs::default_topics::LAND, 1);
             reset_pub_ = n4_.advertise<std_msgs::Empty>(bebop_msgs::default_topics::RESET, 1);
 
@@ -380,11 +395,6 @@ void PositionControllerWithBebop::VelocityErrors(double* dot_e_x, double* dot_e_
    assert(dot_e_x);
    assert(dot_e_y);
    assert(dot_e_z);
-
-   double x_r, y_r, z_r;
-   x_r = command_trajectory_.position_W[0];
-   y_r = command_trajectory_.position_W[1]; 
-   z_r = command_trajectory_.position_W[2];
    
    *dot_e_x = - state_.linearVelocity.x;
    *dot_e_y = - state_.linearVelocity.y;
