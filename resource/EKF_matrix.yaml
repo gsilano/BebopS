@@ -1,5 +1,5 @@
 # Tuning matrix of the Extended Kalman Filter (min 1e-5)
-Qp: {aa: 0.0001, bb: 0.0001, cc: 0.0001, dd: 0.0001, ee: 0.0001, ff: 0.0001}
+Qp: {aa: 0.01, bb: 0.01, cc: 0.1, dd: 0.1, ee: 0.1, ff: 0.1}
 # Standard deviation of noise on positions and linear velocities
 dev_x: 0.01 
 dev_y: 0.01 

@@ -6,6 +6,9 @@
   <arg name="drone_type" default="bebop2" />          <!-- available drone types: bebop1, bebop2 -->
   <arg name="config_file" default="$(find teamsannio_med_control)/config/defaults.yaml" />
   <arg name="camera_info_url" default="package://teamsannio_med_control/data/$(arg drone_type)_camera_calib.yaml" />
+
+  <include file="$(find med_aerial_challenge_launch)/launch/bebop_joy_override.launch" />
+  <include file="$(find med_aerial_challenge_launch)/launch/bebop_optitrack.launch" />
   
     <!-- Launch the controller  -->
     <node name="position_controller_node" pkg="teamsannio_med_control" type="position_controller_node" output="screen"> 

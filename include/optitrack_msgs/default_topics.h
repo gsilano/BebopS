@@ -15,24 +15,19 @@
  * limitations under the License.
  */
 
-#ifndef TEAMSANNIO_MSGS_H_
-#define TEAMSANNIO_MSGS_H_
+#ifndef OPTITRACKS_MSGS_H_
+#define OPTITRACKS_MSGS_H_
 
-namespace teamsannio_msgs {
+namespace optitrack_msgs {
 	namespace default_topics {
 
-        static constexpr char FILTERED_OUTPUT[] = "filteredOutput";
-        static constexpr char STATE_ERRORS[] = "stateErrors";
+        static constexpr char ODOMETRY[] = "odometry";
 
-        static constexpr char ODOMETRY_GT[] = "odometry_gt";
-
-        static constexpr char REFERENCE_ANGLES[] = "referenceAngles";
-        static constexpr char SMOOTHED_TRAJECTORY[] = "smoothedTrajectory";
-
-        static constexpr char BEBOP_REFERENCE_ANLGES[] = "bebopAngles";
+        static constexpr char POSE[] = "pose";
+        static constexpr char VELOCITY[] = "velocity";
 
 
 	}  // end namespace default_topics
 }  // end namespace teamsannio_msgs
 
-#endif /* TEAMSANNIO_MSGS_H_ */
+#endif /* OPTITRACKS_MSGS_H_ */

@@ -347,8 +347,8 @@ void PositionController::GetOdometry(nav_msgs::Odometry* odometry_filtered){
 void PositionController::GetReferenceAngles(nav_msgs::Odometry* reference_angles){
     assert(reference_angles);
 
-   reference_angles->pose.pose.position.x = control_.roll*180/M_PI;
-   reference_angles->pose.pose.position.y = control_.pitch*180/M_PI;
+   reference_angles->pose.pose.position.x = control_.pitch*180/M_PI;
+   reference_angles->pose.pose.position.y = control_.roll*180/M_PI;
 
    double u_x, u_y, u_T, u_Terr;
    PosController(&u_x, &u_y, &u_T, &u_Terr);

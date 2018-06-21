@@ -26,7 +26,14 @@
 #include "teamsannio_med_control/parameters_ros.h"
 
 #include "teamsannio_msgs/default_topics.h"
+#include "optitrack_msgs/default_topics.h"
 #include "bebop_msgs/default_topics.h"
+
+#include "teamsannio_med_control/transform_datatypes.h"
+#include "teamsannio_med_control/Matrix3x3.h"
+#include "teamsannio_med_control/Quaternion.h" 
+
+#define M_PI                      3.14159265358979323846  /* pi */
 
 namespace teamsannio_med_control {
 
@@ -40,7 +47,9 @@ PositionControllerWithBebopNode::PositionControllerWithBebopNode() {
 
     cmd_multi_dof_joint_trajectory_sub_ = nh.subscribe(mav_msgs::default_topics::COMMAND_TRAJECTORY, 1,  &PositionControllerWithBebopNode::MultiDofJointTrajectoryCallback, this);
 
-    odom_sub_ = nh.subscribe(bebop_msgs::default_topics::ODOM, 30, &PositionControllerWithBebopNode::OdomCallback, this);
+    odom_pose_sub_ = nh.subscribe(optitrack_msgs::default_topics::POSE, 1, &PositionControllerWithBebopNode::PoseCallback, this);
+
+    odom_velocity_sub_ = nh.subscribe(optitrack_msgs::default_topics::VELOCITY, 1, &PositionControllerWithBebopNode::VelocityCallback, this);
 
     motor_velocity_reference_pub_ = nh.advertise<geometry_msgs::Twist>(bebop_msgs::default_topics::COMMAND_VEL, 1);
 
@@ -51,6 +60,8 @@ PositionControllerWithBebopNode::PositionControllerWithBebopNode() {
     reference_angles_pub_ = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::REFERENCE_ANGLES, 1);
 
     smoothed_reference_pub_  = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::SMOOTHED_TRAJECTORY, 1);
+
+    bebop_reference_pub_ = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::BEBOP_REFERENCE_ANLGES, 1);
 
 }
 
@@ -79,7 +90,7 @@ void PositionControllerWithBebopNode::MultiDofJointTrajectoryCallback(const traj
 
   if (n_commands >= 1) {
     waypointHasBeenPublished_ = true;
-    ROS_INFO_ONCE("PositionController with AR.Drone node got first MultiDOFJointTrajectory message.");
+    ROS_INFO_ONCE("PositionController with Bebop node got first MultiDOFJointTrajectory message.");
   }
 }
 
@@ -201,18 +212,16 @@ void PositionControllerWithBebopNode::InitializeParams() {
 void PositionControllerWithBebopNode::Publish(){
 }
 
-void PositionControllerWithBebopNode::OdomCallback(const nav_msgs::OdometryConstPtr& odom_msg) {
+void PositionControllerWithBebopNode::OdomCallback(const geometry_msgs::TwistStamped &velocity_msg) {
 
     ROS_INFO_ONCE("PositionController with Bebop got first odometry message.");
 
     if (waypointHasBeenPublished_){
 
-	    EigenOdometry odom;
-	    eigenOdometryFromMsg(odom_msg, &odom);
-	    position_controller_.SetOdom(odom);
+	    position_controller_.SetOdom(odom_);
 
-            if (!takeOffMsgHasBeenSent_)            
-                TakeOff();
+           // if (!takeOffMsgHasBeenSent_)            
+           //     TakeOff();
 
 	    geometry_msgs::Twist ref_command_signals;
 	    position_controller_.CalculateCommandSignals(&ref_command_signals);
@@ -220,21 +229,52 @@ void PositionControllerWithBebopNode::OdomCallback(const nav_msgs::OdometryConst
 
             nav_msgs::Odometry odometry_filtered;
             position_controller_.GetOdometry(&odometry_filtered);
-            odometry_filtered.header.stamp = odom_msg->header.stamp;
+            odometry_filtered.header.stamp = velocity_msg.header.stamp;
             odometry_filtered_pub_.publish(odometry_filtered);
 
             nav_msgs::Odometry reference_angles;
             position_controller_.GetReferenceAngles(&reference_angles);
-            reference_angles.header.stamp = odom_msg->header.stamp;
+            reference_angles.header.stamp = velocity_msg.header.stamp;
             reference_angles_pub_.publish(reference_angles);
 
             nav_msgs::Odometry smoothed_reference;
             position_controller_.GetTrajectory(&smoothed_reference);
-            smoothed_reference.header.stamp = odom_msg->header.stamp;
+            smoothed_reference.header.stamp = velocity_msg.header.stamp;
             smoothed_reference_pub_.publish(smoothed_reference);
+
+            nav_msgs::Odometry bebop_angles;
+            double roll, pitch, yaw;
+            Quaternion2Euler(&roll, &pitch, &yaw);
+            roll = roll * (180/M_PI);
+            pitch = pitch * (180/M_PI);
+            yaw = yaw * (180/M_PI);
+            bebop_angles.pose.pose.position.x = pitch;
+            bebop_angles.pose.pose.position.y = roll;
+            bebop_angles.pose.pose.position.z = yaw;
+            bebop_angles.header.stamp = velocity_msg.header.stamp;
+            bebop_reference_pub_.publish(bebop_angles);
+
 
     }	 
 }
+
+void PositionControllerWithBebopNode::Quaternion2Euler(double* roll, double* pitch, double* yaw) const {
+    assert(roll);
+    assert(pitch);
+    assert(yaw);
+
+    double x, y, z, w;
+    x = odom_.orientation.x();
+    y = odom_.orientation.y();
+    z = odom_.orientation.z();
+    w = odom_.orientation.w();
+    
+    tf::Quaternion q(x, y, z, w);
+    tf::Matrix3x3 m(q);
+    m.getRPY(*roll, *pitch, *yaw);
+	
+}
+
 
 void PositionControllerWithBebopNode::TakeOff(){
 
@@ -245,6 +285,36 @@ void PositionControllerWithBebopNode::TakeOff(){
     takeoff_pub_.publish(empty_msg);
 
     takeOffMsgHasBeenSent_ = true;
+
+}
+
+void PositionControllerWithBebopNode::VelocityCallback(const geometry_msgs::TwistStamped &velocity_msg){
+
+    odom_.velocity[0] = velocity_msg.twist.linear.x;
+    odom_.velocity[1] = velocity_msg.twist.linear.y;
+    odom_.velocity[2] = velocity_msg.twist.linear.z;
+
+    odom_.angular_velocity[0]  = velocity_msg.twist.angular.x;
+    odom_.angular_velocity[1]  = velocity_msg.twist.angular.y;
+    odom_.angular_velocity[2]  = velocity_msg.twist.angular.z;
+
+    ROS_INFO_ONCE("VelocityCallback with Bebop got first velocity message.");
+
+    OdomCallback(velocity_msg);
+
+
+}
+
+void PositionControllerWithBebopNode::PoseCallback(const geometry_msgs::PoseStamped &pose_msg){
+
+     odom_.position[0] = pose_msg.pose.position.x;
+     odom_.position[1] = pose_msg.pose.position.y;
+     odom_.position[2] = pose_msg.pose.position.z;
+
+     odom_.orientation = mav_msgs::quaternionFromMsg(pose_msg.pose.orientation);
+
+     ROS_INFO_ONCE("PoseCallback with Bebop got first pose message.");
+
 
 }
 

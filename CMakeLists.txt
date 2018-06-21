@@ -74,6 +74,10 @@ add_executable(hovering_example src/nodes/hovering_example.cpp)
 target_link_libraries(hovering_example ${catkin_LIBRARIES})
 add_dependencies(hovering_example ${catkin_EXPORTED_TARGETS})
 
+add_executable(hovering_example_with_bebop src/nodes/hovering_example_with_bebop.cpp)
+target_link_libraries(hovering_example_with_bebop ${catkin_LIBRARIES})
+add_dependencies(hovering_example_with_bebop ${catkin_EXPORTED_TARGETS})
+
 add_executable(waypoint_example src/nodes/waypoint_example.cpp)
 target_link_libraries(waypoint_example ${catkin_LIBRARIES})
 add_dependencies(waypoint_example ${catkin_EXPORTED_TARGETS})
@@ -86,7 +90,7 @@ install(TARGETS position_controller extendedKalmanFilter position_controller_wit
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
-install(TARGETS position_controller position_controller_with_bebop_node hovering_example waypoint_example quaternion_to_rpy
+install(TARGETS position_controller position_controller_with_bebop_node hovering_example waypoint_example quaternion_to_rpy hovering_example_with_bebop
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -95,6 +99,7 @@ install(TARGETS position_controller position_controller_with_bebop_node hovering
 install(
   DIRECTORY include/${PROJECT_NAME}/
   DIRECTORY include/teamsannio_msgs/
+  DIRECTORY include/optitrack_msgs/
   DIRECTORY include/bebop_msgs/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
   FILES_MATCHING PATTERN "*.h"

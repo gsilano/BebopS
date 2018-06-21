@@ -24,7 +24,7 @@
 
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
 
-#define T 0.5 /* Waypoint filter pole [s] */
+#define T 0.05   /* Waypoint filter pole [s] */
 #define H 10e-3 /* Sampling time [s] */
 
 using namespace std;

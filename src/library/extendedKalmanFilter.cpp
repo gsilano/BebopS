@@ -33,7 +33,7 @@
 
 #include <random>
 
-#define TsP                       10e-3  /* Position control sampling time */
+#define TsP                       5e-3  /* Position control sampling time */
 
 namespace teamsannio_med_control {
 
@@ -187,33 +187,19 @@ void ExtendedKalmanFilter::PredictWithoutNoise(){
     dy = Hatx_(4);
     dz = Hatx_(5);
 
-    double dx_ENU, dy_ENU, dz_ENU;
-	
-    dx_ENU = (cos(theta) * cos(psi) * dx) + 
-	     ( ( (sin(phi) * sin(theta) * cos(psi) ) - ( cos(phi) * sin(psi) ) ) * dy) + 
-	     ( ( (cos(phi) * sin(theta) * cos(psi) ) + ( sin(phi) * sin(psi) ) ) * dz); 
-
-    dy_ENU = (cos(theta) * sin(psi) * dx) +
-	     ( ( (sin(phi) * sin(theta) * sin(psi) ) + ( cos(phi) * cos(psi) ) ) * dy) +
-	     ( ( (cos(phi) * sin(theta) * sin(psi) ) - ( sin(phi) * cos(psi) ) ) * dz);
-
-    dz_ENU = (-sin(theta) * dx) + ( sin(phi) * cos(theta) * dy) +
-	     (cos(phi) * cos(theta) * dz);
-
-
-     //Nonlinear state propagation 
-     x = x + TsP * dx_ENU;
-     y = y + TsP * dy_ENU;
-     z = z + TsP * dz_ENU;
-     dx_ENU = dx_ENU + TsP * (u_T_private_ * (1/m_private_) * (cos(psi) * sin(theta) * cos(phi) + sin(psi) * sin(theta)));
-     dy_ENU = dy_ENU + TsP * (u_T_private_ * (1/m_private_) * (sin(psi) * sin(theta) * cos(phi) - cos(psi) * sin(phi)));
-     dz_ENU = dz_ENU + TsP * (-g_private_ + u_T_private_ * (1/m_private_) * (cos(theta) * cos(phi)));
-			 
-     // Prediction error Matrix
-     P_ = A_private_*(P_)*A_private_.transpose() + Qp_std_;
+    //Nonlinear state propagation 
+    x = x + TsP * dx;
+    y = y + TsP * dy;
+    z = z + TsP * dz;
+    dx = dx + TsP * (u_T_private_ * (1/m_private_) * (cos(psi) * sin(theta) * cos(phi) + sin(psi) * sin(theta)));
+    dy = dy + TsP * (u_T_private_ * (1/m_private_) * (sin(psi) * sin(theta) * cos(phi) - cos(psi) * sin(phi)));
+    dz = dz + TsP * (-g_private_ + u_T_private_ * (1/m_private_) * (cos(theta) * cos(phi)));
+		 
+    // Prediction error Matrix
+    P_ = A_private_*(P_)*A_private_.transpose() + Qp_std_;
  		
-     //The predicted state
-     Xp_ << x, y, z, dx_ENU, dy_ENU, dz_ENU;
+    //The predicted state
+    Xp_ << x, y, z, dx, dy, dz;
 
 }
 

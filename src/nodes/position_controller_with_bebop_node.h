@@ -25,6 +25,7 @@
 
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Twist.h>
+#include <geometry_msgs/TwistStamped.h>
 #include <ros/callback_queue.h>
 #include <mav_msgs/eigen_mav_msgs.h>
 #include <nav_msgs/Odometry.h>
@@ -52,10 +53,12 @@ namespace teamsannio_med_control {
             bool takeOffMsgHasBeenSent_ = false;
 
             PositionControllerWithBebop position_controller_;
+	    EigenOdometry odom_;
 
             //subscribers
             ros::Subscriber cmd_multi_dof_joint_trajectory_sub_;
-            ros::Subscriber odom_sub_;
+            ros::Subscriber odom_pose_sub_;
+            ros::Subscriber odom_velocity_sub_;
 
             //publisher
             ros::Publisher motor_velocity_reference_pub_;
@@ -63,6 +66,7 @@ namespace teamsannio_med_control {
             ros::Publisher odometry_filtered_pub_;
             ros::Publisher reference_angles_pub_;
             ros::Publisher smoothed_reference_pub_;
+            ros::Publisher bebop_reference_pub_;
 
             mav_msgs::EigenTrajectoryPointDeque commands_;
             std::deque<ros::Duration> command_waiting_times_;
@@ -70,7 +74,10 @@ namespace teamsannio_med_control {
 
             void MultiDofJointTrajectoryCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& trajectory_reference_msg);
             void TakeOff();
-            void OdomCallback(const nav_msgs::OdometryConstPtr& odom_msg);
+            void OdomCallback(const geometry_msgs::TwistStamped &velocity_msg);
+            void VelocityCallback(const geometry_msgs::TwistStamped &velocity_msg);
+            void PoseCallback(const geometry_msgs::PoseStamped &pose_msg);
+            void Quaternion2Euler(double* roll, double* pitch, double* yaw) const;
 
 
     };

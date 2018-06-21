@@ -42,7 +42,7 @@
 
 
 #define M_PI                      3.14159265358979323846  /* pi */
-#define TsP                       10e-3  /* Position control sampling time */
+#define TsP                       5e-3  /* Position control sampling time */
 #define TsA                       5e-3 /* Attitude control sampling time */
 #define TsE                           5 /* Refresh landing time*/
 
@@ -50,10 +50,10 @@
 #define MAX_VERT_SPEED            1  /* Current max vertical speed in m/s */
 #define MAX_ROT_SPEED             100 /* Current max rotation speed in degree/s */
 
-#define MAX_POS_X                     1 /* Max position before emergency state along x-axis */
-#define MAX_POS_Y                     1 /* Max position before emergency state along y-axis */
-#define MAX_POS_Z                     1 /* Max position before emergency state along z-axis */
-#define MAX_VEL_ERR                   1 /* Max velocity error before emergency state */
+#define MAX_POS_X                     10 /* Max position before emergency state along x-axis */
+#define MAX_POS_Y                     10 /* Max position before emergency state along y-axis */
+#define MAX_POS_Z                     10 /* Max position before emergency state along z-axis */
+#define MAX_VEL_ERR                   10 /* Max velocity error before emergency state */
 
 namespace teamsannio_med_control {
 
@@ -231,8 +231,8 @@ void PositionControllerWithBebop::SetOdometryEstimated() {
 void PositionControllerWithBebop::GetReferenceAngles(nav_msgs::Odometry* reference_angles){
     assert(reference_angles);
 
-   reference_angles->pose.pose.position.x = control_.roll*180/M_PI;
-   reference_angles->pose.pose.position.y = control_.pitch*180/M_PI;
+   reference_angles->pose.pose.position.x = control_.pitch*180/M_PI;
+   reference_angles->pose.pose.position.y = control_.roll*180/M_PI;
 
    double u_x, u_y, u_T, u_Terr;
    PosController(&u_x, &u_y, &u_T, &u_Terr);
@@ -267,8 +267,9 @@ void PositionControllerWithBebop::CalculateCommandSignals(geometry_msgs::Twist* 
 
     double linearX, linearY, linearZ, angularZ;
     linearX = theta_ref_degree/MAX_TILT_ANGLE;
-    linearY = phi_ref_degree/MAX_TILT_ANGLE;
+    linearY = -phi_ref_degree/MAX_TILT_ANGLE;
     CommandVelocity(&linearZ);
+    linearZ = linearZ/MAX_VERT_SPEED;
     angularZ = yawRate_ref_degree/MAX_ROT_SPEED;  
 
     //The command signals are saturated to take into the SDK constrains in sending commands
@@ -307,7 +308,7 @@ void PositionControllerWithBebop::CommandVelocity(double* vel_command){
 
     e_z_sum_ = e_z_sum_ + e_z_ * TsP;
 
-    *vel_command = (( (alpha_z_/mu_z_) * e_z_) - ( (beta_z_/pow(mu_z_,2)) * e_z_sum_))/MAX_VERT_SPEED;
+    *vel_command = (( (alpha_z_/mu_z_) * e_z_) - ( (beta_z_/pow(mu_z_,2)) * e_z_sum_))/74.394;
 
 }
 
@@ -374,20 +375,10 @@ void PositionControllerWithBebop::AngularVelocityErrors(double* dot_e_phi, doubl
 
    double psi_r;
    psi_r = command_trajectory_.getYaw();
-   
-   double dot_phi, dot_theta, dot_psi;
 
-   dot_phi = state_.angularVelocity.x + (sin(state_.attitude.roll)*tan(state_.attitude.pitch)*state_.angularVelocity.y)
-                + (cos(state_.attitude.roll)*tan(state_.attitude.pitch)*state_.angularVelocity.z);
-    
-   dot_theta = (cos(state_.attitude.roll)*state_.angularVelocity.y) - (sin(state_.attitude.roll)*state_.angularVelocity.z);    
-
-   dot_psi = ((sin(state_.attitude.roll)*state_.angularVelocity.y)/cos(state_.attitude.pitch)) +
-                 ((cos(state_.attitude.roll)*state_.angularVelocity.z)/cos(state_.attitude.pitch));
-
-   *dot_e_phi =  - dot_phi;
-   *dot_e_theta = - dot_theta;
-   *dot_e_psi = - dot_psi;
+   *dot_e_phi =  0;
+   *dot_e_theta = 0;
+   *dot_e_psi = - state_.angularVelocity.z;
 
 }
 
@@ -430,7 +421,7 @@ void PositionControllerWithBebop::AttitudeErrors(double* e_phi, double* e_theta,
 
    *e_phi = control_.roll - state_.attitude.roll;
    *e_theta = control_.pitch - state_.attitude.pitch;
-   *e_psi = psi_r - state_.attitude.yaw;
+   *e_psi = psi_r  ;//- state_.attitude.yaw;
 
 }
 
