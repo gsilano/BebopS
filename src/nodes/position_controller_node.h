@@ -67,10 +67,7 @@ namespace teamsannio_med_control {
             ros::Publisher reference_angles_pub_;
             ros::Publisher smoothed_reference_pub_;
 
-            mav_msgs::EigenTrajectoryPointDeque commands_;
             nav_msgs::Odometry odometry_gt_;
-            std::deque<ros::Duration> command_waiting_times_;
-            ros::Timer command_timer_;
 
             void MultiDofJointTrajectoryCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& trajectory_reference_msg);
             void OdometryGTCallback(const nav_msgs::OdometryConstPtr& odometry_msg_gt);

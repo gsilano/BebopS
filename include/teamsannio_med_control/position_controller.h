@@ -111,7 +111,8 @@ class PositionControllerParameters {
         private:
             //Boolean variables to active/unactive the controller and the data storage
             bool controller_active_;
-	    bool dataStoring_active_;
+            bool dataStoring_active_;
+            bool EKF_active_;
 
             //Wall clock time offset variable
             double wallSecsOffset_;
@@ -184,7 +185,7 @@ class PositionControllerParameters {
 
             nav_msgs::Odometry odometry_filtered_private_;
 
-	    state_t state_;
+	        state_t state_;
             control_t control_;
             mav_msgs::EigenTrajectoryPoint command_trajectory_;
             EigenOdometry odometry_;

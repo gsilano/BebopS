@@ -70,10 +70,11 @@
     <node name="smoothed_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/smoothedTrajectory/pose/pose/position" output="screen" />
 
     <!-- Launch the filtered output plot -->
-    <node name="position_plot_gt" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/filteredOutput/pose/pose/position" output="screen" />
+    <node name="position_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/filteredOutput/pose/pose/position" output="screen" />
+    <node name="velocity_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/filteredOutput/twist/twist/linear" output="screen" />
 
     <!-- Launch the state errors plot -->
-    <node name="state_errors_position_plot_gt" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/stateErrors/pose/pose/position" output="screen" />
-    <node name="state_errors_velocity_plot_gt" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/stateErrors/twist/twist/linear" output="screen" />
+    <node name="state_errors_position_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/stateErrors/pose/pose/position" output="screen" />
+    <node name="state_errors_velocity_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/stateErrors/twist/twist/linear" output="screen" />
 
 </launch>

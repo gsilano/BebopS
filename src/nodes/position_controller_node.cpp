@@ -27,22 +27,29 @@
 
 namespace teamsannio_med_control {
 
+//Constructor
 PositionControllerNode::PositionControllerNode() {
 
     ROS_INFO_ONCE("Started position controller");
 
+    //The vehicle and controller parameters are initialized
     InitializeParams();
 
     ros::NodeHandle nh;
 
+    //To get the trajectory to follow
     cmd_multi_dof_joint_trajectory_sub_ = nh.subscribe(mav_msgs::default_topics::COMMAND_TRAJECTORY, 1,  &PositionControllerNode::MultiDofJointTrajectoryCallback, this);
 
+    //To get data coming from the the virtual odometry sensor
     odometry_sub_ = nh.subscribe(mav_msgs::default_topics::ODOMETRY, 1, &PositionControllerNode::OdometryCallback, this);
 
+    //To publish the propellers angular speed
     motor_velocity_reference_pub_ = nh.advertise<mav_msgs::Actuators>(mav_msgs::default_topics::COMMAND_ACTUATORS, 1);
 
+    //Useful to compare the results obtained by using the noised and biased virtual odometry sensor
     odometry_sub_gt_ = nh.subscribe(teamsannio_msgs::default_topics::ODOMETRY_GT, 1, &PositionControllerNode::OdometryGTCallback, this);
 
+    //Need to represent the variables into the plots
     odometry_filtered_pub_ = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::FILTERED_OUTPUT, 1);
 
     filtered_errors_pub_ = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::STATE_ERRORS, 1);
@@ -53,13 +60,10 @@ PositionControllerNode::PositionControllerNode() {
 
 }
 
+//Destructor
 PositionControllerNode::~PositionControllerNode(){}
 
 void PositionControllerNode::MultiDofJointTrajectoryCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& msg) {
-  // Clear all pending commands.
-  command_timer_.stop();
-  commands_.clear();
-  command_waiting_times_.clear();
 
   const size_t n_commands = msg->points.size();
 
@@ -70,11 +74,9 @@ void PositionControllerNode::MultiDofJointTrajectoryCallback(const trajectory_ms
 
   mav_msgs::EigenTrajectoryPoint eigen_reference;
   mav_msgs::eigenTrajectoryPointFromMsg(msg->points.front(), &eigen_reference);
-  commands_.push_front(eigen_reference);
 
   // We can trigger the first command immediately.
   position_controller_.waypoint_filter_.SetTrajectoryPoint(eigen_reference);
-  commands_.pop_front();
 
   if (n_commands >= 1) {
     waypointHasBeenPublished_ = true;
@@ -85,7 +87,8 @@ void PositionControllerNode::MultiDofJointTrajectoryCallback(const trajectory_ms
 void PositionControllerNode::InitializeParams() {
   ros::NodeHandle pnh("~");
 
-  // Read parameters from rosparam.
+  // Read parameters from rosparam. The paramters are read by the YAML file and they
+  // are used to create the "controller_parameters_" object
   GetRosParameter(pnh, "beta_xy/beta_x",
                   position_controller_.controller_parameters_.beta_xy_.x(),
                   &position_controller_.controller_parameters_.beta_xy_.x());
@@ -126,8 +129,10 @@ void PositionControllerNode::InitializeParams() {
                   position_controller_.controller_parameters_.mu_psi_,
                   &position_controller_.controller_parameters_.mu_psi_);
 
+  //Analogously, the object "vehicle_paramters_" is created
   GetVehicleParameters(pnh, &position_controller_.vehicle_parameters_);
 
+  //The object "filter_parameters_"
   GetRosParameter(pnh, "dev_x",
                   position_controller_.filter_parameters_.dev_x_,
                   &position_controller_.filter_parameters_.dev_x_);
@@ -224,8 +229,8 @@ void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& 
 
     if (waypointHasBeenPublished_){
 
-	    //This functions allows to put the odometry message into the odometry variable--> _position, _orientation,_velocit_body,
-            //_angular_velocity
+	    //These functions allow to put the odometry message into the odometry variable --> _position, _orientation,_velocit_body,
+        //_angular_velocity
 	    EigenOdometry odometry;
 	    eigenOdometryFromMsg(odometry_msg, &odometry);
 	    position_controller_.SetOdometry(odometry);
@@ -245,31 +250,32 @@ void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& 
 
 	    motor_velocity_reference_pub_.publish(actuator_msg);
 
-            nav_msgs::Odometry odometry_filtered;
-            position_controller_.GetOdometry(&odometry_filtered);
-            odometry_filtered.header.stamp = odometry_msg->header.stamp;
-            odometry_filtered_pub_.publish(odometry_filtered);
+	    //The code reported below is used to plot the data when the simulation is running
+        nav_msgs::Odometry odometry_filtered;
+        position_controller_.GetOdometry(&odometry_filtered);
+        odometry_filtered.header.stamp = odometry_msg->header.stamp;
+        odometry_filtered_pub_.publish(odometry_filtered);
 
-            nav_msgs::Odometry reference_angles;
-            position_controller_.GetReferenceAngles(&reference_angles);
-            reference_angles.header.stamp = odometry_msg->header.stamp;
-            reference_angles_pub_.publish(reference_angles);
+        nav_msgs::Odometry reference_angles;
+        position_controller_.GetReferenceAngles(&reference_angles);
+        reference_angles.header.stamp = odometry_msg->header.stamp;
+        reference_angles_pub_.publish(reference_angles);
 
-            nav_msgs::Odometry smoothed_reference;
-            position_controller_.GetTrajectory(&smoothed_reference);
-            smoothed_reference.header.stamp = odometry_msg->header.stamp;
-            smoothed_reference_pub_.publish(smoothed_reference);
+        nav_msgs::Odometry smoothed_reference;
+        position_controller_.GetTrajectory(&smoothed_reference);
+        smoothed_reference.header.stamp = odometry_msg->header.stamp;
+        smoothed_reference_pub_.publish(smoothed_reference);
 
-            nav_msgs::Odometry filtered_errors;
-            filtered_errors.pose.pose.position.x = odometry_filtered.pose.pose.position.x - odometry_gt_.pose.pose.position.x;
-            filtered_errors.pose.pose.position.y = odometry_filtered.pose.pose.position.y - odometry_gt_.pose.pose.position.y;
-            filtered_errors.pose.pose.position.z = odometry_filtered.pose.pose.position.z - odometry_gt_.pose.pose.position.z;
-            filtered_errors.twist.twist.linear.x = odometry_filtered.twist.twist.linear.x - odometry_gt_.twist.twist.linear.x;
-            filtered_errors.twist.twist.linear.y = odometry_filtered.twist.twist.linear.y - odometry_gt_.twist.twist.linear.y;
-            filtered_errors.twist.twist.linear.z = odometry_filtered.twist.twist.linear.z - odometry_gt_.twist.twist.linear.z;
+        nav_msgs::Odometry filtered_errors;
+        filtered_errors.pose.pose.position.x = odometry_filtered.pose.pose.position.x - odometry_gt_.pose.pose.position.x;
+        filtered_errors.pose.pose.position.y = odometry_filtered.pose.pose.position.y - odometry_gt_.pose.pose.position.y;
+        filtered_errors.pose.pose.position.z = odometry_filtered.pose.pose.position.z - odometry_gt_.pose.pose.position.z;
+        filtered_errors.twist.twist.linear.x = odometry_filtered.twist.twist.linear.x - odometry_gt_.twist.twist.linear.x;
+        filtered_errors.twist.twist.linear.y = odometry_filtered.twist.twist.linear.y - odometry_gt_.twist.twist.linear.y;
+        filtered_errors.twist.twist.linear.z = odometry_filtered.twist.twist.linear.z - odometry_gt_.twist.twist.linear.z;
 
-            filtered_errors.header.stamp = odometry_msg->header.stamp;
-            filtered_errors_pub_.publish(filtered_errors);
+        filtered_errors.header.stamp = odometry_msg->header.stamp;
+        filtered_errors_pub_.publish(filtered_errors);
 
     }	 
 }
