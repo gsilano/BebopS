@@ -58,6 +58,8 @@ PositionControllerNode::PositionControllerNode() {
 
     smoothed_reference_pub_  = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::SMOOTHED_TRAJECTORY, 1);
 
+    uTerr_components_pub_  = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::U_TERR_COMPONENTS, 1);
+
 }
 
 //Destructor
@@ -265,6 +267,11 @@ void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& 
         position_controller_.GetTrajectory(&smoothed_reference);
         smoothed_reference.header.stamp = odometry_msg->header.stamp;
         smoothed_reference_pub_.publish(smoothed_reference);
+
+        nav_msgs::Odometry uTerr_components;
+        position_controller_.GetUTerrComponents(&uTerr_components);
+        uTerr_components.header.stamp = odometry_msg->header.stamp;
+        uTerr_components_pub_.publish(uTerr_components);
 
         nav_msgs::Odometry filtered_errors;
         filtered_errors.pose.pose.position.x = odometry_filtered.pose.pose.position.x - odometry_gt_.pose.pose.position.x;

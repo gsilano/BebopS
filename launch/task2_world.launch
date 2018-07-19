@@ -47,6 +47,7 @@
       <remap from="/stateErrors" to="/bebop/stateErrors" />
       <remap from="/smoothedTrajectory" to="/bebop/smoothedTrajectory" />
       <remap from="/command/trajectory" to="/bebop/command/trajectory" />
+      <remap from="/uTerrComponents" to="/bebop/uTerrComponents" />
     </node>
 
     <!-- Launch the trajectory generator -->
@@ -68,6 +69,9 @@
 
     <!-- Launch the smoothed trajectory plot -->
     <node name="smoothed_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/smoothedTrajectory/pose/pose/position" output="screen" />
+
+    <!-- Launch the uTerr components plot -->
+    <node name="uTerr_components_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/uTerrComponents/pose/pose/position" output="screen" />
 
     <!-- Launch the filtered output plot -->
     <node name="position_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/filteredOutput/pose/pose/position" output="screen" />

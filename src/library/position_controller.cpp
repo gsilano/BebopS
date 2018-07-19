@@ -388,6 +388,15 @@ void PositionController::GetOdometry(nav_msgs::Odometry* odometry_filtered){
 
 }
 
+//Just to analyze the components that get uTerr variable
+void PositionController::GetUTerrComponents(nav_msgs::Odometry* uTerrComponents){
+
+	uTerrComponents->pose.pose.position.x = (alpha_z_/mu_z_) * dot_e_z_;
+	uTerrComponents->pose.pose.position.y = -(beta_z_/pow(mu_z_,2)) * e_z_;
+	uTerrComponents->pose.pose.position.z = ( g_ + ( (alpha_z_/mu_z_) * dot_e_z_) - ( (beta_z_/pow(mu_z_,2)) * e_z_) );
+
+}
+
 //Just to plot the data during the simulation
 void PositionController::GetReferenceAngles(nav_msgs::Odometry* reference_angles){
     assert(reference_angles);
