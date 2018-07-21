@@ -39,6 +39,7 @@
 
 
 #define M_PI                      3.14159265358979323846  /* pi */
+#define MAX_TILT_ANGLE           M_PI/4
 #define TsP                       10e-3  /* Position control sampling time */
 #define TsA                       5e-3 /* Attitude control sampling time */
 #define storeTime                 15  /* Store time*/
@@ -544,17 +545,17 @@ void PositionController::ReferenceAngles(double* phi_r, double* theta_r){
    *theta_r = atan( ( (u_x * cos(psi_r) ) + ( u_y * sin(psi_r) ) )  / u_Terr );
    *phi_r = atan( cos(*theta_r) * ( ( (u_x * sin(psi_r)) - (u_y * cos(psi_r)) ) / (u_Terr) ) );
 
-   if(*theta_r > M_PI/6 || *theta_r < -M_PI/6)
-	   if(*theta_r > M_PI/6)
-		   *theta_r = M_PI/6;
+   if(*theta_r > MAX_TILT_ANGLE || *theta_r < -MAX_TILT_ANGLE)
+	   if(*theta_r > MAX_TILT_ANGLE)
+		   *theta_r = MAX_TILT_ANGLE;
 	   else
-		   *theta_r = -M_PI/6;
+		   *theta_r = -MAX_TILT_ANGLE;
 
-   if(*phi_r > M_PI/6 || *phi_r < -M_PI/6)
-	   if(*phi_r > M_PI/6)
-		   *phi_r = M_PI/6;
+   if(*phi_r > MAX_TILT_ANGLE || *phi_r < -MAX_TILT_ANGLE)
+	   if(*phi_r > MAX_TILT_ANGLE)
+		   *phi_r = MAX_TILT_ANGLE;
 	   else
-		   *phi_r = -M_PI/6;
+		   *phi_r = -MAX_TILT_ANGLE;
 
 
    if(dataStoring_active_){

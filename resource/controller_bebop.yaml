@@ -1,11 +1,11 @@
 # Position controller parameters
 beta_xy: {beta_x: -26.4259, beta_y: -26.3627}
-beta_z: {beta_z: -20}
+beta_z: {beta_z: -27.2277}
 beta_phi: {beta_phi: -14.8134}
 beta_theta: {beta_theta: -16.1561}
 beta_psi: {beta_psi: -14.3431}
 mu_xy: {mu_x: 1, mu_y: 1}
-mu_z: {mu_z: 0.8}
+mu_z: {mu_z: 1}
 mu_phi: {mu_phi: 0.09}
 mu_theta: {mu_theta: 0.26}
 mu_psi: {mu_psi: 0.04}
