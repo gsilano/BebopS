@@ -391,8 +391,8 @@ void PositionController::GetOdometry(nav_msgs::Odometry* odometry_filtered){
 //Just to analyze the components that get uTerr variable
 void PositionController::GetUTerrComponents(nav_msgs::Odometry* uTerrComponents){
 
-	uTerrComponents->pose.pose.position.x = (alpha_z_/mu_z_) * dot_e_z_;
-	uTerrComponents->pose.pose.position.y = -(beta_z_/pow(mu_z_,2)) * e_z_;
+	uTerrComponents->pose.pose.position.x = ( (alpha_z_/mu_z_) * dot_e_z_);
+	uTerrComponents->pose.pose.position.y = - ( (beta_z_/pow(mu_z_,2)) * e_z_);
 	uTerrComponents->pose.pose.position.z = ( g_ + ( (alpha_z_/mu_z_) * dot_e_z_) - ( (beta_z_/pow(mu_z_,2)) * e_z_) );
 
 }
@@ -544,17 +544,17 @@ void PositionController::ReferenceAngles(double* phi_r, double* theta_r){
    *theta_r = atan( ( (u_x * cos(psi_r) ) + ( u_y * sin(psi_r) ) )  / u_Terr );
    *phi_r = atan( cos(*theta_r) * ( ( (u_x * sin(psi_r)) - (u_y * cos(psi_r)) ) / (u_Terr) ) );
 
-   if(*theta_r > M_PI/4 || *theta_r < -M_PI/4)
-	   if(*theta_r > M_PI/4)
-		   *theta_r = M_PI/4;
+   if(*theta_r > M_PI/6 || *theta_r < -M_PI/6)
+	   if(*theta_r > M_PI/6)
+		   *theta_r = M_PI/6;
 	   else
-		   *theta_r = -M_PI/4;
+		   *theta_r = -M_PI/6;
 
-   if(*phi_r > M_PI/4 || *phi_r < -M_PI/4)
-	   if(*phi_r > M_PI/4)
-		   *phi_r = M_PI/4;
+   if(*phi_r > M_PI/6 || *phi_r < -M_PI/6)
+	   if(*phi_r > M_PI/6)
+		   *phi_r = M_PI/6;
 	   else
-		   *phi_r = -M_PI/4;
+		   *phi_r = -M_PI/6;
 
 
    if(dataStoring_active_){
