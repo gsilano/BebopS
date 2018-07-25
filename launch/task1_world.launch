@@ -12,6 +12,9 @@
     <arg name="wind_direction_x" default="0.0"/>
     <arg name="wind_direction_y" default="0.0"/>
     <arg name="wind_direction_z" default="1.0"/>
+    <arg name="csvFilesStoring" default="false"/>
+    <arg name="csvFilesStoringTime" default="15.0"/> <!-- seconds -->
+    <arg name="user_account" default="giuseppe"/>
     
   <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find teamsannio_med_control)/models"/>
   <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find teamsannio_med_control)/models"/>
@@ -39,6 +42,9 @@
       <rosparam command="load" file="$(find teamsannio_med_control)/resource/bebop.yaml" />
       <rosparam command="load" file="$(find teamsannio_med_control)/resource/EKF_matrix.yaml" />
       <param name="use_sim_time" value="$(arg use_sim_time)" />
+      <param name="csvFilesStoring" value="$(arg csvFilesStoring)"/>
+      <param name="csvFilesStoringTime" value="$(arg csvFilesStoringTime)"/>
+      <param name="user_account" value="$(arg user_account)"/>
       <remap from="/command/motor_speed" to="/gazebo/command/motor_speed" />
       <remap from="/odometry" to="/bebop/odometry" />
       <remap from="/odometry_gt" to="/bebop/odometry_gt" />

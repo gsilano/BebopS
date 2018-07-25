@@ -42,7 +42,6 @@
 #define MAX_TILT_ANGLE            M_PI/4
 #define TsP                       10e-3  /* Position control sampling time */
 #define TsA                       5e-3 /* Attitude control sampling time */
-#define storeTime                 15  /* Store time*/
 #define MAX_ROTOR_VELOCITY        1475 /* Max rotors velocity [rad/s] */
 
 using namespace std;
@@ -51,8 +50,10 @@ namespace teamsannio_med_control {
 
 PositionController::PositionController()
     : controller_active_(false),
-      dataStoring_active_(true),
+      dataStoring_active_(false),
 	  EKF_active_(false),
+	  dataStoringTime_(0),
+	  wallSecsOffset_(0),
       e_x_(0),
       e_y_(0),
       e_z_(0),
@@ -64,6 +65,7 @@ PositionController::PositionController()
       e_psi_(0),
       dot_e_phi_(0),
       dot_e_theta_(0), 
+      dot_e_psi_(0),
       bf_(0),
       l_(0),
       bm_(0),
@@ -90,7 +92,6 @@ PositionController::PositionController()
       mu_phi_(0),
       mu_theta_(0),
       mu_psi_(0),
-      dot_e_psi_(0),
       control_({0,0,0,0}), //pitch, roll, yaw rate, thrust
       state_({0,  //Position.x 
               0,  //Position.y
@@ -132,38 +133,7 @@ PositionController::PositionController()
             	    //The timers are used to fix the working frequency of the Outer and Inner loop
             		timer1_ = n1_.createTimer(ros::Duration(TsA), &PositionController::CallbackAttitude, this, false, true);
             		timer2_ = n2_.createTimer(ros::Duration(TsP), &PositionController::CallbackPosition, this, false, true);
-			    
 
-            		//the boolean variable is used to inactive the logging if it is not useful
-            		if(dataStoring_active_){
-            			timer3_ = n3_.createTimer(ros::Duration(storeTime), &PositionController::CallbackSaveData, this, false, true);
-
-            			//Cleaning the string vector contents
-            			listControlSignals_.clear();
-            			listControlSignals_.clear();
-						listControlMixerTerms_.clear();
-						listPropellersAngularVelocities_.clear();
-						listReferenceAngles_.clear();
-						listVelocityErrors_.clear();
-						listDroneAttitude_.clear();
-						listTrajectoryErrors_.clear();
-						listAttitudeErrors_.clear();
-						listDerivativeAttitudeErrors_.clear();
-						listTimeAttitudeErrors_.clear();
-						listTimePositionErrors_.clear();
-			            listDroneAngularVelocitiesABC_.clear();
-			            listDroneTrajectoryReference_.clear();
-
-						//the client needed to get information about the Gazebo simulation environment both the attitude and position errors
-						clientAttitude_ = clientHandleAttitude_.serviceClient<gazebo_msgs::GetWorldProperties>("/gazebo/get_world_properties");
-						clientPosition_ = clientHandlePosition_.serviceClient<gazebo_msgs::GetWorldProperties>("/gazebo/get_world_properties");
-
-						ros::WallTime beginWallOffset = ros::WallTime::now();
-						wallSecsOffset_ = beginWallOffset.toSec();
-         
-            }
-			
-            
 
 }
 
@@ -194,24 +164,24 @@ void PositionController::CallbackSaveData(const ros::TimerEvent& event){
 
       ROS_INFO("CallbackSavaData function is working. Time: %f seconds, %f nanoseconds", odometry_.timeStampSec, odometry_.timeStampNsec);
     
-      fileControllerGains.open ("/home/controllerGains.csv", std::ios_base::app);
-      fileVehicleParameters.open ("/home/vehicleParamters.csv", std::ios_base::app);
-      fileControlSignals.open ("/home/controlSignals.csv", std::ios_base::app);
-      fileControlMixerTerms.open ("/home/controlMixer.csv", std::ios_base::app);
-      filePropellersAngularVelocities.open ("/home/propellersAngularVelocities.csv", std::ios_base::app);
-      fileReferenceAngles.open ("/home/referenceAngles.csv", std::ios_base::app);
-      fileVelocityErrors.open ("/home/velocityErrors.csv", std::ios_base::app);
-      fileDroneAttiude.open ("/home/droneAttitude.csv", std::ios_base::app);
-      fileTrajectoryErrors.open ("/home/trajectoryErrors.csv", std::ios_base::app);
-      fileAttitudeErrors.open ("/home/attitudeErrors.csv", std::ios_base::app);
-      fileDerivativeAttitudeErrors.open ("/home/derivativeAttitudeErrors.csv", std::ios_base::app);
-      fileTimeAttitudeErrors.open ("/home/timeAttitudeErrors.csv", std::ios_base::app);
-      fileTimePositionErrors.open ("/home/timePositionErrors.csv", std::ios_base::app);
-      fileDroneAngularVelocitiesABC.open ("/home/droneAngularVelocitiesABC.csv", std::ios_base::app);
-      fileDroneTrajectoryReference.open ("/home/droneTrajectoryReferences.csv", std::ios_base::app);
-      fileControlMixerTermsSaturated.open ("/home/controlMixerTermsSaturated.csv", std::ios_base::app);
-      fileControlMixerTermsUnsaturated.open ("/home/controlMixerTermsUnsaturated.csv", std::ios_base::app);
-      fileDroneLinearVelocitiesABC.open ("/home/droneLinearVelocitiesABC.csv", std::ios_base::app);
+      fileControllerGains.open ("/home/" + user_ + "/controllerGains.csv", std::ios_base::app);
+      fileVehicleParameters.open ("/home/" + user_ + "/vehicleParamters.csv", std::ios_base::app);
+      fileControlSignals.open ("/home/" + user_ + "/controlSignals.csv", std::ios_base::app);
+      fileControlMixerTerms.open ("/home/" + user_ + "/controlMixer.csv", std::ios_base::app);
+      filePropellersAngularVelocities.open ("/home/" + user_ + "/propellersAngularVelocities.csv", std::ios_base::app);
+      fileReferenceAngles.open ("/home/" + user_ + "/referenceAngles.csv", std::ios_base::app);
+      fileVelocityErrors.open ("/home/" + user_ + "/velocityErrors.csv", std::ios_base::app);
+      fileDroneAttiude.open ("/home/" + user_ + "/droneAttitude.csv", std::ios_base::app);
+      fileTrajectoryErrors.open ("/home/" + user_ + "/trajectoryErrors.csv", std::ios_base::app);
+      fileAttitudeErrors.open ("/home/" + user_ + "/attitudeErrors.csv", std::ios_base::app);
+      fileDerivativeAttitudeErrors.open ("/home/" + user_ + "/derivativeAttitudeErrors.csv", std::ios_base::app);
+      fileTimeAttitudeErrors.open ("/home/" + user_ + "/timeAttitudeErrors.csv", std::ios_base::app);
+      fileTimePositionErrors.open ("/home/" + user_ + "/timePositionErrors.csv", std::ios_base::app);
+      fileDroneAngularVelocitiesABC.open ("/home/" + user_ + "/droneAngularVelocitiesABC.csv", std::ios_base::app);
+      fileDroneTrajectoryReference.open ("/home/" + user_ + "/droneTrajectoryReferences.csv", std::ios_base::app);
+      fileControlMixerTermsSaturated.open ("/home/" + user_ + "/controlMixerTermsSaturated.csv", std::ios_base::app);
+      fileControlMixerTermsUnsaturated.open ("/home/" + user_ + "/controlMixerTermsUnsaturated.csv", std::ios_base::app);
+      fileDroneLinearVelocitiesABC.open ("/home/" + user_ + "/droneLinearVelocitiesABC.csv", std::ios_base::app);
 
       //Saving vehicle parameters in a file
       fileControllerGains << beta_x_ << "," << beta_y_ << "," << beta_z_ << "," << alpha_x_ << "," << alpha_y_ << "," << alpha_z_ << "," << beta_phi_ << ","
@@ -360,9 +330,44 @@ void PositionController::SetVehicleParameters(){
       Iy_ = vehicle_parameters_.inertia_(1,1);
       Iz_ = vehicle_parameters_.inertia_(2,2);
 
-      //On the EKF object is invoked the method SeVehicleParamters. Such function allows to send the vehicle paramter to the EKF class.
+      //On the EKF object is invoked the method SeVehicleParamters. Such function allows to send the vehicle parameter to the EKF class.
       //Then, they are employed to set the filter matrices
       extended_kalman_filter_bebop_.SetVehicleParameters(m_, g_);
+
+}
+
+//Reading parameters come frame launch file
+void PositionController::SetLaunchFileParamters(){
+
+	//the boolean variable is used to inactive the logging if it is not useful
+	if(dataStoring_active_){
+		//Time after which the data storing function is turned on
+		timer3_ = n3_.createTimer(ros::Duration(dataStoringTime_), &PositionController::CallbackSaveData, this, false, true);
+
+		//Cleaning the string vector contents
+		listControlSignals_.clear();
+		listControlSignals_.clear();
+		listControlMixerTerms_.clear();
+		listPropellersAngularVelocities_.clear();
+		listReferenceAngles_.clear();
+		listVelocityErrors_.clear();
+		listDroneAttitude_.clear();
+		listTrajectoryErrors_.clear();
+		listAttitudeErrors_.clear();
+		listDerivativeAttitudeErrors_.clear();
+		listTimeAttitudeErrors_.clear();
+		listTimePositionErrors_.clear();
+        listDroneAngularVelocitiesABC_.clear();
+        listDroneTrajectoryReference_.clear();
+
+		//the client needed to get information about the Gazebo simulation environment both the attitude and position errors
+		clientAttitude_ = clientHandleAttitude_.serviceClient<gazebo_msgs::GetWorldProperties>("/gazebo/get_world_properties");
+		clientPosition_ = clientHandlePosition_.serviceClient<gazebo_msgs::GetWorldProperties>("/gazebo/get_world_properties");
+
+		ros::WallTime beginWallOffset = ros::WallTime::now();
+		wallSecsOffset_ = beginWallOffset.toSec();
+
+	}
 
 }
 

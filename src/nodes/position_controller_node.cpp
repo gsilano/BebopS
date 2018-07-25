@@ -201,6 +201,35 @@ void PositionControllerNode::InitializeParams() {
   position_controller_.SetVehicleParameters();
   position_controller_.SetFilterParameters();
 
+  //Reading the parameters come from the launch file
+  bool dataStoringActive;
+  double dataStoringTime;
+  std::string user;
+
+  if (pnh.getParam("user_account", user)){
+	  ROS_INFO("Got param 'user_account': %s", user.c_str());
+	  position_controller_.user_ = user;
+  }
+  else
+      ROS_ERROR("Failed to get param 'user'");
+
+  if (pnh.getParam("csvFilesStoring", dataStoringActive)){
+	  ROS_INFO("Got param 'csvFilesStoring': %d", dataStoringActive);
+	  position_controller_.dataStoring_active_ = dataStoringActive;
+  }
+  else
+      ROS_ERROR("Failed to get param 'csvFilesStoring'");
+
+  if (pnh.getParam("csvFilesStoringTime", dataStoringTime)){
+	  ROS_INFO("Got param 'csvFilesStoringTime': %f", dataStoringTime);
+	  position_controller_.dataStoringTime_ = dataStoringTime;
+  }
+  else
+      ROS_ERROR("Failed to get param 'csvFilesStoringTime'");
+
+  position_controller_.SetLaunchFileParamters();
+
+
 }
 
 void PositionControllerNode::Publish(){

@@ -101,6 +101,7 @@ class PositionControllerParameters {
             void GetReferenceAngles(nav_msgs::Odometry* reference_angles);
             void GetTrajectory(nav_msgs::Odometry* smoothed_trajectory);
             void GetUTerrComponents(nav_msgs::Odometry* uTerrComponents);
+            void SetLaunchFileParamters();
             
             PositionControllerParameters controller_parameters_;
             ExtendedKalmanFilter extended_kalman_filter_bebop_;
@@ -108,11 +109,15 @@ class PositionControllerParameters {
             FilterParameters filter_parameters_;
             WaypointFilter waypoint_filter_;
 
+            //Launch file parameters
+            std::string user_;
+            double dataStoringTime_;
+            bool dataStoring_active_;
+
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         private:
             //Boolean variables to active/unactive the controller and the data storage
             bool controller_active_;
-            bool dataStoring_active_;
             bool EKF_active_;
 
             //Wall clock time offset variable
@@ -126,7 +131,6 @@ class PositionControllerParameters {
             ros::NodeHandle clientHandleAttitude_;
             ros::ServiceClient clientAttitude_;
             gazebo_msgs::GetWorldProperties my_messageAttitude_;
-                         
 
             //Sting vectors used to stare data
             std::vector<string> listControlSignals_;
