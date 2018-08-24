@@ -165,7 +165,7 @@ void PositionController::CallbackSaveData(const ros::TimerEvent& event){
       ROS_INFO("CallbackSavaData function is working. Time: %f seconds, %f nanoseconds", odometry_.timeStampSec, odometry_.timeStampNsec);
     
       fileControllerGains.open ("/home/" + user_ + "/controllerGains.csv", std::ios_base::app);
-      fileVehicleParameters.open ("/home/" + user_ + "/vehicleParamters.csv", std::ios_base::app);
+      fileVehicleParameters.open ("/home/" + user_ + "/vehicleParameters.csv", std::ios_base::app);
       fileControlSignals.open ("/home/" + user_ + "/controlSignals.csv", std::ios_base::app);
       fileControlMixerTerms.open ("/home/" + user_ + "/controlMixer.csv", std::ios_base::app);
       filePropellersAngularVelocities.open ("/home/" + user_ + "/propellersAngularVelocities.csv", std::ios_base::app);
@@ -318,7 +318,7 @@ void PositionController::SetControllerGains(){
 
 }
 
-//As SetControllerGains, the function is used to set the vehicle paramteters into private variables of the class
+//As SetControllerGains, the function is used to set the vehicle parameteters into private variables of the class
 void PositionController::SetVehicleParameters(){
 
       bf_ = vehicle_parameters_.bf_;
@@ -330,14 +330,14 @@ void PositionController::SetVehicleParameters(){
       Iy_ = vehicle_parameters_.inertia_(1,1);
       Iz_ = vehicle_parameters_.inertia_(2,2);
 
-      //On the EKF object is invoked the method SeVehicleParamters. Such function allows to send the vehicle parameter to the EKF class.
+      //On the EKF object is invoked the method SeVehicleParameters. Such function allows to send the vehicle parameter to the EKF class.
       //Then, they are employed to set the filter matrices
       extended_kalman_filter_bebop_.SetVehicleParameters(m_, g_);
 
 }
 
 //Reading parameters come frame launch file
-void PositionController::SetLaunchFileParamters(){
+void PositionController::SetLaunchFileParameters(){
 
 	//the boolean variable is used to inactive the logging if it is not useful
 	if(dataStoring_active_){
