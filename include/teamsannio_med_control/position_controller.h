@@ -101,7 +101,7 @@ class PositionControllerParameters {
             void GetReferenceAngles(nav_msgs::Odometry* reference_angles);
             void GetTrajectory(nav_msgs::Odometry* smoothed_trajectory);
             void GetUTerrComponents(nav_msgs::Odometry* uTerrComponents);
-            void SetLaunchFileParamters();
+            void SetLaunchFileParameters();
             
             PositionControllerParameters controller_parameters_;
             ExtendedKalmanFilter extended_kalman_filter_bebop_;
