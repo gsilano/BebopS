@@ -89,7 +89,7 @@ void PositionControllerNode::MultiDofJointTrajectoryCallback(const trajectory_ms
 void PositionControllerNode::InitializeParams() {
   ros::NodeHandle pnh("~");
 
-  // Read parameters from rosparam. The paramters are read by the YAML file and they
+  // Read parameters from rosparam. The parameters are read by the YAML file and they
   // are used to create the "controller_parameters_" object
   GetRosParameter(pnh, "beta_xy/beta_x",
                   position_controller_.controller_parameters_.beta_xy_.x(),
@@ -131,7 +131,7 @@ void PositionControllerNode::InitializeParams() {
                   position_controller_.controller_parameters_.mu_psi_,
                   &position_controller_.controller_parameters_.mu_psi_);
 
-  //Analogously, the object "vehicle_paramters_" is created
+  //Analogously, the object "vehicle_parameters_" is created
   GetVehicleParameters(pnh, &position_controller_.vehicle_parameters_);
 
   //The object "filter_parameters_"
@@ -227,7 +227,7 @@ void PositionControllerNode::InitializeParams() {
   else
       ROS_ERROR("Failed to get param 'csvFilesStoringTime'");
 
-  position_controller_.SetLaunchFileParamters();
+  position_controller_.SetLaunchFileParameters();
 
 
 }
