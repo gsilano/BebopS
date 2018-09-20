@@ -357,8 +357,8 @@ void PositionController::SetLaunchFileParameters(){
 		listDerivativeAttitudeErrors_.clear();
 		listTimeAttitudeErrors_.clear();
 		listTimePositionErrors_.clear();
-        listDroneAngularVelocitiesABC_.clear();
-        listDroneTrajectoryReference_.clear();
+    listDroneAngularVelocitiesABC_.clear();
+    listDroneTrajectoryReference_.clear();
 
 		//the client needed to get information about the Gazebo simulation environment both the attitude and position errors
 		clientAttitude_ = clientHandleAttitude_.serviceClient<gazebo_msgs::GetWorldProperties>("/gazebo/get_world_properties");
@@ -597,6 +597,7 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     }
     
     *rotor_velocities = Eigen::Vector4d(omega_1, omega_2, omega_3, omega_4);
+
 }
 
 

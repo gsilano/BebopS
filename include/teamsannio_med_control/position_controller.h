@@ -147,8 +147,8 @@ class PositionControllerParameters {
             std::vector<string> listDroneAngularVelocitiesABC_;
             std::vector<string> listDroneTrajectoryReference_;
             std::vector<string> listControlMixerTermsSaturated_;
-			std::vector<string> listControlMixerTermsUnsaturated_;
-			std::vector<string> listDroneLinearVelocitiesABC_;
+			      std::vector<string> listControlMixerTermsUnsaturated_;
+			      std::vector<string> listDroneLinearVelocitiesABC_;
           
             //Controller gains
             double beta_x_, beta_y_, beta_z_;

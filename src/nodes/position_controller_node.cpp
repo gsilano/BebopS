@@ -274,44 +274,44 @@ void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& 
 
 	    //we use clear because we later want to be sure that we used the previously calculated velocity.
 	    actuator_msg->angular_velocities.clear();
-	    //for all propellers, we put them into actuator_msg so they will later be used to control the crazyflie.
+	    //for all propellers, we put them into actuator_msg so they will later be used to control the drone.
 	    for (int i = 0; i < ref_rotor_velocities.size(); i++)
 	       actuator_msg->angular_velocities.push_back(ref_rotor_velocities[i]);
 	    actuator_msg->header.stamp = odometry_msg->header.stamp;
 
-	    motor_velocity_reference_pub_.publish(actuator_msg);
+      motor_velocity_reference_pub_.publish(actuator_msg);
 
 	    //The code reported below is used to plot the data when the simulation is running
-        nav_msgs::Odometry odometry_filtered;
-        position_controller_.GetOdometry(&odometry_filtered);
-        odometry_filtered.header.stamp = odometry_msg->header.stamp;
-        odometry_filtered_pub_.publish(odometry_filtered);
+      nav_msgs::Odometry odometry_filtered;
+      position_controller_.GetOdometry(&odometry_filtered);
+      odometry_filtered.header.stamp = odometry_msg->header.stamp;
+      odometry_filtered_pub_.publish(odometry_filtered);
 
-        nav_msgs::Odometry reference_angles;
-        position_controller_.GetReferenceAngles(&reference_angles);
-        reference_angles.header.stamp = odometry_msg->header.stamp;
-        reference_angles_pub_.publish(reference_angles);
+      nav_msgs::Odometry reference_angles;
+      position_controller_.GetReferenceAngles(&reference_angles);
+      reference_angles.header.stamp = odometry_msg->header.stamp;
+      reference_angles_pub_.publish(reference_angles);
 
-        nav_msgs::Odometry smoothed_reference;
-        position_controller_.GetTrajectory(&smoothed_reference);
-        smoothed_reference.header.stamp = odometry_msg->header.stamp;
-        smoothed_reference_pub_.publish(smoothed_reference);
+      nav_msgs::Odometry smoothed_reference;
+      position_controller_.GetTrajectory(&smoothed_reference);
+      smoothed_reference.header.stamp = odometry_msg->header.stamp;
+      smoothed_reference_pub_.publish(smoothed_reference);
 
-        nav_msgs::Odometry uTerr_components;
-        position_controller_.GetUTerrComponents(&uTerr_components);
-        uTerr_components.header.stamp = odometry_msg->header.stamp;
-        uTerr_components_pub_.publish(uTerr_components);
+      nav_msgs::Odometry uTerr_components;
+      position_controller_.GetUTerrComponents(&uTerr_components);
+      uTerr_components.header.stamp = odometry_msg->header.stamp;
+      uTerr_components_pub_.publish(uTerr_components);
 
-        nav_msgs::Odometry filtered_errors;
-        filtered_errors.pose.pose.position.x = odometry_filtered.pose.pose.position.x - odometry_gt_.pose.pose.position.x;
-        filtered_errors.pose.pose.position.y = odometry_filtered.pose.pose.position.y - odometry_gt_.pose.pose.position.y;
-        filtered_errors.pose.pose.position.z = odometry_filtered.pose.pose.position.z - odometry_gt_.pose.pose.position.z;
-        filtered_errors.twist.twist.linear.x = odometry_filtered.twist.twist.linear.x - odometry_gt_.twist.twist.linear.x;
-        filtered_errors.twist.twist.linear.y = odometry_filtered.twist.twist.linear.y - odometry_gt_.twist.twist.linear.y;
-        filtered_errors.twist.twist.linear.z = odometry_filtered.twist.twist.linear.z - odometry_gt_.twist.twist.linear.z;
+      nav_msgs::Odometry filtered_errors;
+      filtered_errors.pose.pose.position.x = odometry_filtered.pose.pose.position.x - odometry_gt_.pose.pose.position.x;
+      filtered_errors.pose.pose.position.y = odometry_filtered.pose.pose.position.y - odometry_gt_.pose.pose.position.y;
+      filtered_errors.pose.pose.position.z = odometry_filtered.pose.pose.position.z - odometry_gt_.pose.pose.position.z;
+      filtered_errors.twist.twist.linear.x = odometry_filtered.twist.twist.linear.x - odometry_gt_.twist.twist.linear.x;
+      filtered_errors.twist.twist.linear.y = odometry_filtered.twist.twist.linear.y - odometry_gt_.twist.twist.linear.y;
+      filtered_errors.twist.twist.linear.z = odometry_filtered.twist.twist.linear.z - odometry_gt_.twist.twist.linear.z;
 
-        filtered_errors.header.stamp = odometry_msg->header.stamp;
-        filtered_errors_pub_.publish(filtered_errors);
+      filtered_errors.header.stamp = odometry_msg->header.stamp;
+      filtered_errors_pub_.publish(filtered_errors);
 
     }	 
 }
