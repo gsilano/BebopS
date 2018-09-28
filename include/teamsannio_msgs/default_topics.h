@@ -31,6 +31,8 @@ namespace teamsannio_msgs {
 
         static constexpr char U_TERR_COMPONENTS[] = "uTerrComponents";
 
+        static constexpr char Z_VELOCITY_COMPONENTS[] = "zVelocityComponents";
+
 
 	}  // end namespace default_topics
 }  // end namespace teamsannio_msgs

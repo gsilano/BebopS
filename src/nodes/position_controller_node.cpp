@@ -60,6 +60,8 @@ PositionControllerNode::PositionControllerNode() {
 
     uTerr_components_pub_  = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::U_TERR_COMPONENTS, 1);
 
+    zVelocity_components_pub_ = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::Z_VELOCITY_COMPONENTS, 1);
+
 }
 
 //Destructor
@@ -301,6 +303,11 @@ void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& 
       position_controller_.GetUTerrComponents(&uTerr_components);
       uTerr_components.header.stamp = odometry_msg->header.stamp;
       uTerr_components_pub_.publish(uTerr_components);
+
+      nav_msgs::Odometry zVelocity_components;
+      position_controller_.GetVelocityAlongZComponents(&zVelocity_components);
+      zVelocity_components.header.stamp = odometry_msg->header.stamp;
+      zVelocity_components_pub_.publish(zVelocity_components);
 
       nav_msgs::Odometry filtered_errors;
       filtered_errors.pose.pose.position.x = odometry_filtered.pose.pose.position.x - odometry_gt_.pose.pose.position.x;
