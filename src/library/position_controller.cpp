@@ -530,8 +530,10 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     
     double first, second, third, fourth;
     first = (1 / ( 4 * bf_ )) * control_.thrust;
-    second = (1 / (4 * bf_ * l_ * cos(M_PI/4) ) ) * u_phi;
-    third = (1 / (4 * bf_ * l_ * cos(M_PI/4) ) ) * u_theta;
+    //second = (1 / (4 * bf_ * l_ * cos(M_PI/4) ) ) * u_phi;
+    second = (1 / (4 * bf_ * 0.08440513 ) ) * u_phi;
+    //third = (1 / (4 * bf_ * l_ * cos(M_PI/4) ) ) * u_theta;
+    third = (1 / (4 * bf_ * 0.09784210 ) ) * u_theta;
     fourth = (1 / ( 4 * bf_ * bm_)) * u_psi;
 
 	
@@ -577,11 +579,13 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     omega_3 = sqrt(satured_3);
     omega_4 = sqrt(satured_4);
 
+    /*
     // To compensate the asymmetric position of the rotors
     omega_1 = omega_1 - u_theta/2 + u_phi/2 + u_psi;
     omega_2 = omega_2 - u_theta/2 - u_phi/2 - u_psi;
     omega_3 = omega_3 + u_theta/2 - u_phi/2 - u_psi;
     omega_4 = omega_4 + u_theta/2 + u_phi/2 + u_psi;
+    */
 
     if(dataStoring_active_){
 		//Saving the saturated and unsaturated values
@@ -742,6 +746,9 @@ void PositionController::PosController(double* u_x, double* u_y, double* u_T, do
    *u_y = m_ * ( (alpha_y_/mu_y_) * dot_e_y_) - ( (beta_y_/pow(mu_y_,2)) * e_y_);
    *u_Terr = m_ * ( g_ + ( (alpha_z_/mu_z_) * dot_e_z_) - ( (beta_z_/pow(mu_z_,2)) * e_z_) );
    *u_T = sqrt( pow(*u_x,2) + pow(*u_y,2) + pow(*u_Terr,2) );
+
+   if(*u_Terr < (0.1 * m_ * g_))
+     *u_Terr = 0.1 * m_ * g_;
 
 }
 
