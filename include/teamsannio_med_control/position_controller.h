@@ -28,6 +28,7 @@
 
 #include "extendedKalmanFilter.h"
 #include "waypoint_filter.h"
+#include "waypointfilter_parameters.h"
 #include "filter_parameters.h"
 #include "stabilizer_types.h"
 #include "parameters.h"
@@ -93,9 +94,10 @@ class PositionControllerParameters {
             void CalculateRotorVelocities(Eigen::Vector4d* rotor_velocities);
 
             void SetOdometry(const EigenOdometry& odometry);
-            void SetTrajectoryPoint();
+            void SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory_positionControllerNode);
             void SetControllerGains();
             void SetVehicleParameters();
+            void SetWaypointFilterParameters();
             void SetFilterParameters();
             void GetOdometry(nav_msgs::Odometry* odometry_filtered);
             void GetReferenceAngles(nav_msgs::Odometry* reference_angles);
@@ -108,12 +110,14 @@ class PositionControllerParameters {
             ExtendedKalmanFilter extended_kalman_filter_bebop_;
             VehicleParameters vehicle_parameters_;
             FilterParameters filter_parameters_;
+            WaypointFilterParameters waypoint_filter_parameters_;
             WaypointFilter waypoint_filter_;
 
             //Launch file parameters
             std::string user_;
             double dataStoringTime_;
             bool dataStoring_active_;
+            bool waypointFilter_active_;
 
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         private:
@@ -196,7 +200,7 @@ class PositionControllerParameters {
 
             nav_msgs::Odometry odometry_filtered_private_;
 
-	        state_t state_;
+	          state_t state_;
             control_t control_;
             mav_msgs::EigenTrajectoryPoint command_trajectory_;
             EigenOdometry odometry_;

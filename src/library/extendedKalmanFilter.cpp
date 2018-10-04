@@ -40,7 +40,7 @@ namespace teamsannio_med_control {
 ExtendedKalmanFilter::ExtendedKalmanFilter()
        :Xp_(Eigen::VectorXf::Zero(6)), 
         Xe_(Eigen::VectorXf::Zero(6)),
-		P_(Eigen::MatrixXf::Zero(6,6)),
+        P_(Eigen::MatrixXf::Zero(6,6)),
         Pe_(Eigen::MatrixXf::Zero(6,6)),
         Hatx_(Eigen::VectorXf::Zero(6)),
         u_T_private_(0),
@@ -54,12 +54,12 @@ ExtendedKalmanFilter::ExtendedKalmanFilter()
         Rp_std_(Eigen::MatrixXf::Zero(6,6)){
 
               	
-		A_private_ <<   1, 0, 0,  TsP,    0,    0,
-				0, 1, 0,     0, TsP,    0,
-				0, 0, 1, 	   0,    0, TsP,
-				0, 0, 0,     1,    0,    0,
-				0, 0, 0,     0,    1,    0,
-				0, 0, 0,     0,    0,    1;
+		            A_private_ <<   1, 0, 0,  TsP,    0,    0,
+		                            0, 1, 0,     0, TsP,    0,
+		                            0, 0, 1, 	   0,    0, TsP,
+		                            0, 0, 0,     1,    0,    0,
+		                            0, 0, 0,     0,    1,    0,
+		                            0, 0, 0,     0,    0,    1;
 
                 double mean = 0, std = 0.005;
                 std::normal_distribution<double>  distribution_(mean, std);

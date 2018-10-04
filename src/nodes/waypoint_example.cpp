@@ -123,7 +123,7 @@ int main(int argc, char** argv){
                  desired_position.x(),
                  desired_position.y(),
                  desired_position.z());
-                 trajectory_pub.publish(trajectory_msg);
+        trajectory_pub.publish(trajectory_msg);
 
          // Wait for t seconds to let the Gazebo GUI show up.
          double t = waypoints[i].waiting_time;

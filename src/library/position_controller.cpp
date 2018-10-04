@@ -39,7 +39,8 @@
 
 
 #define M_PI                      3.14159265358979323846  /* pi */
-#define MAX_TILT_ANGLE            M_PI/4
+#define MAX_TILT_ANGLE            30 /* max tilt angle in degree */
+#define MAX_TILT_ANGLE_RAD        MAX_TILT_ANGLE*M_PI/180 /* max tilt angle in radians */
 #define TsP                       10e-3  /* Position control sampling time */
 #define TsA                       5e-3 /* Attitude control sampling time */
 #define MAX_ROTOR_VELOCITY        1475 /* Max rotors velocity [rad/s] */
@@ -51,6 +52,7 @@ namespace teamsannio_med_control {
 PositionController::PositionController()
     : controller_active_(false),
       dataStoring_active_(false),
+      waypointFilter_active_(true),
 	    EKF_active_(false),
 	    dataStoringTime_(0),
 	    wallSecsOffset_(0),
@@ -411,10 +413,22 @@ void PositionController::SetOdometry(const EigenOdometry& odometry) {
 
 }
 
-//The function is used to invoke the waypoint filter emploies to reduce the error dimension along the axes when the drone stars to follow the trajectory
-void PositionController::SetTrajectoryPoint(){
+// The function allows to set the waypoint filter parameters
+void PositionController::SetWaypointFilterParameters(){
 
-    waypoint_filter_.GetTrajectoryPoint(&command_trajectory_);
+  waypoint_filter_.SetParameters(&waypoint_filter_parameters_);
+
+}
+
+void PositionController::SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory_positionControllerNode) {
+
+  // If the waypoint has been activated or not
+  if(waypointFilter_active_){
+    waypoint_filter_.SetTrajectoryPoint(command_trajectory_positionControllerNode);
+  }
+  else
+    command_trajectory_ = command_trajectory_positionControllerNode;
+
 
 }
 
@@ -530,8 +544,10 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     
     double first, second, third, fourth;
     first = (1 / ( 4 * bf_ )) * control_.thrust;
-    second = (1 / (4 * bf_ * l_ * cos(M_PI/4) ) ) * u_phi;
-    third = (1 / (4 * bf_ * l_ * cos(M_PI/4) ) ) * u_theta;
+    //second = (1 / (4 * bf_ * l_ * cos(M_PI/4) ) ) * u_phi;
+    second = (1 / (4 * bf_ * 0.08440513 ) ) * u_phi;
+    //third = (1 / (4 * bf_ * l_ * cos(M_PI/4) ) ) * u_theta;
+    third = (1 / (4 * bf_ * 0.09784210 ) ) * u_theta;
     fourth = (1 / ( 4 * bf_ * bm_)) * u_psi;
 
 	
@@ -577,11 +593,13 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     omega_3 = sqrt(satured_3);
     omega_4 = sqrt(satured_4);
 
+    /*
     // To compensate the asymmetric position of the rotors
     omega_1 = omega_1 - u_theta/2 + u_phi/2 + u_psi;
     omega_2 = omega_2 - u_theta/2 - u_phi/2 - u_psi;
     omega_3 = omega_3 + u_theta/2 - u_phi/2 - u_psi;
     omega_4 = omega_4 + u_theta/2 + u_phi/2 + u_psi;
+    */
 
     if(dataStoring_active_){
 		//Saving the saturated and unsaturated values
@@ -638,17 +656,17 @@ void PositionController::ReferenceAngles(double* phi_r, double* theta_r){
    *theta_r = atan( ( (u_x * cos(psi_r) ) + ( u_y * sin(psi_r) ) )  / u_Terr );
    *phi_r = atan( cos(*theta_r) * ( ( (u_x * sin(psi_r)) - (u_y * cos(psi_r)) ) / (u_Terr) ) );
 
-   if(*theta_r > MAX_TILT_ANGLE || *theta_r < -MAX_TILT_ANGLE)
-	   if(*theta_r > MAX_TILT_ANGLE)
-		   *theta_r = MAX_TILT_ANGLE;
+   if(*theta_r > MAX_TILT_ANGLE_RAD || *theta_r < -MAX_TILT_ANGLE_RAD)
+	   if(*theta_r > MAX_TILT_ANGLE_RAD)
+		   *theta_r = MAX_TILT_ANGLE_RAD;
 	   else
-		   *theta_r = -MAX_TILT_ANGLE;
+		   *theta_r = -MAX_TILT_ANGLE_RAD;
 
-   if(*phi_r > MAX_TILT_ANGLE || *phi_r < -MAX_TILT_ANGLE)
-	   if(*phi_r > MAX_TILT_ANGLE)
-		   *phi_r = MAX_TILT_ANGLE;
+   if(*phi_r > MAX_TILT_ANGLE_RAD || *phi_r < -MAX_TILT_ANGLE_RAD)
+	   if(*phi_r > MAX_TILT_ANGLE_RAD)
+		   *phi_r = MAX_TILT_ANGLE_RAD;
 	   else
-		   *phi_r = -MAX_TILT_ANGLE;
+		   *phi_r = -MAX_TILT_ANGLE_RAD;
 
 
    if(dataStoring_active_){
@@ -666,11 +684,6 @@ void PositionController::VelocityErrors(double* dot_e_x, double* dot_e_y, double
    assert(dot_e_x);
    assert(dot_e_y);
    assert(dot_e_z);
-
-   double x_r, y_r, z_r;
-   x_r = command_trajectory_.position_W[0];
-   y_r = command_trajectory_.position_W[1]; 
-   z_r = command_trajectory_.position_W[2];
 
    //WITH THE EXTENDED KALMAN FILTER
    if(EKF_active_){
@@ -742,6 +755,9 @@ void PositionController::PosController(double* u_x, double* u_y, double* u_T, do
    *u_y = m_ * ( (alpha_y_/mu_y_) * dot_e_y_) - ( (beta_y_/pow(mu_y_,2)) * e_y_);
    *u_Terr = m_ * ( g_ + ( (alpha_z_/mu_z_) * dot_e_z_) - ( (beta_z_/pow(mu_z_,2)) * e_z_) );
    *u_T = sqrt( pow(*u_x,2) + pow(*u_y,2) + pow(*u_Terr,2) );
+
+   //if(*u_Terr < (0.47 * g_))
+     //*u_Terr = 0.47 * g_;
 
 }
 
@@ -842,44 +858,52 @@ void PositionController::CallbackAttitude(const ros::TimerEvent& event){
 //  * the last part is used to store the data into csv files if the data storing is active
 void PositionController::CallbackPosition(const ros::TimerEvent& event){
   
-     waypoint_filter_.TrajectoryGeneration();
-     SetTrajectoryPoint();
+     // The function is used to invoke the waypoint filter emploies to reduce the error dimension along the axes when the drone stars to follow the trajectory.
+     // The waypoint filter works with an update time of Tsp
+     if(controller_active_)
+       waypoint_filter_.Initialize(state_);
+
+     if(waypointFilter_active_ && controller_active_){
+        waypoint_filter_.TrajectoryGeneration();
+        waypoint_filter_.GetTrajectoryPoint(&command_trajectory_);
+     }
+
      SetOdometryEstimated();
      PositionErrors(&e_x_, &e_y_, &e_z_);
      VelocityErrors(&dot_e_x_, &dot_e_y_, &dot_e_z_);
      
      //Saving the time instant when the position errors are computed
      if(dataStoring_active_){
-		clientPosition_.call(my_messagePosition_);
+      clientPosition_.call(my_messagePosition_);
 
-		std::stringstream tempTimePositionErrors;
-		tempTimePositionErrors << my_messagePosition_.response.sim_time << "\n";
-		listTimePositionErrors_.push_back(tempTimePositionErrors.str());
+      std::stringstream tempTimePositionErrors;
+      tempTimePositionErrors << my_messagePosition_.response.sim_time << "\n";
+      listTimePositionErrors_.push_back(tempTimePositionErrors.str());
 
-		ros::WallTime beginWall = ros::WallTime::now();
-		double wallSecs = beginWall.toSec() - wallSecsOffset_;
+      ros::WallTime beginWall = ros::WallTime::now();
+      double wallSecs = beginWall.toSec() - wallSecsOffset_;
 
-		ros::Time begin = ros::Time::now();
-		double secs = begin.toSec();
+      ros::Time begin = ros::Time::now();
+      double secs = begin.toSec();
 
-		//Saving velocity errors in a file
-		std::stringstream tempVelocityErrors;
-		tempVelocityErrors << dot_e_x_ << "," << dot_e_y_ << "," << dot_e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messagePosition_.response.sim_time << "," << wallSecs << "," << secs << "\n";
+      //Saving velocity errors in a file
+      std::stringstream tempVelocityErrors;
+      tempVelocityErrors << dot_e_x_ << "," << dot_e_y_ << "," << dot_e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messagePosition_.response.sim_time << "," << wallSecs << "," << secs << "\n";
 
-		listVelocityErrors_.push_back(tempVelocityErrors.str());
+      listVelocityErrors_.push_back(tempVelocityErrors.str());
 
-		//Saving trajectory errors in a file
-		std::stringstream tempTrajectoryErrors;
-		tempTrajectoryErrors << e_x_ << "," << e_y_ << "," << e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messagePosition_.response.sim_time << "," << wallSecs << "," << secs << "\n";
+      //Saving trajectory errors in a file
+      std::stringstream tempTrajectoryErrors;
+      tempTrajectoryErrors << e_x_ << "," << e_y_ << "," << e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messagePosition_.response.sim_time << "," << wallSecs << "," << secs << "\n";
 
-		listTrajectoryErrors_.push_back(tempTrajectoryErrors.str());
+      listTrajectoryErrors_.push_back(tempTrajectoryErrors.str());
 
-		//Saving the drone trajectory referneces (them coming from the waypoint filter)
-		std::stringstream tempTrajectoryReferences;
-		tempTrajectoryReferences << command_trajectory_.position_W[0] << "," << command_trajectory_.position_W[1] << "," << command_trajectory_.position_W[2] << ","
-				<<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messagePosition_.response.sim_time << "," << wallSecs << "," << secs << "\n";
+      //Saving the drone trajectory referneces (them coming from the waypoint filter)
+      std::stringstream tempTrajectoryReferences;
+      tempTrajectoryReferences << command_trajectory_.position_W[0] << "," << command_trajectory_.position_W[1] << "," << command_trajectory_.position_W[2] << ","
+          <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messagePosition_.response.sim_time << "," << wallSecs << "," << secs << "\n";
 
-		listDroneTrajectoryReference_.push_back(tempTrajectoryReferences.str());
+      listDroneTrajectoryReference_.push_back(tempTrajectoryReferences.str());
 
      }
 }

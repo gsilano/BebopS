@@ -80,7 +80,7 @@ void PositionControllerNode::MultiDofJointTrajectoryCallback(const trajectory_ms
   mav_msgs::eigenTrajectoryPointFromMsg(msg->points.front(), &eigen_reference);
 
   // We can trigger the first command immediately.
-  position_controller_.waypoint_filter_.SetTrajectoryPoint(eigen_reference);
+  position_controller_.SetTrajectoryPoint(eigen_reference);
 
   if (n_commands >= 1) {
     waypointHasBeenPublished_ = true;
@@ -135,6 +135,15 @@ void PositionControllerNode::InitializeParams() {
 
   //Analogously, the object "vehicle_parameters_" is created
   GetVehicleParameters(pnh, &position_controller_.vehicle_parameters_);
+
+  //Waypoint Filter parameters
+  GetRosParameter(pnh, "Tsf",
+                  position_controller_.waypoint_filter_parameters_.tsf_,
+                  &position_controller_.waypoint_filter_parameters_.tsf_);
+
+  GetRosParameter(pnh, "H",
+                  position_controller_.waypoint_filter_parameters_.h_,
+                  &position_controller_.waypoint_filter_parameters_.h_);
 
   //The object "filter_parameters_"
   GetRosParameter(pnh, "dev_x",
@@ -202,8 +211,10 @@ void PositionControllerNode::InitializeParams() {
   position_controller_.SetControllerGains();
   position_controller_.SetVehicleParameters();
   position_controller_.SetFilterParameters();
+  position_controller_.SetWaypointFilterParameters();
 
   //Reading the parameters come from the launch file
+  bool waypointFilterActive;
   bool dataStoringActive;
   double dataStoringTime;
   std::string user;
@@ -214,6 +225,13 @@ void PositionControllerNode::InitializeParams() {
   }
   else
       ROS_ERROR("Failed to get param 'user'");
+
+  if (pnh.getParam("waypoint_filter", waypointFilterActive)){
+    ROS_INFO("Got param 'waypoint_filter': %d", waypointFilterActive);
+    position_controller_.waypointFilter_active_ = waypointFilterActive;
+  }
+  else
+      ROS_ERROR("Failed to get param 'waypoint_filter'");
 
   if (pnh.getParam("csvFilesStoring", dataStoringActive)){
 	  ROS_INFO("Got param 'csvFilesStoring': %d", dataStoringActive);
