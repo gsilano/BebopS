@@ -39,7 +39,7 @@
 
 
 #define M_PI                      3.14159265358979323846  /* pi */
-#define MAX_TILT_ANGLE            30 /* max tilt angle in degree */
+#define MAX_TILT_ANGLE            38 /* max tilt angle in degree */
 #define MAX_TILT_ANGLE_RAD        MAX_TILT_ANGLE*M_PI/180 /* max tilt angle in radians */
 #define TsP                       10e-3  /* Position control sampling time */
 #define TsA                       5e-3 /* Attitude control sampling time */
@@ -544,10 +544,10 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     
     double first, second, third, fourth;
     first = (1 / ( 4 * bf_ )) * control_.thrust;
-    //second = (1 / (4 * bf_ * l_ * cos(M_PI/4) ) ) * u_phi;
-    second = (1 / (4 * bf_ * 0.08440513 ) ) * u_phi;
-    //third = (1 / (4 * bf_ * l_ * cos(M_PI/4) ) ) * u_theta;
-    third = (1 / (4 * bf_ * 0.09784210 ) ) * u_theta;
+    second = (1 / (4 * bf_ * l_ * cos(M_PI/4) ) ) * u_phi;
+    //second = (1 / (4 * bf_ * 0.08440513 ) ) * u_phi;  // It considers the asymmetry of the drone
+    third = (1 / (4 * bf_ * l_ * cos(M_PI/4) ) ) * u_theta;
+    //third = (1 / (4 * bf_ * 0.09784210 ) ) * u_theta; // It considers the asymmetry of the drone
     fourth = (1 / ( 4 * bf_ * bm_)) * u_psi;
 
 	
@@ -753,9 +753,15 @@ void PositionController::PosController(double* u_x, double* u_y, double* u_T, do
 
    *u_x = m_ * ( (alpha_x_/mu_x_) * dot_e_x_) - ( (beta_x_/pow(mu_x_,2)) * e_x_);
    *u_y = m_ * ( (alpha_y_/mu_y_) * dot_e_y_) - ( (beta_y_/pow(mu_y_,2)) * e_y_);
-   *u_Terr = m_ * ( g_ + ( (alpha_z_/mu_z_) * dot_e_z_) - ( (beta_z_/pow(mu_z_,2)) * e_z_) );
+
+   double u_z = ( (alpha_z_/mu_z_) * dot_e_z_) - ( (beta_z_/pow(mu_z_,2)) * e_z_);
+   if (u_z < -g_)
+     u_z = -g_;
+
+   *u_Terr = m_ * ( g_ +  u_z);
    *u_T = sqrt( pow(*u_x,2) + pow(*u_y,2) + pow(*u_Terr,2) );
 
+   // The lower bound of u_Terr
    //if(*u_Terr < (0.47 * g_))
      //*u_Terr = 0.47 * g_;
 
