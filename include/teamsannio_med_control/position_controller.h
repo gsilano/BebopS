@@ -105,6 +105,7 @@ class PositionControllerParameters {
             void GetUTerrComponents(nav_msgs::Odometry* uTerrComponents);
             void SetLaunchFileParameters();
             void GetVelocityAlongZComponents(nav_msgs::Odometry* zVelocity_components);
+            void GetPositionAndVelocityErrors(nav_msgs::Odometry* positionAndVelocityErrors);
             
             PositionControllerParameters controller_parameters_;
             ExtendedKalmanFilter extended_kalman_filter_bebop_;
@@ -210,7 +211,7 @@ class PositionControllerParameters {
             void AttitudeController(double* u_phi, double* u_theta, double* u_psi);
             void AngularVelocityErrors(double* dot_e_phi_, double* dot_e_theta_, double* dot_e_psi_);
             void AttitudeErrors(double* e_phi_, double* e_theta_, double* e_psi_);
-            void PosController(double* u_x, double* u_y, double* u_T, double* u_Terr);
+            void PosController(double* u_x, double* u_y, double* u_T, double* u_Terr, double* u_z);
             void PositionErrors(double* e_x, double* e_y, double* e_z);
             void VelocityErrors(double* dot_e_x, double* dot_e_y, double* dot_e_z);
             void ReferenceAngles(double* phi_r, double* theta_r);

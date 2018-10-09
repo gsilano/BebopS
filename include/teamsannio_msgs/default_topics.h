@@ -33,6 +33,8 @@ namespace teamsannio_msgs {
 
         static constexpr char Z_VELOCITY_COMPONENTS[] = "zVelocityComponents";
 
+        static constexpr char POSITION_AND_VELOCITY_ERRORS[] = "positionAndVelocityErrors";
+
 
 	}  // end namespace default_topics
 }  // end namespace teamsannio_msgs

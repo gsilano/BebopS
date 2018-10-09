@@ -68,6 +68,7 @@ namespace teamsannio_med_control {
             ros::Publisher smoothed_reference_pub_;
             ros::Publisher uTerr_components_pub_;
             ros::Publisher zVelocity_components_pub_;
+            ros::Publisher positionAndVelocityErrors_pub_;
 
             nav_msgs::Odometry odometry_gt_;
 

@@ -3,7 +3,7 @@
     <arg name="name" default="bebop"/>
     <arg name="x" default="0.0" />
     <arg name="y" default="0.0" />
-    <arg name="z" default="0.02" />
+    <arg name="z" default="0.0" />
     <arg name="use_sim_time" default="true"/>
     <arg name="world_name" default="basic"/>
     <arg name="wind_force" default="0.0"/>
@@ -58,6 +58,7 @@
       <remap from="/command/trajectory" to="/bebop/command/trajectory" />
       <remap from="/uTerrComponents" to="/bebop/uTerrComponents" />
       <remap from="/zVelocityComponents" to="/bebop/zVelocityComponents" />
+      <remap from="/positionAndVelocityErrors" to="/bebop/positionAndVelocityErrors" />
     </node>
 
     <!-- Launch the trajectory generator -->
@@ -94,5 +95,9 @@
     <!-- Launch the state errors plot -->
     <node name="state_errors_position_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/stateErrors/pose/pose/position" output="screen" />
     <node name="state_errors_velocity_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/stateErrors/twist/twist/linear" output="screen" />
+    
+    <!-- Launch the position and velocity errors plot -->
+    <node name="position_errors_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/positionAndVelocityErrors/pose/pose/position" output="screen" />
+    <node name="velocity_errors_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/positionAndVelocityErrors/twist/twist/linear" output="screen" />
 
 </launch>
