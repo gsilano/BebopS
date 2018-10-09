@@ -106,6 +106,7 @@ class PositionControllerParameters {
             void SetLaunchFileParameters();
             void GetVelocityAlongZComponents(nav_msgs::Odometry* zVelocity_components);
             void GetPositionAndVelocityErrors(nav_msgs::Odometry* positionAndVelocityErrors);
+            void GetAngularAndAngularVelocityErrors(nav_msgs::Odometry* angularAndAngularVelocityErrors);
             
             PositionControllerParameters controller_parameters_;
             ExtendedKalmanFilter extended_kalman_filter_bebop_;

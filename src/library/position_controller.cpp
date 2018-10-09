@@ -470,6 +470,19 @@ void PositionController::GetPositionAndVelocityErrors(nav_msgs::Odometry* positi
 
 }
 
+//Just to analyze the position and velocity errors
+void PositionController::GetAngularAndAngularVelocityErrors(nav_msgs::Odometry* angularAndAngularVelocityErrors){
+
+  angularAndAngularVelocityErrors->pose.pose.position.x = e_phi_;
+  angularAndAngularVelocityErrors->pose.pose.position.y = e_theta_;
+  angularAndAngularVelocityErrors->pose.pose.position.z = e_psi_;
+
+  angularAndAngularVelocityErrors->twist.twist.linear.x = dot_e_phi_;
+  angularAndAngularVelocityErrors->twist.twist.linear.y = dot_e_theta_;
+  angularAndAngularVelocityErrors->twist.twist.linear.z = dot_e_psi_;
+
+}
+
 //Just to plot the data during the simulation
 void PositionController::GetReferenceAngles(nav_msgs::Odometry* reference_angles){
     assert(reference_angles);
@@ -557,9 +570,9 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     double first, second, third, fourth;
     first = (1 / ( 4 * bf_ )) * control_.uT;
     second = (1 / (4 * bf_ * l_ * cos(M_PI/4) ) ) * u_phi;
-    //second = (1 / (4 * bf_ * 0.08440513 ) ) * u_phi;  // It considers the asymmetry of the drone
+    //second = (1 / (4 * bf_ * 0.09784210 ) ) * u_phi;  // It considers the asymmetry of the drone
     third = (1 / (4 * bf_ * l_ * cos(M_PI/4) ) ) * u_theta;
-    //third = (1 / (4 * bf_ * 0.09784210 ) ) * u_theta; // It considers the asymmetry of the drone
+    //third = (1 / (4 * bf_ * 0.08440513 ) ) * u_theta; // It considers the asymmetry of the drone
     fourth = (1 / ( 4 * bf_ * bm_)) * u_psi;
 
 	
@@ -642,7 +655,8 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
       listPropellersAngularVelocities_.push_back(tempPropellersAngularVelocities.str());
     }
     
-   *rotor_velocities = Eigen::Vector4d(omega_1, omega_2, omega_3, omega_4);
+
+    *rotor_velocities = Eigen::Vector4d(omega_1, omega_2, omega_3, omega_4);
 
 }
 

@@ -59,6 +59,7 @@
       <remap from="/uTerrComponents" to="/bebop/uTerrComponents" />
       <remap from="/zVelocityComponents" to="/bebop/zVelocityComponents" />
       <remap from="/positionAndVelocityErrors" to="/bebop/positionAndVelocityErrors" />
+      <remap from="/angularAndAngularVelocityErrors" to="/bebop/angularAndAngularVelocityErrors" />
     </node>
 
     <!-- Launch the trajectory generator -->
@@ -99,5 +100,10 @@
     <!-- Launch the position and velocity errors plot -->
     <node name="position_errors_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/positionAndVelocityErrors/pose/pose/position" output="screen" />
     <node name="velocity_errors_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/positionAndVelocityErrors/twist/twist/linear" output="screen" />
+
+    <!-- Launch the angular and angular velocities errors plot -->
+    <node name="angular_errors_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/angularAndAngularVelocityErrors/pose/pose/position" output="screen" />
+    <node name="angular_velocity_errors_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/angularAndAngularVelocityErrors/twist/twist/linear" output="screen" />
+
 
 </launch>

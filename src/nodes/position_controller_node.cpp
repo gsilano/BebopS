@@ -64,6 +64,8 @@ PositionControllerNode::PositionControllerNode() {
 
     positionAndVelocityErrors_pub_= nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::POSITION_AND_VELOCITY_ERRORS, 1);
 
+    angularAndAngularVelocityErrors_pub_= nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::ANGULAR_AND_ANGULAR_VELOCITY_ERRORS, 1);
+
 }
 
 //Destructor
@@ -333,6 +335,11 @@ void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& 
       position_controller_.GetPositionAndVelocityErrors(&positionAndVelocityErrors);
       positionAndVelocityErrors.header.stamp = odometry_msg->header.stamp;
       positionAndVelocityErrors_pub_.publish(positionAndVelocityErrors);
+
+      nav_msgs::Odometry angularAndAngularVelocityErrors;
+      position_controller_.GetAngularAndAngularVelocityErrors(&angularAndAngularVelocityErrors);
+      angularAndAngularVelocityErrors.header.stamp = odometry_msg->header.stamp;
+      angularAndAngularVelocityErrors_pub_.publish(angularAndAngularVelocityErrors);
 
       nav_msgs::Odometry filtered_errors;
       filtered_errors.pose.pose.position.x = odometry_filtered.pose.pose.position.x - odometry_gt_.pose.pose.position.x;
