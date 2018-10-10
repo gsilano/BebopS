@@ -163,6 +163,7 @@ void PositionController::CallbackSaveData(const ros::TimerEvent& event){
       ofstream fileControlMixerTermsSaturated;
       ofstream fileControlMixerTermsUnsaturated;
       ofstream fileDroneLinearVelocitiesABC;
+      ofstream fileDronePosition;
 
       ROS_INFO("CallbackSavaData function is working. Time: %f seconds, %f nanoseconds", odometry_.timeStampSec, odometry_.timeStampNsec);
     
@@ -184,6 +185,7 @@ void PositionController::CallbackSaveData(const ros::TimerEvent& event){
       fileControlMixerTermsSaturated.open("/home/" + user_ + "/controlMixerTermsSaturated.csv", std::ios_base::app);
       fileControlMixerTermsUnsaturated.open("/home/" + user_ + "/controlMixerTermsUnsaturated.csv", std::ios_base::app);
       fileDroneLinearVelocitiesABC.open("/home/" + user_ + "/droneLinearVelocitiesABC.csv", std::ios_base::app);
+      fileDronePosition.open("/home/" + user_ + "/dronePosition.csv", std::ios_base::app);
 
       //Saving vehicle parameters in a file
       fileControllerGains << beta_x_ << "," << beta_y_ << "," << beta_z_ << "," << alpha_x_ << "," << alpha_y_ << "," << alpha_z_ << "," << beta_phi_ << ","
@@ -268,6 +270,10 @@ void PositionController::CallbackSaveData(const ros::TimerEvent& event){
     	  fileDroneLinearVelocitiesABC << listDroneLinearVelocitiesABC_.at( n );
       }
 
+      for (unsigned n=0; n < listDronePosition_.size(); ++n) {
+        fileDronePosition << listDronePosition_.at( n );
+      }
+
       //Closing all opened files
       fileControllerGains.close ();
       fileVehicleParameters.close ();
@@ -287,6 +293,7 @@ void PositionController::CallbackSaveData(const ros::TimerEvent& event){
       fileControlMixerTermsSaturated.close();
       fileControlMixerTermsUnsaturated.close();
       fileDroneLinearVelocitiesABC.close();
+      fileDronePosition.close();
 
 }
 
@@ -543,7 +550,7 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     double u_x, u_y, u_Terr, u_z;
     AttitudeController(&u_phi, &u_theta, &u_psi);
     PosController(&u_x, &u_y, &control_.uT, &u_Terr, &u_z);
-    
+
     if(dataStoring_active_){
       //Saving control signals in a file
       std::stringstream tempControlSignals;
@@ -647,6 +654,11 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     if(omega_4 > MAX_ROTOR_VELOCITY)
        omega_4 = MAX_ROTOR_VELOCITY;
 
+    omega_1 = 450;
+    omega_2 = 450;
+    omega_3 = 450;
+    omega_4 = 450;
+
     if(dataStoring_active_){
       //Saving propellers angular velocities in a file
       std::stringstream tempPropellersAngularVelocities;
@@ -655,7 +667,6 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
       listPropellersAngularVelocities_.push_back(tempPropellersAngularVelocities.str());
     }
     
-
     *rotor_velocities = Eigen::Vector4d(omega_1, omega_2, omega_3, omega_4);
 
 }
@@ -687,7 +698,6 @@ void PositionController::ReferenceAngles(double* phi_r, double* theta_r){
 		   *phi_r = MAX_TILT_ANGLE_RAD;
 	   else
 		   *phi_r = -MAX_TILT_ANGLE_RAD;
-
 
    if(dataStoring_active_){
       //Saving reference angles in a file
@@ -771,10 +781,10 @@ void PositionController::PosController(double* u_x, double* u_y, double* u_T, do
    assert(u_T);
    assert(u_Terr);
 
-   *u_x = m_ * ( (alpha_x_/mu_x_) * dot_e_x_) - ( (beta_x_/pow(mu_x_,2)) * e_x_);
-   *u_y = m_ * ( (alpha_y_/mu_y_) * dot_e_y_) - ( (beta_y_/pow(mu_y_,2)) * e_y_);
+   *u_x = m_ * (( (alpha_x_/mu_x_) * dot_e_x_) - ( (beta_x_/pow(mu_x_,2)) * e_x_) );
+   *u_y = m_ * (( (alpha_y_/mu_y_) * dot_e_y_) - ( (beta_y_/pow(mu_y_,2)) * e_y_) );
 
-   *u_z = ( (alpha_z_/mu_z_) * dot_e_z_) - ( (beta_z_/pow(mu_z_,2)) * e_z_);
+   *u_z =       ( (alpha_z_/mu_z_) * dot_e_z_) - ( (beta_z_/pow(mu_z_,2)) * e_z_);
    if (*u_z < -g_*0.95)
        *u_z = -g_*0.95;
 
@@ -834,15 +844,16 @@ void PositionController::AttitudeController(double* u_phi, double* u_theta, doub
    *u_phi = Ix_ *   ( ( ( (alpha_phi_/mu_phi_    ) * dot_e_phi_  ) - ( (beta_phi_/pow(mu_phi_,2)    ) * e_phi_  ) ) - ( ( (Iy_ - Iz_)/(Ix_ * mu_theta_ * mu_psi_) ) * e_theta_ * e_psi_) );
    *u_theta = Iy_ * ( ( ( (alpha_theta_/mu_theta_) * dot_e_theta_) - ( (beta_theta_/pow(mu_theta_,2)) * e_theta_) ) - ( ( (Iz_ - Ix_)/(Iy_ * mu_phi_ * mu_psi_  ) ) * e_phi_   * e_psi_) );
    *u_psi = Iz_ *   ( ( ( (alpha_psi_/mu_psi_    ) * dot_e_psi_  ) - ( (beta_psi_/pow(mu_psi_,2)    ) * e_psi_  ) ) - ( ( (Ix_ - Iy_)/(Iz_ * mu_theta_ * mu_phi_) ) * e_theta_ * e_phi_) );
+
 }
 
 
-//The function every TsA computes the attidue and angular velocity errors. When the data storing is active, the data are saved into csv files
+//The function every TsA computes the attitude and angular velocity errors. When the data storing is active, the data are saved into csv files
 void PositionController::CallbackAttitude(const ros::TimerEvent& event){
      
      AttitudeErrors(&e_phi_, &e_theta_, &e_psi_);
      AngularVelocityErrors(&dot_e_phi_, &dot_e_theta_, &dot_e_psi_);
-     
+
      //Saving the time instant when the attitude errors are computed
      if(dataStoring_active_){	
         clientAttitude_.call(my_messageAttitude_);
@@ -869,6 +880,13 @@ void PositionController::CallbackAttitude(const ros::TimerEvent& event){
 
         listAttitudeErrors_.push_back(tempAttitudeErrors.str());
 
+        //Saving the drone position along axes
+        std::stringstream tempDronePosition;
+        tempDronePosition << state_.position.x << "," << state_.position.y << "," << state_.position.z << ","
+            << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messagePosition_.response.sim_time << "," << wallSecs << "," << secs << "\n";
+
+        listDronePosition_.push_back(tempDronePosition.str());
+
       }
 }
 
@@ -893,7 +911,7 @@ void PositionController::CallbackPosition(const ros::TimerEvent& event){
      SetOdometryEstimated();
      PositionErrors(&e_x_, &e_y_, &e_z_);
      VelocityErrors(&dot_e_x_, &dot_e_y_, &dot_e_z_);
-     
+
      //Saving the time instant when the position errors are computed
      if(dataStoring_active_){
         clientPosition_.call(my_messagePosition_);

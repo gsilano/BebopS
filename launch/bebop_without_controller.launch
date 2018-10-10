@@ -3,14 +3,14 @@
     <arg name="name" default="bebop"/>
     <arg name="x" default="0.0" />
     <arg name="y" default="0.0" />
-    <arg name="z" default="0.02" />
+    <arg name="z" default="0.00" />
     <arg name="world_name" default="basic"/>
     <arg name="wind_force" default="0.0"/>
     <arg name="wind_start" default="0.0"/>
     <arg name="wind_duration" default="0.0"/>
     <arg name="wind_direction_x" default="0.0"/>
     <arg name="wind_direction_y" default="0.0"/>
-    <arg name="wind_direction_z" default="1.0"/>
+    <arg name="wind_direction_z" default="0.0"/>
     
   <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find teamsannio_med_control)/models"/>
   <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find teamsannio_med_control)/models"/>
