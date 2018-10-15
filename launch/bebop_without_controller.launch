@@ -3,8 +3,9 @@
     <arg name="name" default="bebop"/>
     <arg name="x" default="0.0" />
     <arg name="y" default="0.0" />
-    <arg name="z" default="0.00" />
-    <arg name="world_name" default="basic"/>
+    <arg name="z" default="0.0" />
+    <arg name="use_sim_time" default="true"/>
+    <arg name="world_name" default="basicTest"/>
     <arg name="wind_force" default="0.0"/>
     <arg name="wind_start" default="0.0"/>
     <arg name="wind_duration" default="0.0"/>
@@ -12,13 +13,11 @@
     <arg name="wind_direction_y" default="0.0"/>
     <arg name="wind_direction_z" default="0.0"/>
     
-  <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find teamsannio_med_control)/models"/>
-  <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find teamsannio_med_control)/models"/>
-  <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find teamsannio_med_control)/worlds/$(arg world_name).world" />
-    <!-- <arg name="debug" value="true"/> -->
-    <!-- <arg name="gui" value="false"/> -->
-  </include>
+    <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find teamsannio_med_control)/models"/>
+    <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find teamsannio_med_control)/models"/>
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+       <arg name="world_name" value="$(find teamsannio_med_control)/worlds/$(arg world_name).world" />
+    </include>
 
     <!-- Launch UAV -->
     <include file="$(find med_uav_description)/launch/spawn_bebop.launch">

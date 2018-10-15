@@ -654,11 +654,6 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     if(omega_4 > MAX_ROTOR_VELOCITY)
        omega_4 = MAX_ROTOR_VELOCITY;
 
-    omega_1 = 450;
-    omega_2 = 450;
-    omega_3 = 450;
-    omega_4 = 450;
-
     if(dataStoring_active_){
       //Saving propellers angular velocities in a file
       std::stringstream tempPropellersAngularVelocities;
@@ -821,13 +816,13 @@ void PositionController::AngularVelocityErrors(double* dot_e_phi, double* dot_e_
    
    double dot_phi, dot_theta, dot_psi;
 
-   dot_phi = state_.angularVelocity.x + (sin(state_.attitude.roll)*tan(state_.attitude.pitch)*state_.angularVelocity.y)
-                + (cos(state_.attitude.roll)*tan(state_.attitude.pitch)*state_.angularVelocity.z);
+   dot_phi = state_.angularVelocity.x + (sin(state_.attitude.roll) * tan(state_.attitude.pitch) * state_.angularVelocity.y)
+                + (cos(state_.attitude.roll) * tan(state_.attitude.pitch) * state_.angularVelocity.z);
     
-   dot_theta = (cos(state_.attitude.roll)*state_.angularVelocity.y) - (sin(state_.attitude.roll)*state_.angularVelocity.z);    
+   dot_theta = (cos(state_.attitude.roll) * state_.angularVelocity.y) - (sin(state_.attitude.roll) * state_.angularVelocity.z);
 
-   dot_psi = ((sin(state_.attitude.roll)*state_.angularVelocity.y)/cos(state_.attitude.pitch)) +
-		        ((cos(state_.attitude.roll)*state_.angularVelocity.z)/cos(state_.attitude.pitch));
+   dot_psi = ( ( sin(state_.attitude.roll) * state_.angularVelocity.y) / cos(state_.attitude.pitch) ) +
+		         ( ( cos(state_.attitude.roll) * state_.angularVelocity.z) / cos(state_.attitude.pitch) );
 
    *dot_e_phi =  - dot_phi;
    *dot_e_theta = - dot_theta;
