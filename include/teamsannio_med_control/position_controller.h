@@ -56,6 +56,8 @@ static const double MuDefaultRollController = 0.09;
 static const double MuDefaultPitchController = 0.26;
 static const double MuDefaultYawRateController = 0.04;
 
+static const Eigen::Vector3d UqDefaultXYZ = Eigen::Vector3d(1.1810, 1.1810, 4.6697);
+
 class PositionControllerParameters {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -69,7 +71,8 @@ class PositionControllerParameters {
         mu_z_(MuDefaultAltitudeController),
         mu_theta_(MuDefaultPitchController),
         mu_phi_(MuDefaultRollController),
-        mu_psi_(MuDefaultYawRateController){
+        mu_psi_(MuDefaultYawRateController),
+		U_q_(UqDefaultXYZ){
   }
 
   Eigen::Vector2d beta_xy_;
@@ -85,6 +88,8 @@ class PositionControllerParameters {
   double mu_phi_;
   double mu_theta_;
   double mu_psi_;
+  
+  Eigen::Vector3d U_q_;
 };
     
     class PositionController{
@@ -167,6 +172,11 @@ class PositionControllerParameters {
 
             double mu_x_, mu_y_, mu_z_;
             double mu_phi_, mu_theta_, mu_psi_;
+			
+			double lambda_x_, lambda_y_, lambda_z_;
+			double K_x_1_, K_x_2_;
+			double K_y_1_, K_y_2_;
+			double K_z_1_, K_z_2_;
 
             //Position and linear velocity errors
             double e_x_;
@@ -213,10 +223,9 @@ class PositionControllerParameters {
             void AttitudeController(double* u_phi, double* u_theta, double* u_psi);
             void AngularVelocityErrors(double* dot_e_phi_, double* dot_e_theta_, double* dot_e_psi_);
             void AttitudeErrors(double* e_phi_, double* e_theta_, double* e_psi_);
-            void PosController(double* u_x, double* u_y, double* u_T, double* u_Terr, double* u_z);
+            void PosController(double* u_T, double* phi_r, double* theta_r);
             void PositionErrors(double* e_x, double* e_y, double* e_z);
             void VelocityErrors(double* dot_e_x, double* dot_e_y, double* dot_e_z);
-            void ReferenceAngles(double* phi_r, double* theta_r);
 
     };
 

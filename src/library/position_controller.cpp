@@ -39,8 +39,6 @@
 
 
 #define M_PI                      3.14159265358979323846  /* pi */
-#define MAX_TILT_ANGLE            38 /* max tilt angle in degree */
-#define MAX_TILT_ANGLE_RAD        MAX_TILT_ANGLE*M_PI/180 /* max tilt angle in radians */
 #define TsP                       10e-3  /* Position control sampling time */
 #define TsA                       5e-3 /* Attitude control sampling time */
 #define MAX_ROTOR_VELOCITY        1475 /* Max rotors velocity [rad/s] */
@@ -323,7 +321,20 @@ void PositionController::SetControllerGains(){
 
       mu_phi_ = controller_parameters_.mu_phi_;
       mu_theta_ = controller_parameters_.mu_theta_;
-      mu_psi_ = controller_parameters_.mu_psi_;  
+      mu_psi_ = controller_parameters_.mu_psi_; 
+
+	  lambda_x_ = controller_parameters_.U_q_.x();
+	  lambda_y_ = controller_parameters_.U_q_.y();
+	  lambda_z_ = controller_parameters_.U_q_.z();
+	  
+	  K_x_1_ = 1/mu_x_;
+	  K_x_2_ = -2 * (beta_x_/mu_x_);
+	  
+	  K_y_1_ = 1/mu_y_; 
+	  K_y_2_ = -2 * (beta_y_/mu_y_);
+	  
+	  K_z_1_ = 1/mu_z_;
+	  K_z_2_ = -2 * (beta_z_/mu_z_);	  
 
 }
 
@@ -498,13 +509,6 @@ void PositionController::GetReferenceAngles(nav_msgs::Odometry* reference_angles
    reference_angles->pose.pose.position.y = control_.thetaR*180/M_PI;
    reference_angles->pose.pose.position.z = control_.uT;
 
-   double u_x, u_y, u_T, u_Terr, u_z;
-   PosController(&u_x, &u_y, &u_T, &u_Terr, &u_z);
-
-   reference_angles->twist.twist.linear.x = u_x;
-   reference_angles->twist.twist.linear.y = u_y;
-   reference_angles->twist.twist.linear.z = u_Terr;
-
 }
 
 //Just to plot the components make able to compute dot_e_z
@@ -547,18 +551,12 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     }
 
     double u_phi, u_theta, u_psi;
-    double u_x, u_y, u_Terr, u_z;
+	double phi_r, theta_r;
     AttitudeController(&u_phi, &u_theta, &u_psi);
-    PosController(&u_x, &u_y, &control_.uT, &u_Terr, &u_z);
+	PosController(&control_.uT, &phi_r, &theta_r)
 
     if(dataStoring_active_){
-      //Saving control signals in a file
-      std::stringstream tempControlSignals;
-      tempControlSignals << control_.uT << "," << u_phi << "," << u_theta << "," << u_psi << "," << u_x << "," << u_y << ","
-          << u_Terr << "," << u_z << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
-
-      listControlSignals_.push_back(tempControlSignals.str());
-
+      
       //Saving drone attitude in a file
       std::stringstream tempDroneAttitude;
       tempDroneAttitude << state_.attitude.roll << "," << state_.attitude.pitch << "," << state_.attitude.yaw << ","
@@ -577,9 +575,7 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     double first, second, third, fourth;
     first = (1 / ( 4 * bf_ )) * control_.uT;
     second = (1 / (4 * bf_ * l_ * cos(M_PI/4) ) ) * u_phi;
-    //second = (1 / (4 * bf_ * 0.09784210 ) ) * u_phi;  // It considers the asymmetry of the drone
     third = (1 / (4 * bf_ * l_ * cos(M_PI/4) ) ) * u_theta;
-    //third = (1 / (4 * bf_ * 0.08440513 ) ) * u_theta; // It considers the asymmetry of the drone
     fourth = (1 / ( 4 * bf_ * bm_)) * u_psi;
 
 	
@@ -666,44 +662,6 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
 
 }
 
-
-//The functions computes the reference angles limited to 45° (equal to M_PI)
-void PositionController::ReferenceAngles(double* phi_r, double* theta_r){
-   assert(phi_r);
-   assert(theta_r);
-
-   double psi_r;
-   psi_r = command_trajectory_.getYaw();
-
-   double u_x, u_y, u_T, u_Terr, u_z;
-   PosController(&u_x, &u_y, &u_T, &u_Terr, &u_z);
-
-   *theta_r = atan( ( (u_x * cos(psi_r) ) + ( u_y * sin(psi_r) ) )  / u_Terr );
-
-   if(*theta_r > MAX_TILT_ANGLE_RAD || *theta_r < -MAX_TILT_ANGLE_RAD)
-	   if(*theta_r > MAX_TILT_ANGLE_RAD)
-		   *theta_r = MAX_TILT_ANGLE_RAD;
-	   else
-		   *theta_r = -MAX_TILT_ANGLE_RAD;
-
-   *phi_r = atan( cos(*theta_r) * ( ( (u_x * sin(psi_r)) - (u_y * cos(psi_r)) ) / (u_Terr) ) );
-
-   if(*phi_r > MAX_TILT_ANGLE_RAD || *phi_r < -MAX_TILT_ANGLE_RAD)
-	   if(*phi_r > MAX_TILT_ANGLE_RAD)
-		   *phi_r = MAX_TILT_ANGLE_RAD;
-	   else
-		   *phi_r = -MAX_TILT_ANGLE_RAD;
-
-   if(dataStoring_active_){
-      //Saving reference angles in a file
-      std::stringstream tempReferenceAngles;
-      tempReferenceAngles << *theta_r << "," << *phi_r << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
-
-      listReferenceAngles_.push_back(tempReferenceAngles.str());
-    }
-    
-}
-
 //The function computes the velocity errors
 void PositionController::VelocityErrors(double* dot_e_x, double* dot_e_y, double* dot_e_z){
    assert(dot_e_x);
@@ -770,21 +728,101 @@ void PositionController::PositionErrors(double* e_x, double* e_y, double* e_z){
 }
 
 //The function computes the position controller outputs
-void PositionController::PosController(double* u_x, double* u_y, double* u_T, double* u_Terr, double* u_z){
-   assert(u_x);
-   assert(u_y);
+void PositionController::PosController(double* u_T, double* phi_r, double* theta_r){
    assert(u_T);
-   assert(u_Terr);
-
-   *u_x = m_ * (( (alpha_x_/mu_x_) * dot_e_x_) - ( (beta_x_/pow(mu_x_,2)) * e_x_) );
-   *u_y = m_ * (( (alpha_y_/mu_y_) * dot_e_y_) - ( (beta_y_/pow(mu_y_,2)) * e_y_) );
-
-   *u_z =       ( (alpha_z_/mu_z_) * dot_e_z_) - ( (beta_z_/pow(mu_z_,2)) * e_z_);
-   if (*u_z < -g_*0.95)
-       *u_z = -g_*0.95;
-
-   *u_Terr = m_ * ( g_ +  *u_z);
+   assert(phi_r);
+   assert(theta_r);
+   
+   double u_x, u_y, u_z, u_Terr;
+   
+   //u_x computing
+   u_x = ( (e_x_ * K_x_1_ * K_x_2_)/lambda_x_ ) + ( (dot_e_x_ * K_x_2_)/lambda_x_ );
+   
+   if (u_x > 1 || u_x <-1)
+	   if (u_x > 1)
+		   u_x = 1;
+	   else
+		   u_x = -1;
+	   
+   u_x = (u_x * 1/2) + ( (K_x_1_/lambda_x_) * dot_e_x_ );
+   
+   if (u_x > 1 || u_x <-1)
+	   if (u_x > 1)
+		   u_x = 1;
+	   else
+		   u_x = -1;
+	   
+   u_x = m_ * (u_x * lambda_x_);
+   
+   //u_y computing
+   u_y = ( (e_y_ * K_y_1_ * K_y_2_)/lambda_y_ ) + ( (dot_e_y_ * K_y_2_)/lambda_y_ );
+   
+   if (u_y > 1 || u_y <-1)
+	   if (u_y > 1)
+		   u_y = 1;
+	   else
+		   u_y = -1;
+	   
+   u_y = (u_y * 1/2) + ( (K_y_1_/lambda_y_) * dot_e_y_ );
+   
+   if (u_y > 1 || u_y <-1)
+	   if (u_y > 1)
+		   u_y = 1;
+	   else
+		   u_y = -1;
+	   
+   u_y = m_* ( u_y * lambda_y_);
+   
+   //u_z computing
+   u_z = ( (e_z_ * K_z_1_ * K_z_2_)/lambda_z_ ) + ( (dot_e_z_ * K_z_2_)/lambda_z_ );
+   
+   if (u_z > 1 || u_z <-1)
+	   if (u_z > 1)
+		   u_z = 1;
+	   else
+		   u_z = -1;
+	   
+   u_z = (u_z * 1/2) + ( (K_z_1_/lambda_z_) * dot_e_z_ );
+   
+   if (u_z > 1 || u_z <-1)
+	   if (u_z > 1)
+		   u_z = 1;
+	   else
+		   u_z = -1;
+	   
+   u_z = m_* ( u_z * lambda_z_);
+   
+   u_Terr = u_z + (m_ * g_);
+   
    *u_T = sqrt( pow(*u_x,2) + pow(*u_y,2) + pow(*u_Terr,2) );
+   
+   double psi_r;
+   psi_r = command_trajectory_.getYaw();
+
+   *theta_r = atan( ( (u_x * cos(psi_r) ) + ( u_y * sin(psi_r) ) )  / u_Terr );
+
+   *phi_r = atan( cos(*theta_r) * ( ( (u_x * sin(psi_r)) - (u_y * cos(psi_r)) ) / (u_Terr) ) );
+
+   if(dataStoring_active_){
+      //Saving reference angles in a file
+      std::stringstream tempReferenceAngles;
+      tempReferenceAngles << *theta_r << "," << *phi_r << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+
+      listReferenceAngles_.push_back(tempReferenceAngles.str());
+	  
+	  double u_phi, u_theta, u_psi;
+	  AttitudeController(&u_phi, &u_theta, &u_psi)
+	  
+	  //Saving control signals in a file
+      std::stringstream tempControlSignals;
+      tempControlSignals << *u_T << "," << u_phi << "," << u_theta << "," << u_psi << "," << u_x << "," << u_y << ","
+          << u_Terr << "," << u_z << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+
+      listControlSignals_.push_back(tempControlSignals.str());
+
+    }
+    
+}
 
 }
 
@@ -797,7 +835,8 @@ void PositionController::AttitudeErrors(double* e_phi, double* e_theta, double* 
    double psi_r;
    psi_r = command_trajectory_.getYaw();
    
-   ReferenceAngles(&control_.phiR, &control_.thetaR);
+   double u_T;
+   PosController(&u_T, &control_.phiR, &control_.thetaR);
 
    *e_phi = control_.phiR - state_.attitude.roll;
    *e_theta = control_.thetaR - state_.attitude.pitch;

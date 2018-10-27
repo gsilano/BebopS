@@ -136,6 +136,16 @@ void PositionControllerNode::InitializeParams() {
   GetRosParameter(pnh, "mu_psi/mu_psi",
                   position_controller_.controller_parameters_.mu_psi_,
                   &position_controller_.controller_parameters_.mu_psi_);
+				  
+  GetRosParameter(pnh, "U_xyz/U_x",
+                  position_controller_.controller_parameters_.U_q_.x(),
+                  &position_controller_.controller_parameters_.U_q_.x());
+  GetRosParameter(pnh, "U_xyz/U_y",
+                  position_controller_.controller_parameters_.U_q_.y(),
+                  &position_controller_.controller_parameters_.U_q_.y());
+  GetRosParameter(pnh, "U_xyz/U_z",
+                  position_controller_.controller_parameters_.U_q_.z(),
+                  &position_controller_.controller_parameters_.U_q_.z();
 
   //Analogously, the object "vehicle_parameters_" is created
   GetVehicleParameters(pnh, &position_controller_.vehicle_parameters_);

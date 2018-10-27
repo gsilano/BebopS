@@ -5,7 +5,7 @@
     <arg name="y" default="0.0" />
     <arg name="z" default="0.0" />
     <arg name="use_sim_time" default="true"/>
-    <arg name="world_name" default="basicTest"/>
+    <arg name="world_name" default="basic"/>
     <arg name="csvFilesStoring" default="false"/>
     <arg name="csvFilesStoringTime" default="25.0"/> <!-- seconds -->
     <arg name="user_account" default="giuseppe"/> <!-- account name of your pc -->
@@ -65,7 +65,6 @@
 
     <!-- Launch the reference angles plot -->
     <node name="reference_angles_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/referenceAngles/pose/pose/position" output="screen" />
-    <node name="uXY_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/referenceAngles/twist/twist/linear" output="screen" />
 
     <!-- Launch the smoothed trajectory plot -->
     <node name="smoothed_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/smoothedTrajectory/pose/pose/position" output="screen" />

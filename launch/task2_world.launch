@@ -77,7 +77,6 @@
 
     <!-- Launch the reference angles plot -->
     <node name="reference_angles_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/referenceAngles/pose/pose/position" output="screen" />
-    <node name="uXY_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/referenceAngles/twist/twist/linear" output="screen" />
 
     <!-- Launch the smoothed trajectory plot -->
     <node name="smoothed_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/smoothedTrajectory/pose/pose/position" output="screen" />
