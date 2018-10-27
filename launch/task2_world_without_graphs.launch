@@ -67,42 +67,4 @@
        <node name="waypoint_example" pkg="teamsannio_med_control" type="waypoint_example" output="screen" args="$(find teamsannio_med_control)/resource/waypoints.txt"/>   
     </group>
 
-    <!-- Launch the trajectory plot -->
-    <node name="position_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/odometry/pose/pose/position" output="screen" />
-    <node name="quaternion_to_rpy" pkg="teamsannio_med_control" type="quaternion_to_rpy" output="screen" >
-       <remap from="/odometry" to="/bebop/odometry" />
-       <remap from="/orientation_rpy" to="/bebop/orientation_rpy" />
-    </node>
-    <node name="orientation_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/orientation_rpy" output="screen" />
-
-    <!-- Launch the reference angles plot -->
-    <node name="reference_angles_uT_PhiR_ThetaR" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/referenceAngles/pose/pose/position" output="screen" />
-    <node name="reference_angles_Ux_Uy_Uterr" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/referenceAngles/twist/twist/linear" output="screen" />
-
-    <!-- Launch the smoothed trajectory plot -->
-    <node name="smoothed_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/smoothedTrajectory/pose/pose/position" output="screen" />
-
-    <!-- Launch the uTerr components plot -->
-    <node name="uTerr_components_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/uTerrComponents/pose/pose/position" output="screen" />
-
-    <!-- Launch the zVelocity components plot -->
-    <node name="zVelocity_components_plot_1" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/zVelocityComponents/pose/pose/position" output="screen" />
-    <node name="zVelocity_components_plot_2" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/zVelocityComponents/twist/twist/linear" output="screen" />
-
-    <!-- Launch the filtered output plot -->
-    <node name="position_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/filteredOutput/pose/pose/position" output="screen" />
-    <node name="velocity_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/filteredOutput/twist/twist/linear" output="screen" />
-
-    <!-- Launch the state errors plot -->
-    <node name="state_errors_position_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/stateErrors/pose/pose/position" output="screen" />
-    <node name="state_errors_velocity_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/stateErrors/twist/twist/linear" output="screen" />
-    
-    <!-- Launch the position and velocity errors plot -->
-    <node name="position_errors_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/positionAndVelocityErrors/pose/pose/position" output="screen" />
-    <node name="velocity_errors_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/positionAndVelocityErrors/twist/twist/linear" output="screen" />
-
-    <!-- Launch the angular and angular velocities errors plot -->
-    <node name="angular_errors_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/angularAndAngularVelocityErrors/pose/pose/position" output="screen" />
-    <node name="angular_velocity_errors_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/angularAndAngularVelocityErrors/twist/twist/linear" output="screen" />
-
 </launch>

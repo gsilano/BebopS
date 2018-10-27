@@ -173,10 +173,10 @@ class PositionControllerParameters {
             double mu_x_, mu_y_, mu_z_;
             double mu_phi_, mu_theta_, mu_psi_;
 			
-			double lambda_x_, lambda_y_, lambda_z_;
-			double K_x_1_, K_x_2_;
-			double K_y_1_, K_y_2_;
-			double K_z_1_, K_z_2_;
+			      double lambda_x_, lambda_y_, lambda_z_;
+			      double K_x_1_, K_x_2_;
+			      double K_y_1_, K_y_2_;
+			      double K_z_1_, K_z_2_;
 
             //Position and linear velocity errors
             double e_x_;
@@ -223,7 +223,7 @@ class PositionControllerParameters {
             void AttitudeController(double* u_phi, double* u_theta, double* u_psi);
             void AngularVelocityErrors(double* dot_e_phi_, double* dot_e_theta_, double* dot_e_psi_);
             void AttitudeErrors(double* e_phi_, double* e_theta_, double* e_psi_);
-            void PosController(double* u_T, double* phi_r, double* theta_r);
+            void PosController(double* u_T, double* phi_r, double* theta_r, double* u_x, double* u_y, double* u_z, double* u_Terr);
             void PositionErrors(double* e_x, double* e_y, double* e_z);
             void VelocityErrors(double* dot_e_x, double* dot_e_y, double* dot_e_z);
 

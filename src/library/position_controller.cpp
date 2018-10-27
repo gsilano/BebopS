@@ -323,18 +323,18 @@ void PositionController::SetControllerGains(){
       mu_theta_ = controller_parameters_.mu_theta_;
       mu_psi_ = controller_parameters_.mu_psi_; 
 
-	  lambda_x_ = controller_parameters_.U_q_.x();
-	  lambda_y_ = controller_parameters_.U_q_.y();
-	  lambda_z_ = controller_parameters_.U_q_.z();
+	    lambda_x_ = controller_parameters_.U_q_.x();
+	    lambda_y_ = controller_parameters_.U_q_.y();
+	    lambda_z_ = controller_parameters_.U_q_.z();
 	  
-	  K_x_1_ = 1/mu_x_;
-	  K_x_2_ = -2 * (beta_x_/mu_x_);
+	    K_x_1_ = 1/mu_x_;
+	    K_x_2_ = -2 * (beta_x_/mu_x_);
 	  
-	  K_y_1_ = 1/mu_y_; 
-	  K_y_2_ = -2 * (beta_y_/mu_y_);
+	    K_y_1_ = 1/mu_y_;
+	    K_y_2_ = -2 * (beta_y_/mu_y_);
 	  
-	  K_z_1_ = 1/mu_z_;
-	  K_z_2_ = -2 * (beta_z_/mu_z_);	  
+	    K_z_1_ = 1/mu_z_;
+	    K_z_2_ = -2 * (beta_z_/mu_z_);
 
 }
 
@@ -503,11 +503,18 @@ void PositionController::GetAngularAndAngularVelocityErrors(nav_msgs::Odometry* 
 
 //Just to plot the data during the simulation
 void PositionController::GetReferenceAngles(nav_msgs::Odometry* reference_angles){
-    assert(reference_angles);
+   assert(reference_angles);
+
+   double u_x, u_y, u_z, u_Terr;
+   PosController(&control_.uT, &control_.phiR, &control_.thetaR, &u_x, &u_y, &u_z, &u_Terr);
 
    reference_angles->pose.pose.position.x = control_.phiR*180/M_PI;
    reference_angles->pose.pose.position.y = control_.thetaR*180/M_PI;
    reference_angles->pose.pose.position.z = control_.uT;
+
+   reference_angles->twist.twist.linear.x = u_x;
+   reference_angles->twist.twist.linear.y = u_y;
+   reference_angles->twist.twist.linear.z = u_Terr;
 
 }
 
@@ -551,9 +558,9 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     }
 
     double u_phi, u_theta, u_psi;
-	double phi_r, theta_r;
+    double u_x, u_y, u_z, u_Terr;
     AttitudeController(&u_phi, &u_theta, &u_psi);
-	PosController(&control_.uT, &phi_r, &theta_r)
+	  PosController(&control_.uT, &control_.phiR, &control_.thetaR, &u_x, &u_y, &u_z, &u_Terr);
 
     if(dataStoring_active_){
       
@@ -728,80 +735,82 @@ void PositionController::PositionErrors(double* e_x, double* e_y, double* e_z){
 }
 
 //The function computes the position controller outputs
-void PositionController::PosController(double* u_T, double* phi_r, double* theta_r){
+void PositionController::PosController(double* u_T, double* phi_r, double* theta_r, double* u_x, double* u_y, double* u_z, double* u_Terr){
    assert(u_T);
    assert(phi_r);
    assert(theta_r);
-   
-   double u_x, u_y, u_z, u_Terr;
+   assert(u_x);
+   assert(u_y);
+   assert(u_z);
+   assert(u_Terr);
    
    //u_x computing
-   u_x = ( (e_x_ * K_x_1_ * K_x_2_)/lambda_x_ ) + ( (dot_e_x_ * K_x_2_)/lambda_x_ );
+   *u_x = ( (e_x_ * K_x_1_ * K_x_2_)/lambda_x_ ) + ( (dot_e_x_ * K_x_2_)/lambda_x_ );
    
-   if (u_x > 1 || u_x <-1)
-	   if (u_x > 1)
-		   u_x = 1;
+   if (*u_x > 1 || *u_x <-1)
+	   if (*u_x > 1)
+		   *u_x = 1;
 	   else
-		   u_x = -1;
+		   *u_x = -1;
 	   
-   u_x = (u_x * 1/2) + ( (K_x_1_/lambda_x_) * dot_e_x_ );
+   *u_x = (*u_x * 1/2) + ( (K_x_1_/lambda_x_) * dot_e_x_ );
    
-   if (u_x > 1 || u_x <-1)
-	   if (u_x > 1)
-		   u_x = 1;
+   if (*u_x > 1 || *u_x <-1)
+	   if (*u_x > 1)
+		   *u_x = 1;
 	   else
-		   u_x = -1;
+		   *u_x = -1;
 	   
-   u_x = m_ * (u_x * lambda_x_);
+   *u_x = m_ * (*u_x * lambda_x_);
    
    //u_y computing
-   u_y = ( (e_y_ * K_y_1_ * K_y_2_)/lambda_y_ ) + ( (dot_e_y_ * K_y_2_)/lambda_y_ );
+   *u_y = ( (e_y_ * K_y_1_ * K_y_2_)/lambda_y_ ) + ( (dot_e_y_ * K_y_2_)/lambda_y_ );
    
-   if (u_y > 1 || u_y <-1)
-	   if (u_y > 1)
-		   u_y = 1;
+   if (*u_y > 1 || *u_y <-1)
+	   if (*u_y > 1)
+		   *u_y = 1;
 	   else
-		   u_y = -1;
+		   *u_y = -1;
 	   
-   u_y = (u_y * 1/2) + ( (K_y_1_/lambda_y_) * dot_e_y_ );
+   *u_y = (*u_y * 1/2) + ( (K_y_1_/lambda_y_) * dot_e_y_ );
    
-   if (u_y > 1 || u_y <-1)
-	   if (u_y > 1)
-		   u_y = 1;
+   if (*u_y > 1 || *u_y <-1)
+	   if (*u_y > 1)
+		   *u_y = 1;
 	   else
-		   u_y = -1;
+		   *u_y = -1;
 	   
-   u_y = m_* ( u_y * lambda_y_);
+   *u_y = m_* ( *u_y * lambda_y_);
    
    //u_z computing
-   u_z = ( (e_z_ * K_z_1_ * K_z_2_)/lambda_z_ ) + ( (dot_e_z_ * K_z_2_)/lambda_z_ );
+   *u_z = ( (e_z_ * K_z_1_ * K_z_2_)/lambda_z_ ) + ( (dot_e_z_ * K_z_2_)/lambda_z_ );
    
-   if (u_z > 1 || u_z <-1)
-	   if (u_z > 1)
-		   u_z = 1;
+   if (*u_z > 1 || *u_z <-1)
+	   if (*u_z > 1)
+		   *u_z = 1;
 	   else
-		   u_z = -1;
+		   *u_z = -1;
 	   
-   u_z = (u_z * 1/2) + ( (K_z_1_/lambda_z_) * dot_e_z_ );
+   *u_z = (*u_z * 1/2) + ( (K_z_1_/lambda_z_) * dot_e_z_ );
    
-   if (u_z > 1 || u_z <-1)
-	   if (u_z > 1)
-		   u_z = 1;
+   if (*u_z > 1 || *u_z <-1)
+	   if (*u_z > 1)
+		   *u_z = 1;
 	   else
-		   u_z = -1;
+		   *u_z = -1;
 	   
-   u_z = m_* ( u_z * lambda_z_);
+   *u_z = m_* ( *u_z * lambda_z_);
    
-   u_Terr = u_z + (m_ * g_);
+   *u_Terr = *u_z + (m_ * g_);
    
    *u_T = sqrt( pow(*u_x,2) + pow(*u_y,2) + pow(*u_Terr,2) );
    
    double psi_r;
    psi_r = command_trajectory_.getYaw();
 
-   *theta_r = atan( ( (u_x * cos(psi_r) ) + ( u_y * sin(psi_r) ) )  / u_Terr );
+   *theta_r = atan( ( (*u_x * cos(psi_r) ) + ( *u_y * sin(psi_r) ) )  / *u_Terr );
 
-   *phi_r = atan( cos(*theta_r) * ( ( (u_x * sin(psi_r)) - (u_y * cos(psi_r)) ) / (u_Terr) ) );
+   *phi_r = atan( cos(*theta_r) * ( ( (*u_x * sin(psi_r)) - (*u_y * cos(psi_r)) ) / (*u_Terr) ) );
 
    if(dataStoring_active_){
       //Saving reference angles in a file
@@ -810,19 +819,17 @@ void PositionController::PosController(double* u_T, double* phi_r, double* theta
 
       listReferenceAngles_.push_back(tempReferenceAngles.str());
 	  
-	  double u_phi, u_theta, u_psi;
-	  AttitudeController(&u_phi, &u_theta, &u_psi)
+	    double u_phi, u_theta, u_psi;
+	    AttitudeController(&u_phi, &u_theta, &u_psi);
 	  
-	  //Saving control signals in a file
+	    //Saving control signals in a file
       std::stringstream tempControlSignals;
-      tempControlSignals << *u_T << "," << u_phi << "," << u_theta << "," << u_psi << "," << u_x << "," << u_y << ","
-          << u_Terr << "," << u_z << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+      tempControlSignals << *u_T << "," << u_phi << "," << u_theta << "," << u_psi << "," << *u_x << "," << *u_y << ","
+          << *u_Terr << "," << *u_z << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
       listControlSignals_.push_back(tempControlSignals.str());
 
     }
-    
-}
 
 }
 
@@ -835,8 +842,8 @@ void PositionController::AttitudeErrors(double* e_phi, double* e_theta, double* 
    double psi_r;
    psi_r = command_trajectory_.getYaw();
    
-   double u_T;
-   PosController(&u_T, &control_.phiR, &control_.thetaR);
+   double u_T, u_x, u_y, u_z, u_Terr;
+   PosController(&u_T, &control_.phiR, &control_.thetaR, &u_x, &u_y, &u_z, &u_Terr);
 
    *e_phi = control_.phiR - state_.attitude.roll;
    *e_theta = control_.thetaR - state_.attitude.pitch;
