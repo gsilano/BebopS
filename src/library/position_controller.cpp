@@ -704,15 +704,15 @@ void PositionController::VelocityErrors(double* dot_e_x, double* dot_e_y, double
    	 *dot_e_y = - dot_y;
    	 *dot_e_z = - dot_z;
 
-   	 if(dataStoring_active_){
-   		  //Saving drone linear velocity in the aircraft body center reference system
-   		  std::stringstream tempDroneLinearVelocitiesABC;
-   		  tempDroneLinearVelocitiesABC << state_.linearVelocity.x << "," << state_.linearVelocity.y << "," << state_.linearVelocity.z << ","
-   				  << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+   }
 
-   		  listDroneLinearVelocitiesABC_.push_back(tempDroneLinearVelocitiesABC.str());
-   	  }
+   if(dataStoring_active_){
+     //Saving drone linear velocity in the aircraft body center reference system
+     std::stringstream tempDroneLinearVelocitiesABC;
+     tempDroneLinearVelocitiesABC << state_.linearVelocity.x << "," << state_.linearVelocity.y << "," << state_.linearVelocity.z << ","
+         << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
+     listDroneLinearVelocitiesABC_.push_back(tempDroneLinearVelocitiesABC.str());
    }
 
 }

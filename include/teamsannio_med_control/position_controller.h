@@ -125,12 +125,12 @@ class PositionControllerParameters {
             double dataStoringTime_;
             bool dataStoring_active_;
             bool waypointFilter_active_;
+            bool EKF_active_;
 
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         private:
             //Boolean variables to active/unactive the controller and the data storage
             bool controller_active_;
-            bool EKF_active_;
 
             //Wall clock time offset variable
             double wallSecsOffset_;

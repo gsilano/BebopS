@@ -10,6 +10,7 @@
     <arg name="csvFilesStoringTime" default="25.0"/> <!-- seconds -->
     <arg name="user_account" default="giuseppe"/> <!-- account name of your pc -->
     <arg name="waypoint_filter" default="true"/>
+    <arg name="EKFActive" default="false"/>
     
   <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find teamsannio_med_control)/models"/>
   <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find teamsannio_med_control)/models"/>
@@ -35,6 +36,7 @@
       <param name="csvFilesStoring" value="$(arg csvFilesStoring)"/>
       <param name="csvFilesStoringTime" value="$(arg csvFilesStoringTime)"/>
       <param name="user_account" value="$(arg user_account)"/>
+      <param name="EKFActive" value="$(arg EKFActive)"/>
       <param name="waypoint_filter" value="$(arg waypoint_filter)"/>
       <remap from="/command/motor_speed" to="/gazebo/command/motor_speed" />
       <remap from="/odometry" to="/bebop/odometry" />

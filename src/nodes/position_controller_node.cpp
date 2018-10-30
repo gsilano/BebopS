@@ -230,6 +230,7 @@ void PositionControllerNode::InitializeParams() {
   //Reading the parameters come from the launch file
   bool waypointFilterActive;
   bool dataStoringActive;
+  bool EKFActive;
   double dataStoringTime;
   std::string user;
 
@@ -253,6 +254,13 @@ void PositionControllerNode::InitializeParams() {
   }
   else
       ROS_ERROR("Failed to get param 'csvFilesStoring'");
+
+  if (pnh.getParam("EKFActive", EKFActive)){
+    ROS_INFO("Got param 'EKFActive': %d", EKFActive);
+    position_controller_.EKF_active_ = EKFActive;
+  }
+  else
+      ROS_ERROR("Failed to get param 'EKFActive'");
 
   if (pnh.getParam("csvFilesStoringTime", dataStoringTime)){
 	  ROS_INFO("Got param 'csvFilesStoringTime': %f", dataStoringTime);

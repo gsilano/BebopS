@@ -6,11 +6,17 @@
     <arg name="z" default="0.0" />
     <arg name="use_sim_time" default="true"/>
     <arg name="world_name" default="basic"/>
-    <arg name="csvFilesStoring" default="true"/>
-    <arg name="csvFilesStoringTime" default="5.0"/> <!-- seconds -->
+    <arg name="wind_force" default="0.0"/>
+    <arg name="wind_start" default="0.0"/>
+    <arg name="wind_duration" default="0.0"/>
+    <arg name="wind_direction_x" default="0.0"/>
+    <arg name="wind_direction_y" default="0.0"/>
+    <arg name="wind_direction_z" default="0.0"/>
+    <arg name="csvFilesStoring" default="false"/>
+    <arg name="csvFilesStoringTime" default="25.0"/> <!-- seconds -->
     <arg name="user_account" default="giuseppe"/> <!-- account name of your pc -->
     <arg name="waypoint_filter" default="true"/>
-    <arg name="EKFActive" default="true"/>
+    <arg name="EKFActive" default="false"/>
     
   <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find teamsannio_med_control)/models"/>
   <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find teamsannio_med_control)/models"/>
@@ -19,11 +25,17 @@
   </include>
 
     <!-- Launch UAV -->
-    <include file="$(find med_uav_description)/launch/spawn_bebop_only_odometry_sensor.launch">
+    <include file="$(find med_uav_description)/launch/spawn_bebop.launch">
        <arg name="name" value="$(arg name)" />
        <arg name="x" value="$(arg x)"/>
        <arg name="y" value="$(arg y)"/>
        <arg name="z" value="$(arg z)"/>
+       <arg name="wind_force" value="$(arg wind_force)"/>
+       <arg name="wind_start" value="$(arg wind_start)"/>
+       <arg name="wind_duration" value="$(arg wind_duration)"/>
+       <arg name="wind_direction_x" value="$(arg wind_direction_x)"/>
+       <arg name="wind_direction_y" value="$(arg wind_direction_y)"/>
+       <arg name="wind_direction_z" value="$(arg wind_direction_z)"/>
     </include>
 
     <!-- Launch the controller  -->
@@ -56,5 +68,6 @@
    <group ns="$(arg name)">
        <node name="waypoint_example" pkg="teamsannio_med_control" type="waypoint_example" output="screen" args="$(find teamsannio_med_control)/resource/waypoints.txt"/>   
     </group>
+
 
 </launch>
