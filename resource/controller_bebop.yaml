@@ -8,5 +8,5 @@ mu_xy: {mu_x: 1, mu_y: 1}
 mu_z: {mu_z: 1}
 mu_phi: {mu_phi: 0.09}
 mu_theta: {mu_theta: 0.26}
-mu_psi: {mu_psi: 0.04}
+mu_psi: {mu_psi: 0.4}
 U_xyz: {U_x: 1.1810, U_y: 1.1810, U_z: 4.6697}
