@@ -42,6 +42,8 @@
 #define TsP                       10e-3  /* Position control sampling time */
 #define TsA                       5e-3 /* Attitude control sampling time */
 #define MAX_ROTOR_VELOCITY        1475 /* Max rotors velocity [rad/s] */
+#define MIN_ROTOR_VELOCITY        0 /* Min rotors velocity [rad/s] */
+#define POW_MAX_ROTOR_VELOCITY    2175625 /* Square Max rotors velocity [rad/s] */
 
 using namespace std;
 
@@ -92,6 +94,15 @@ PositionController::PositionController()
       mu_phi_(0),
       mu_theta_(0),
       mu_psi_(0),
+      K_x_1_(0),
+      K_y_1_(0),
+      K_z_1_(0),
+      K_x_2_(0),
+      K_y_2_(0),
+      K_z_2_(0),
+      lambda_x_(0),
+      lambda_y_(0),
+      lambda_z_(0),
       control_({0,0,0,0}), //roll, pitch, yaw rate, thrust
       state_({0,  //Position.x 
               0,  //Position.y
@@ -142,6 +153,10 @@ PositionController::~PositionController() {}
 
 //The callback is used to store data about the simulation into csv files
 void PositionController::CallbackSaveData(const ros::TimerEvent& event){
+
+      if(!dataStoring_active_){
+         return;
+      }
 
       ofstream fileControllerGains;
       ofstream fileVehicleParameters;
@@ -293,6 +308,9 @@ void PositionController::CallbackSaveData(const ros::TimerEvent& event){
       fileDroneLinearVelocitiesABC.close();
       fileDronePosition.close();
 
+      //To have a oneshot storing
+      dataStoring_active_ = false;
+
 }
 
 //The function is used to move the controller gains read from file (controller_bebop.yaml) to the private variables of the class.
@@ -379,6 +397,9 @@ void PositionController::SetLaunchFileParameters(){
 		listTimePositionErrors_.clear();
     listDroneAngularVelocitiesABC_.clear();
     listDroneTrajectoryReference_.clear();
+    listControlMixerTermsSaturated_.clear();
+    listControlMixerTermsUnsaturated_.clear();
+    listDronePosition_.clear();
 
 		//the client needed to get information about the Gazebo simulation environment both the attitude and position errors
 		clientAttitude_ = clientHandleAttitude_.serviceClient<gazebo_msgs::GetWorldProperties>("/gazebo/get_world_properties");
@@ -600,6 +621,26 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     not_saturated_3 = first + second + third - fourth;
     not_saturated_4 = first - second + third + fourth;
 
+    //The propellers velocities is limited by taking into account the physical constrains
+    double motorMin=not_saturated_1, motorMax=not_saturated_1, motorFix=0;
+
+    if(not_saturated_2 < motorMin) motorMin = not_saturated_2;
+    if(not_saturated_2 > motorMax) motorMax = not_saturated_2;
+
+    if(not_saturated_3 < motorMin) motorMin = not_saturated_3;
+    if(not_saturated_3 > motorMax) motorMax = not_saturated_3;
+
+    if(not_saturated_4 < motorMin) motorMin = not_saturated_4;
+    if(not_saturated_4 > motorMax) motorMax = not_saturated_4;
+
+    if(motorMin < MIN_ROTOR_VELOCITY) motorFix = MIN_ROTOR_VELOCITY - motorMin;
+    else if(motorMax > POW_MAX_ROTOR_VELOCITY) motorFix = POW_MAX_ROTOR_VELOCITY - motorMax;
+
+    not_saturated_1 = not_saturated_1 + motorFix;
+    not_saturated_2 = not_saturated_2 + motorFix;
+    not_saturated_3 = not_saturated_3 + motorFix;
+    not_saturated_4 = not_saturated_4 + motorFix;
+
     //The values have been saturated to avoid the root square of negative values
     double saturated_1, saturated_2, saturated_3, saturated_4;
     if(not_saturated_1 < 0)
@@ -643,19 +684,6 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
 
       listControlMixerTermsUnsaturated_.push_back(tempControlMixerTermsUnsaturated.str());
     }
-    
-    //The propellers velocities is limited by taking into account the physical constrains
-    if(omega_1 > MAX_ROTOR_VELOCITY)
-       omega_1 = MAX_ROTOR_VELOCITY;
-	
-    if(omega_2 > MAX_ROTOR_VELOCITY)
-       omega_2 = MAX_ROTOR_VELOCITY;
-	
-    if(omega_3 > MAX_ROTOR_VELOCITY)
-       omega_3 = MAX_ROTOR_VELOCITY;
-	
-    if(omega_4 > MAX_ROTOR_VELOCITY)
-       omega_4 = MAX_ROTOR_VELOCITY;
 
     if(dataStoring_active_){
       //Saving propellers angular velocities in a file
