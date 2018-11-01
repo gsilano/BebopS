@@ -53,9 +53,9 @@ PositionController::PositionController()
     : controller_active_(false),
       dataStoring_active_(false),
       waypointFilter_active_(true),
-	    EKF_active_(false),
-	    dataStoringTime_(0),
-	    wallSecsOffset_(0),
+      EKF_active_(false),
+      dataStoringTime_(0),
+      wallSecsOffset_(0),
       e_x_(0),
       e_y_(0),
       e_z_(0),
@@ -119,7 +119,7 @@ PositionController::PositionController()
               0}) //Angular velocity z)
               {  
 
-					      //Initializing the structure employed to set the command signals
+			//Initializing the structure employed to set the command signals
             		command_trajectory_.setFromYaw(0);
             		command_trajectory_.position_W[0] = 0;
             		command_trajectory_.position_W[1] = 0;
@@ -141,7 +141,7 @@ PositionController::PositionController()
             		filter_parameters_.Rp_ = Eigen::MatrixXf::Zero(6,6);
             		filter_parameters_.Qp_ = Eigen::MatrixXf::Identity(6,6);
 
-            	  //The timers are used to fix the working frequency of the Outer and Inner loop
+            	        //The timers are used to fix the working frequency of the Outer and Inner loop
             		timer1_ = n1_.createTimer(ros::Duration(TsA), &PositionController::CallbackAttitude, this, false, true);
             		timer2_ = n2_.createTimer(ros::Duration(TsP), &PositionController::CallbackPosition, this, false, true);
 
@@ -177,6 +177,7 @@ void PositionController::CallbackSaveData(const ros::TimerEvent& event){
       ofstream fileControlMixerTermsUnsaturated;
       ofstream fileDroneLinearVelocitiesABC;
       ofstream fileDronePosition;
+      ofstream fileControlMixerUnSaturatedBefore;
 
       ROS_INFO("CallbackSavaData function is working. Time: %f seconds, %f nanoseconds", odometry_.timeStampSec, odometry_.timeStampNsec);
     
@@ -199,6 +200,7 @@ void PositionController::CallbackSaveData(const ros::TimerEvent& event){
       fileControlMixerTermsUnsaturated.open("/home/" + user_ + "/controlMixerTermsUnsaturated.csv", std::ios_base::app);
       fileDroneLinearVelocitiesABC.open("/home/" + user_ + "/droneLinearVelocitiesABC.csv", std::ios_base::app);
       fileDronePosition.open("/home/" + user_ + "/dronePosition.csv", std::ios_base::app);
+      fileControlMixerUnSaturatedBefore.open("/home/" + user_ + "/controlMixerUnSaturatedBefore.csv", std::ios_base::app);
 
       //Saving vehicle parameters in a file
       fileControllerGains << beta_x_ << "," << beta_y_ << "," << beta_z_ << "," << alpha_x_ << "," << alpha_y_ << "," << alpha_z_ << "," << beta_phi_ << ","
@@ -287,6 +289,10 @@ void PositionController::CallbackSaveData(const ros::TimerEvent& event){
         fileDronePosition << listDronePosition_.at( n );
       }
 
+      for (unsigned n=0; n < listControlMixerTermsUnSaturatedBefore_.size(); ++n) {
+        fileControlMixerUnSaturatedBefore << listControlMixerTermsUnSaturatedBefore_.at( n );
+      }
+
       //Closing all opened files
       fileControllerGains.close ();
       fileVehicleParameters.close ();
@@ -307,6 +313,7 @@ void PositionController::CallbackSaveData(const ros::TimerEvent& event){
       fileControlMixerTermsUnsaturated.close();
       fileDroneLinearVelocitiesABC.close();
       fileDronePosition.close();
+      fileControlMixerUnSaturatedBefore.close();
 
       //To have a oneshot storing
       dataStoring_active_ = false;
@@ -341,18 +348,18 @@ void PositionController::SetControllerGains(){
       mu_theta_ = controller_parameters_.mu_theta_;
       mu_psi_ = controller_parameters_.mu_psi_; 
 
-	    lambda_x_ = controller_parameters_.U_q_.x();
-	    lambda_y_ = controller_parameters_.U_q_.y();
-	    lambda_z_ = controller_parameters_.U_q_.z();
+      lambda_x_ = controller_parameters_.U_q_.x();
+      lambda_y_ = controller_parameters_.U_q_.y();
+      lambda_z_ = controller_parameters_.U_q_.z();
 	  
-	    K_x_1_ = 1/mu_x_;
-	    K_x_2_ = -2 * (beta_x_/mu_x_);
+       K_x_1_ = 1/mu_x_;
+       K_x_2_ = -2 * (beta_x_/mu_x_);
 	  
-	    K_y_1_ = 1/mu_y_;
-	    K_y_2_ = -2 * (beta_y_/mu_y_);
+       K_y_1_ = 1/mu_y_;
+       K_y_2_ = -2 * (beta_y_/mu_y_);
 	  
-	    K_z_1_ = 1/mu_z_;
-	    K_z_2_ = -2 * (beta_z_/mu_z_);
+       K_z_1_ = 1/mu_z_;
+       K_z_2_ = -2 * (beta_z_/mu_z_);
 
 }
 
@@ -395,11 +402,12 @@ void PositionController::SetLaunchFileParameters(){
 		listDerivativeAttitudeErrors_.clear();
 		listTimeAttitudeErrors_.clear();
 		listTimePositionErrors_.clear();
-    listDroneAngularVelocitiesABC_.clear();
-    listDroneTrajectoryReference_.clear();
-    listControlMixerTermsSaturated_.clear();
-    listControlMixerTermsUnsaturated_.clear();
-    listDronePosition_.clear();
+                listDroneAngularVelocitiesABC_.clear();
+                listDroneTrajectoryReference_.clear();
+                listControlMixerTermsSaturated_.clear();
+                listControlMixerTermsUnsaturated_.clear();
+                listDronePosition_.clear();
+                listControlMixerTermsUnSaturatedBefore_.clear();
 
 		//the client needed to get information about the Gazebo simulation environment both the attitude and position errors
 		clientAttitude_ = clientHandleAttitude_.serviceClient<gazebo_msgs::GetWorldProperties>("/gazebo/get_world_properties");
@@ -414,7 +422,7 @@ void PositionController::SetLaunchFileParameters(){
 
 void PositionController::SetFilterParameters(){
 
-	  //The function is used to move the filter parameters from the YAML file to the filter class
+      //The function is used to move the filter parameters from the YAML file to the filter class
       extended_kalman_filter_bebop_.SetFilterParameters(&filter_parameters_);
 
 }
@@ -490,9 +498,9 @@ void PositionController::GetOdometry(nav_msgs::Odometry* odometry_filtered){
 //Just to analyze the components that get uTerr variable
 void PositionController::GetUTerrComponents(nav_msgs::Odometry* uTerrComponents){
 
-	uTerrComponents->pose.pose.position.x = ( (alpha_z_/mu_z_) * dot_e_z_);
-	uTerrComponents->pose.pose.position.y = - ( (beta_z_/pow(mu_z_,2)) * e_z_);
-	uTerrComponents->pose.pose.position.z = ( g_ + ( (alpha_z_/mu_z_) * dot_e_z_) - ( (beta_z_/pow(mu_z_,2)) * e_z_) );
+  uTerrComponents->pose.pose.position.x = ( (alpha_z_/mu_z_) * dot_e_z_);
+  uTerrComponents->pose.pose.position.y = - ( (beta_z_/pow(mu_z_,2)) * e_z_);
+  uTerrComponents->pose.pose.position.z = ( g_ + ( (alpha_z_/mu_z_) * dot_e_z_) - ( (beta_z_/pow(mu_z_,2)) * e_z_) );
 
 }
 
@@ -621,6 +629,15 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     not_saturated_3 = first + second + third - fourth;
     not_saturated_4 = first - second + third + fourth;
 
+    if(dataStoring_active_){
+      //Saving the unsaturated values before the limiting
+      std::stringstream tempControlMixerTermsUnSaturatedBefore;
+      tempControlMixerTermsUnSaturatedBefore << not_saturated_1 << "," << not_saturated_2 << "," << not_saturated_3 << "," << not_saturated_4 << "," << odometry_.timeStampSec << ","
+          << odometry_.timeStampNsec << "\n";
+
+      listControlMixerTermsUnSaturatedBefore_.push_back(tempControlMixerTermsUnSaturatedBefore.str());
+    }
+
     //The propellers velocities is limited by taking into account the physical constrains
     double motorMin=not_saturated_1, motorMax=not_saturated_1, motorFix=0;
 
@@ -683,9 +700,7 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
           << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
       listControlMixerTermsUnsaturated_.push_back(tempControlMixerTermsUnsaturated.str());
-    }
 
-    if(dataStoring_active_){
       //Saving propellers angular velocities in a file
       std::stringstream tempPropellersAngularVelocities;
       tempPropellersAngularVelocities << omega_1 << "," << omega_2 << "," << omega_3 << "," << omega_4 << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";

@@ -72,7 +72,7 @@ class PositionControllerParameters {
         mu_theta_(MuDefaultPitchController),
         mu_phi_(MuDefaultRollController),
         mu_psi_(MuDefaultYawRateController),
-		U_q_(UqDefaultXYZ){
+	U_q_(UqDefaultXYZ){
   }
 
   Eigen::Vector2d beta_xy_;
@@ -159,9 +159,10 @@ class PositionControllerParameters {
             std::vector<string> listDroneAngularVelocitiesABC_;
             std::vector<string> listDroneTrajectoryReference_;
             std::vector<string> listControlMixerTermsSaturated_;
-			      std::vector<string> listControlMixerTermsUnsaturated_;
-			      std::vector<string> listDroneLinearVelocitiesABC_;
-			      std::vector<string> listDronePosition_;
+	    std::vector<string> listControlMixerTermsUnsaturated_;
+	    std::vector<string> listDroneLinearVelocitiesABC_;
+	    std::vector<string> listDronePosition_;
+            std::vector<string> listControlMixerTermsUnSaturatedBefore_;
           
             //Controller gains
             double beta_x_, beta_y_, beta_z_;
@@ -173,10 +174,10 @@ class PositionControllerParameters {
             double mu_x_, mu_y_, mu_z_;
             double mu_phi_, mu_theta_, mu_psi_;
 			
-			      double lambda_x_, lambda_y_, lambda_z_;
-			      double K_x_1_, K_x_2_;
-			      double K_y_1_, K_y_2_;
-			      double K_z_1_, K_z_2_;
+	    double lambda_x_, lambda_y_, lambda_z_;
+	    double K_x_1_, K_x_2_;
+	    double K_y_1_, K_y_2_;
+	    double K_z_1_, K_z_2_;
 
             //Position and linear velocity errors
             double e_x_;
@@ -213,7 +214,7 @@ class PositionControllerParameters {
 
             nav_msgs::Odometry odometry_filtered_private_;
 
-	          state_t state_;
+	    state_t state_;
             control_t control_;
             mav_msgs::EigenTrajectoryPoint command_trajectory_;
             EigenOdometry odometry_;
