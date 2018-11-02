@@ -43,7 +43,7 @@
 #define TsA                       5e-3 /* Attitude control sampling time */
 #define MAX_ROTOR_VELOCITY        1475 /* Max rotors velocity [rad/s] */
 #define MIN_ROTOR_VELOCITY        0 /* Min rotors velocity [rad/s] */
-#define POW_MAX_ROTOR_VELOCITY    2175625 /* Square Max rotors velocity [rad/s] */
+#define POW_MAX_ROTOR_VELOCITY    MAX_ROTOR_VELOCITY*MAX_ROTOR_VELOCITY /* Squared max rotors velocity [rad/s] */
 
 using namespace std;
 
@@ -662,21 +662,29 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     double saturated_1, saturated_2, saturated_3, saturated_4;
     if(not_saturated_1 < 0)
       saturated_1 = 0;
+    else if(not_saturated_1 > POW_MAX_ROTOR_VELOCITY)
+      saturated_1 = POW_MAX_ROTOR_VELOCITY;
     else
       saturated_1 = not_saturated_1;
 
     if(not_saturated_2 < 0)
       saturated_2 = 0;
+    else if(not_saturated_2 > POW_MAX_ROTOR_VELOCITY)
+      saturated_2 = POW_MAX_ROTOR_VELOCITY;
     else
       saturated_2 = not_saturated_2;
 
     if(not_saturated_3 < 0)
       saturated_3 = 0;
+    else if(not_saturated_3 > POW_MAX_ROTOR_VELOCITY)
+      saturated_3 = POW_MAX_ROTOR_VELOCITY;
     else
       saturated_3 = not_saturated_3;
 
     if(not_saturated_4 < 0)
       saturated_4 = 0;
+    else if(not_saturated_4 > POW_MAX_ROTOR_VELOCITY)
+      saturated_4 = POW_MAX_ROTOR_VELOCITY;
     else
       saturated_4 = not_saturated_4;
 
