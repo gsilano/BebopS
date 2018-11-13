@@ -689,10 +689,10 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
       saturated_4 = not_saturated_4;
 
     double omega_1, omega_2, omega_3, omega_4;
-    omega_1 = sqrt(not_saturated_1);
-    omega_2 = sqrt(not_saturated_2);
-    omega_3 = sqrt(not_saturated_3);
-    omega_4 = sqrt(not_saturated_4);
+    omega_1 = sqrt(saturated_1);
+    omega_2 = sqrt(saturated_2);
+    omega_3 = sqrt(saturated_3);
+    omega_4 = sqrt(saturated_4);
 
 
     if(dataStoring_active_){
