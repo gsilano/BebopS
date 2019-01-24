@@ -142,7 +142,7 @@ PositionController::PositionController()
             		filter_parameters_.Qp_ = Eigen::MatrixXf::Identity(6,6);
 
             	  //The timers are used to fix the working frequency of the Outer and Inner loop
-            		timer1_ = n1_.createTimer(ros::Duration(TsA), &PositionController::CallbackAttitude, this, false, true);
+            		//timer1_ = n1_.createTimer(ros::Duration(TsA), &PositionController::CallbackAttitude, this, false, true);
             		timer2_ = n2_.createTimer(ros::Duration(TsP), &PositionController::CallbackPosition, this, false, true);
 
 
@@ -410,8 +410,8 @@ void PositionController::SetLaunchFileParameters(){
     listControlMixerTermsUnSaturatedBefore_.clear();
 
 		//the client needed to get information about the Gazebo simulation environment both the attitude and position errors
-		clientAttitude_ = clientHandleAttitude_.serviceClient<gazebo_msgs::GetWorldProperties>("/gazebo/get_world_properties");
-		clientPosition_ = clientHandlePosition_.serviceClient<gazebo_msgs::GetWorldProperties>("/gazebo/get_world_properties");
+		// clientAttitude_ = clientHandleAttitude_.serviceClient<gazebo_msgs::GetWorldProperties>("/gazebo/get_world_properties");
+		// clientPosition_ = clientHandlePosition_.serviceClient<gazebo_msgs::GetWorldProperties>("/gazebo/get_world_properties");
 
 		ros::WallTime beginWallOffset = ros::WallTime::now();
 		wallSecsOffset_ = beginWallOffset.toSec();
@@ -446,7 +446,7 @@ void PositionController::Quaternion2Euler(double* roll, double* pitch, double* y
 }
 
 //When a new odometry message comes, the content of the message is stored in private variable. At the same time, the controller is going to be active.
-//The attitude of the aircraft is computer (as we said before it move from quaterninon to Euler angles) and also the angulary velocity is stored.
+//The attitude of the aircraft is computed (as we said before it move from quaterninon to Euler angles) and also the angular velocity is stored.
 void PositionController::SetOdometry(const EigenOdometry& odometry) {
     
     odometry_ = odometry; 
@@ -574,7 +574,22 @@ void PositionController::SetOdometryEstimated() {
     	extended_kalman_filter_bebop_.EstimatorWithNoise(&state_, &odometry_, &odometry_filtered_private_);
     else
     	extended_kalman_filter_bebop_.Estimator(&state_, &odometry_);
+}
 
+double* PositionController::GetControllerOuputs() {
+  static double r[3];
+  r[0] = control_.phiR;
+  r[1] = control_.thetaR;
+  r[2] = control_.uT;
+  return r;
+}
+
+void PositionController::CallPosController() {
+    double u_phi, u_theta, u_psi;
+    double u_x, u_y, u_z, u_Terr;
+    ROS_INFO("[CallPosController] before calling pos controller, control thrust: [%lf], phi: [%lf], theta: [%lf]", control_.uT, control_.phiR, control_.thetaR);
+	  PosController(&control_.uT, &control_.phiR, &control_.thetaR, &u_x, &u_y, &u_z, &u_Terr);
+    // ROS_INFO("command signals: x= [%lf], y= [%lf], z= [%lf]", u_x, u_y, u_z);
 }
 
 void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocities) {
@@ -589,24 +604,24 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     double u_phi, u_theta, u_psi;
     double u_x, u_y, u_z, u_Terr;
     AttitudeController(&u_phi, &u_theta, &u_psi);
-	  PosController(&control_.uT, &control_.phiR, &control_.thetaR, &u_x, &u_y, &u_z, &u_Terr);
+    PosController(&control_.uT, &control_.phiR, &control_.thetaR, &u_x, &u_y, &u_z, &u_Terr);
 
-    if(dataStoring_active_){
+    // if(dataStoring_active_){
       
-      //Saving drone attitude in a file
-      std::stringstream tempDroneAttitude;
-      tempDroneAttitude << state_.attitude.roll << "," << state_.attitude.pitch << "," << state_.attitude.yaw << ","
-          <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+    //   //Saving drone attitude in a file
+    //   std::stringstream tempDroneAttitude;
+    //   tempDroneAttitude << state_.attitude.roll << "," << state_.attitude.pitch << "," << state_.attitude.yaw << ","
+    //       <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
-      listDroneAttitude_.push_back(tempDroneAttitude.str());
+    //   listDroneAttitude_.push_back(tempDroneAttitude.str());
 
-      //Saving the drone angular velocity in the aircraft body reference system
-      std:stringstream tempDroneAngularVelocitiesABC;
-      tempDroneAngularVelocitiesABC << state_.angularVelocity.x << "," << state_.angularVelocity.y << "," << state_.angularVelocity.z
-        << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+    //   //Saving the drone angular velocity in the aircraft body reference system
+    //   std:stringstream tempDroneAngularVelocitiesABC;
+    //   tempDroneAngularVelocitiesABC << state_.angularVelocity.x << "," << state_.angularVelocity.y << "," << state_.angularVelocity.z
+    //     << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
-      listDroneAngularVelocitiesABC_.push_back(tempDroneAngularVelocitiesABC.str());
-    }
+    //   listDroneAngularVelocitiesABC_.push_back(tempDroneAngularVelocitiesABC.str());
+    // }
     
     double first, second, third, fourth;
     first = (1 / ( 4 * bf_ )) * control_.uT;
@@ -615,13 +630,13 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     fourth = (1 / ( 4 * bf_ * bm_)) * u_psi;
 
 	
-    if(dataStoring_active_){
-      //Saving the control mixer terms in a file
-      std::stringstream tempControlMixerTerms;
-      tempControlMixerTerms << first << "," << second << "," << third << "," << fourth << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+    // if(dataStoring_active_){
+    //   //Saving the control mixer terms in a file
+    //   std::stringstream tempControlMixerTerms;
+    //   tempControlMixerTerms << first << "," << second << "," << third << "," << fourth << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
-      listControlMixerTerms_.push_back(tempControlMixerTerms.str());
-    }
+    //   listControlMixerTerms_.push_back(tempControlMixerTerms.str());
+    // }
 
     double not_saturated_1, not_saturated_2, not_saturated_3, not_saturated_4;
     not_saturated_1 = first - second - third - fourth;
@@ -629,14 +644,14 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     not_saturated_3 = first + second + third - fourth;
     not_saturated_4 = first - second + third + fourth;
 
-    if(dataStoring_active_){
-      //Saving the unsaturated values before the limiting
-      std::stringstream tempControlMixerTermsUnSaturatedBefore;
-      tempControlMixerTermsUnSaturatedBefore << not_saturated_1 << "," << not_saturated_2 << "," << not_saturated_3 << "," << not_saturated_4 << "," << odometry_.timeStampSec << ","
-          << odometry_.timeStampNsec << "\n";
+    // if(dataStoring_active_){
+    //   //Saving the unsaturated values before the limiting
+    //   std::stringstream tempControlMixerTermsUnSaturatedBefore;
+    //   tempControlMixerTermsUnSaturatedBefore << not_saturated_1 << "," << not_saturated_2 << "," << not_saturated_3 << "," << not_saturated_4 << "," << odometry_.timeStampSec << ","
+    //       << odometry_.timeStampNsec << "\n";
 
-      listControlMixerTermsUnSaturatedBefore_.push_back(tempControlMixerTermsUnSaturatedBefore.str());
-    }
+    //   listControlMixerTermsUnSaturatedBefore_.push_back(tempControlMixerTermsUnSaturatedBefore.str());
+    // }
 
     //The propellers velocities is limited by taking into account the physical constrains
     double motorMin=not_saturated_1, motorMax=not_saturated_1, motorFix=0;
@@ -695,26 +710,26 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     omega_4 = sqrt(saturated_4);
 
 
-    if(dataStoring_active_){
-      //Saving the saturated and unsaturated values
-      std::stringstream tempControlMixerTermsSaturated;
-      tempControlMixerTermsSaturated << saturated_1 << "," << saturated_2 << "," << saturated_3 << "," << saturated_4 << "," << odometry_.timeStampSec << ","
-          << odometry_.timeStampNsec << "\n";
+    // if(dataStoring_active_){
+    //   //Saving the saturated and unsaturated values
+    //   std::stringstream tempControlMixerTermsSaturated;
+    //   tempControlMixerTermsSaturated << saturated_1 << "," << saturated_2 << "," << saturated_3 << "," << saturated_4 << "," << odometry_.timeStampSec << ","
+    //       << odometry_.timeStampNsec << "\n";
 
-      listControlMixerTermsSaturated_.push_back(tempControlMixerTermsSaturated.str());
+    //   listControlMixerTermsSaturated_.push_back(tempControlMixerTermsSaturated.str());
 
-      std::stringstream tempControlMixerTermsUnsaturated;
-      tempControlMixerTermsUnsaturated << not_saturated_1 << "," << not_saturated_2 << "," << not_saturated_3 << "," << not_saturated_4 << ","
-          << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+    //   std::stringstream tempControlMixerTermsUnsaturated;
+    //   tempControlMixerTermsUnsaturated << not_saturated_1 << "," << not_saturated_2 << "," << not_saturated_3 << "," << not_saturated_4 << ","
+    //       << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
-      listControlMixerTermsUnsaturated_.push_back(tempControlMixerTermsUnsaturated.str());
+    //   listControlMixerTermsUnsaturated_.push_back(tempControlMixerTermsUnsaturated.str());
 
-      //Saving propellers angular velocities in a file
-      std::stringstream tempPropellersAngularVelocities;
-      tempPropellersAngularVelocities << omega_1 << "," << omega_2 << "," << omega_3 << "," << omega_4 << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+    //   //Saving propellers angular velocities in a file
+    //   std::stringstream tempPropellersAngularVelocities;
+    //   tempPropellersAngularVelocities << omega_1 << "," << omega_2 << "," << omega_3 << "," << omega_4 << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
-      listPropellersAngularVelocities_.push_back(tempPropellersAngularVelocities.str());
-    }
+    //   listPropellersAngularVelocities_.push_back(tempPropellersAngularVelocities.str());
+    // }
     
     *rotor_velocities = Eigen::Vector4d(omega_1, omega_2, omega_3, omega_4);
 
@@ -783,6 +798,9 @@ void PositionController::PositionErrors(double* e_x, double* e_y, double* e_z){
    *e_y = y_r - state_.position.y;
    *e_z = z_r - state_.position.z;
 
+  // ROS_INFO("reference position is ([%lf], [%lf], [%lf])", x_r, y_r, z_r );
+  // ROS_INFO("state position is ([%lf], [%lf], [%lf]", state_.position.x, state_.position.y, state_.position.z );
+
 }
 
 //The function computes the position controller outputs
@@ -794,6 +812,9 @@ void PositionController::PosController(double* u_T, double* phi_r, double* theta
    assert(u_y);
    assert(u_z);
    assert(u_Terr);
+
+   ROS_INFO("[PosController] control thrust: [%lf], phi: [%lf], theta: [%lf]", control_.uT, control_.phiR, control_.thetaR);
+   ROS_INFO("[PosController] thrust: [%lf], phi: [%lf], theta: [%lf]", &u_T, &phi_r, &theta_r);
    
    //u_x computing
    *u_x = ( (e_x_ * K_x_1_ * K_x_2_)/lambda_x_ ) + ( (dot_e_x_ * K_x_2_)/lambda_x_ );
@@ -863,24 +884,24 @@ void PositionController::PosController(double* u_T, double* phi_r, double* theta
 
    *phi_r = atan( cos(*theta_r) * ( ( (*u_x * sin(psi_r)) - (*u_y * cos(psi_r)) ) / (*u_Terr) ) );
 
-   if(dataStoring_active_){
-      //Saving reference angles in a file
-      std::stringstream tempReferenceAngles;
-      tempReferenceAngles << *theta_r << "," << *phi_r << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+  //  if(dataStoring_active_){
+  //     //Saving reference angles in a file
+  //     std::stringstream tempReferenceAngles;
+  //     tempReferenceAngles << *theta_r << "," << *phi_r << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
-      listReferenceAngles_.push_back(tempReferenceAngles.str());
+  //     listReferenceAngles_.push_back(tempReferenceAngles.str());
 	  
-	    double u_phi, u_theta, u_psi;
-	    AttitudeController(&u_phi, &u_theta, &u_psi);
+	//     double u_phi, u_theta, u_psi;
+	//     AttitudeController(&u_phi, &u_theta, &u_psi);
 	  
-	    //Saving control signals in a file
-      std::stringstream tempControlSignals;
-      tempControlSignals << *u_T << "," << u_phi << "," << u_theta << "," << u_psi << "," << *u_x << "," << *u_y << ","
-          << *u_Terr << "," << *u_z << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+	//     //Saving control signals in a file
+  //     std::stringstream tempControlSignals;
+  //     tempControlSignals << *u_T << "," << u_phi << "," << u_theta << "," << u_psi << "," << *u_x << "," << *u_y << ","
+  //         << *u_Terr << "," << *u_z << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
-      listControlSignals_.push_back(tempControlSignals.str());
+  //     listControlSignals_.push_back(tempControlSignals.str());
 
-    }
+  //   }
 
 }
 
@@ -997,6 +1018,7 @@ void PositionController::CallbackPosition(const ros::TimerEvent& event){
 
      if(waypointFilter_active_ && controller_active_){
         waypoint_filter_.TrajectoryGeneration();
+        // we set command_trajectory to command_trajectory_toSend to the value of the next waypoint
         waypoint_filter_.GetTrajectoryPoint(&command_trajectory_);
      }
 
@@ -1005,39 +1027,39 @@ void PositionController::CallbackPosition(const ros::TimerEvent& event){
      VelocityErrors(&dot_e_x_, &dot_e_y_, &dot_e_z_);
 
      //Saving the time instant when the position errors are computed
-     if(dataStoring_active_){
-        clientPosition_.call(my_messagePosition_);
+    //  if(dataStoring_active_){
+    //     clientPosition_.call(my_messagePosition_);
 
-        std::stringstream tempTimePositionErrors;
-        tempTimePositionErrors << my_messagePosition_.response.sim_time << "\n";
-        listTimePositionErrors_.push_back(tempTimePositionErrors.str());
+    //     std::stringstream tempTimePositionErrors;
+    //     tempTimePositionErrors << my_messagePosition_.response.sim_time << "\n";
+    //     listTimePositionErrors_.push_back(tempTimePositionErrors.str());
 
-        ros::WallTime beginWall = ros::WallTime::now();
-        double wallSecs = beginWall.toSec() - wallSecsOffset_;
+    //     ros::WallTime beginWall = ros::WallTime::now();
+    //     double wallSecs = beginWall.toSec() - wallSecsOffset_;
 
-        ros::Time begin = ros::Time::now();
-        double secs = begin.toSec();
+    //     ros::Time begin = ros::Time::now();
+    //     double secs = begin.toSec();
 
-        //Saving velocity errors in a file
-        std::stringstream tempVelocityErrors;
-        tempVelocityErrors << dot_e_x_ << "," << dot_e_y_ << "," << dot_e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messagePosition_.response.sim_time << "," << wallSecs << "," << secs << "\n";
+    //     //Saving velocity errors in a file
+    //     std::stringstream tempVelocityErrors;
+    //     tempVelocityErrors << dot_e_x_ << "," << dot_e_y_ << "," << dot_e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messagePosition_.response.sim_time << "," << wallSecs << "," << secs << "\n";
 
-        listVelocityErrors_.push_back(tempVelocityErrors.str());
+    //     listVelocityErrors_.push_back(tempVelocityErrors.str());
 
-        //Saving trajectory errors in a file
-        std::stringstream tempTrajectoryErrors;
-        tempTrajectoryErrors << e_x_ << "," << e_y_ << "," << e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messagePosition_.response.sim_time << "," << wallSecs << "," << secs << "\n";
+    //     //Saving trajectory errors in a file
+    //     std::stringstream tempTrajectoryErrors;
+    //     tempTrajectoryErrors << e_x_ << "," << e_y_ << "," << e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messagePosition_.response.sim_time << "," << wallSecs << "," << secs << "\n";
 
-        listTrajectoryErrors_.push_back(tempTrajectoryErrors.str());
+    //     listTrajectoryErrors_.push_back(tempTrajectoryErrors.str());
 
-        //Saving the drone trajectory referneces (them coming from the waypoint filter)
-        std::stringstream tempTrajectoryReferences;
-        tempTrajectoryReferences << command_trajectory_.position_W[0] << "," << command_trajectory_.position_W[1] << "," << command_trajectory_.position_W[2] << ","
-            <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messagePosition_.response.sim_time << "," << wallSecs << "," << secs << "\n";
+    //     //Saving the drone trajectory referneces (them coming from the waypoint filter)
+    //     std::stringstream tempTrajectoryReferences;
+    //     tempTrajectoryReferences << command_trajectory_.position_W[0] << "," << command_trajectory_.position_W[1] << "," << command_trajectory_.position_W[2] << ","
+    //         <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << my_messagePosition_.response.sim_time << "," << wallSecs << "," << secs << "\n";
 
-        listDroneTrajectoryReference_.push_back(tempTrajectoryReferences.str());
+    //     listDroneTrajectoryReference_.push_back(tempTrajectoryReferences.str());
 
-     }
+    //  }
 }
 
 

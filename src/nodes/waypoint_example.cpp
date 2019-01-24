@@ -85,24 +85,24 @@ int main(int argc, char** argv){
   }
 
   std_srvs::Empty srv;
-  bool unpaused = ros::service::call("/gazebo/unpause_physics", srv);
-  unsigned int i = 0;
+  //bool unpaused = ros::service::call("/gazebo/unpause_physics", srv);
+  //unsigned int i = 0;
 
-  // Trying to unpause Gazebo for 10 seconds.
-  while (i <= 10 && !unpaused) {
-    ROS_INFO("Wait for 1 second before trying to unpause Gazebo again.");
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    unpaused = ros::service::call("/gazebo/unpause_physics", srv);
-    ++i;
-  }
+  // // Trying to unpause Gazebo for 10 seconds.
+  // while (i <= 10 && !unpaused) {
+  //   ROS_INFO("Wait for 1 second before trying to unpause Gazebo again.");
+  //   std::this_thread::sleep_for(std::chrono::seconds(1));
+  //   unpaused = ros::service::call("/gazebo/unpause_physics", srv);
+  //   ++i;
+  // }
 
-  if (!unpaused) {
-    ROS_FATAL("Could not wake up Gazebo.");
-    return -1;
-  }
-  else {
-    ROS_INFO("Unpaused the Gazebo simulation.");
-  }
+  // if (!unpaused) {
+  //   ROS_FATAL("Could not wake up Gazebo.");
+  //   return -1;
+  // }
+  // else {
+  //   ROS_INFO("Unpaused the Gazebo simulation.");
+  // }
 
   // Wait for t seconds to let the Gazebo GUI show up.
   double t = 0.5;

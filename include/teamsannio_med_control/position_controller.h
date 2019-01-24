@@ -98,6 +98,8 @@ class PositionControllerParameters {
             ~PositionController();
             void CalculateRotorVelocities(Eigen::Vector4d* rotor_velocities);
 
+            double* GetControllerOuputs();
+            void CallPosController();
             void SetOdometry(const EigenOdometry& odometry);
             void SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory_positionControllerNode);
             void SetControllerGains();

@@ -19,11 +19,17 @@
 #include <ros/ros.h>
 #include <mav_msgs/default_topics.h>
 #include <ros/console.h> 
+#include <math.h>
 
 #include "position_controller_node.h"
 
 #include "teamsannio_med_control/parameters_ros.h"
 #include "teamsannio_msgs/default_topics.h"
+#include "geometry_msgs/Twist.h"
+#include "geometry_msgs/Vector3.h"
+#include "std_msgs/Empty.h"
+
+#include "teamsannio_med_control/position_controller.h"
 
 namespace teamsannio_med_control {
 
@@ -36,40 +42,88 @@ PositionControllerNode::PositionControllerNode() {
     InitializeParams();
 
     ros::NodeHandle nh;
-
+    
+    
     //To get the trajectory to follow
     cmd_multi_dof_joint_trajectory_sub_ = nh.subscribe(mav_msgs::default_topics::COMMAND_TRAJECTORY, 1,  &PositionControllerNode::MultiDofJointTrajectoryCallback, this);
 
     //To get data coming from the the virtual odometry sensor
-    odometry_sub_ = nh.subscribe(mav_msgs::default_topics::ODOMETRY, 1, &PositionControllerNode::OdometryCallback, this, ros::TransportHints().tcpNoDelay(true));
+    takeoff_pub_ = nh.advertise<std_msgs::Empty>("/bebop/takeoff", 1);
+    piloting_pub_ = nh.advertise<geometry_msgs::Twist>("/bebop/cmd_vel", 1);
+    ROS_INFO("initialized publishers!");
+    odometry_sub_ = nh.subscribe("/bebop/odom", 1, &PositionControllerNode::OdometryCallback, this, ros::TransportHints().tcpNoDelay(true));
+    ROS_INFO("initialized subscribers");
 
     //To publish the propellers angular speed
-    motor_velocity_reference_pub_ = nh.advertise<mav_msgs::Actuators>(mav_msgs::default_topics::COMMAND_ACTUATORS, 1);
+    //motor_velocity_reference_pub_ = nh.advertise<mav_msgs::Actuators>(mav_msgs::default_topics::COMMAND_ACTUATORS, 1);
 
     //Useful to compare the results obtained by using the noised and biased virtual odometry sensor
-    odometry_sub_gt_ = nh.subscribe(teamsannio_msgs::default_topics::ODOMETRY_GT, 1, &PositionControllerNode::OdometryGTCallback, this);
+    // odometry_sub_gt_ = nh.subscribe(teamsannio_msgs::default_topics::ODOMETRY_GT, 1, &PositionControllerNode::OdometryGTCallback, this);
 
     //Need to represent the variables into the plots
-    odometry_filtered_pub_ = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::FILTERED_OUTPUT, 1);
+    // odometry_filtered_pub_ = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::FILTERED_OUTPUT, 1);
 
-    filtered_errors_pub_ = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::STATE_ERRORS, 1);
+    // filtered_errors_pub_ = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::STATE_ERRORS, 1);
 
-    reference_angles_pub_ = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::REFERENCE_ANGLES, 1);
+    // reference_angles_pub_ = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::REFERENCE_ANGLES, 1);
 
-    smoothed_reference_pub_  = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::SMOOTHED_TRAJECTORY, 1);
+    // smoothed_reference_pub_  = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::SMOOTHED_TRAJECTORY, 1);
 
-    uTerr_components_pub_  = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::U_TERR_COMPONENTS, 1);
+    // uTerr_components_pub_  = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::U_TERR_COMPONENTS, 1);
 
-    zVelocity_components_pub_ = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::Z_VELOCITY_COMPONENTS, 1);
+    // zVelocity_components_pub_ = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::Z_VELOCITY_COMPONENTS, 1);
 
-    positionAndVelocityErrors_pub_= nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::POSITION_AND_VELOCITY_ERRORS, 1);
+    // positionAndVelocityErrors_pub_= nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::POSITION_AND_VELOCITY_ERRORS, 1);
 
-    angularAndAngularVelocityErrors_pub_= nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::ANGULAR_AND_ANGULAR_VELOCITY_ERRORS, 1);
+    // angularAndAngularVelocityErrors_pub_= nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::ANGULAR_AND_ANGULAR_VELOCITY_ERRORS, 1);
 
 }
 
 //Destructor
 PositionControllerNode::~PositionControllerNode(){}
+
+void PositionControllerNode::SendTakeoffMsg() {
+    // TODO: callback logic for takeoff
+    ROS_INFO("making the drone takeoff");
+    std_msgs::Empty takeoffMsg;
+    takeoff_pub_.publish(takeoffMsg);
+    hasTakenOff_ = true;
+}
+
+void PositionControllerNode::SendPilotMsg() {
+    // TODO: callback logic for piloting (cmd_vel topic)
+    // publish to cmd_vel with uT, phiR, thetaR, and psiR (0)
+    // &control_.uT, &control_.phiR, &control_.thetaR, &u_x, &u_y, &u_z, &u_Terr
+    geometry_msgs::Twist pilotMsg;
+    geometry_msgs::Vector3 linearVector;
+    geometry_msgs::Vector3 angularVector;
+
+    // TODO: move these constants to other file
+    double maxTiltAngle = M_PI / 2;
+    // todo: change this speed according to pasquale
+    double maxVerticalSpeed = 148.788;
+
+    double* values;
+    values = position_controller_.GetControllerOuputs();
+
+    ROS_INFO("the expected phi is: [%lf], expected theta is [%lf], expected thrust is [%lf]", values[0], values[1], values[2]);
+
+    // all values for vector fields need to be in [-1,...,1]
+    // roll angle, phi
+    //linearVector.y = values[0] / maxTiltAngle;
+    linearVector.y = values[0];
+    // pitch angle, theta
+    //linearVector.x = values[1] / maxTiltAngle;
+    linearVector.x = values[1];
+    // vertical velocity, 
+    linearVector.z = values[2] / maxVerticalSpeed;
+    // yaw angle, should just be 0
+    angularVector.z = 0.0;
+
+    pilotMsg.linear = linearVector;
+    pilotMsg.angular = angularVector;
+    piloting_pub_.publish(pilotMsg);
+}
 
 void PositionControllerNode::MultiDofJointTrajectoryCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& msg) {
 
@@ -296,11 +350,18 @@ void PositionControllerNode::OdometryGTCallback(const nav_msgs::OdometryConstPtr
     }
 }
 
+/*
+    Main callback function for the 
+*/
 void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg) {
 
     ROS_INFO_ONCE("PositionController got first odometry message.");
 
     if (waypointHasBeenPublished_){
+        ROS_INFO("Waypoint has been published");
+        if (!hasTakenOff_) {
+            SendTakeoffMsg();
+        }
 
 	    //These functions allow to put the odometry message into the odometry variable --> _position, _orientation,_velocit_body,
         //_angular_velocity
@@ -309,66 +370,68 @@ void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& 
 	    position_controller_.SetOdometry(odometry);
 
 	    Eigen::Vector4d ref_rotor_velocities;
-	    position_controller_.CalculateRotorVelocities(&ref_rotor_velocities);
+	    // position_controller_.CalculateRotorVelocities(&ref_rotor_velocities);
 
+	    position_controller_.CallPosController();
+        SendPilotMsg();
 	    //creating a new mav message. actuator_msg is used to send the velocities of the propellers.  
-	    mav_msgs::ActuatorsPtr actuator_msg(new mav_msgs::Actuators);
+	    //mav_msgs::ActuatorsPtr actuator_msg(new mav_msgs::Actuators);
 
 	    //we use clear because we later want to be sure that we used the previously calculated velocity.
-	    actuator_msg->angular_velocities.clear();
+	    //actuator_msg->angular_velocities.clear();
 	    //for all propellers, we put them into actuator_msg so they will later be used to control the drone.
-	    for (int i = 0; i < ref_rotor_velocities.size(); i++)
-	       actuator_msg->angular_velocities.push_back(ref_rotor_velocities[i]);
-	    actuator_msg->header.stamp = odometry_msg->header.stamp;
+	//     for (int i = 0; i < ref_rotor_velocities.size(); i++)
+	//        actuator_msg->angular_velocities.push_back(ref_rotor_velocities[i]);
+	//     actuator_msg->header.stamp = odometry_msg->header.stamp;
 
-      motor_velocity_reference_pub_.publish(actuator_msg);
+    //   motor_velocity_reference_pub_.publish(actuator_msg);
 
-	    //The code reported below is used to plot the data when the simulation is running
-      nav_msgs::Odometry odometry_filtered;
-      position_controller_.GetOdometry(&odometry_filtered);
-      odometry_filtered.header.stamp = odometry_msg->header.stamp;
-      odometry_filtered_pub_.publish(odometry_filtered);
+	//     //The code reported below is used to plot the data when the simulation is running
+    //   nav_msgs::Odometry odometry_filtered;
+    //   position_controller_.GetOdometry(&odometry_filtered);
+    //   odometry_filtered.header.stamp = odometry_msg->header.stamp;
+    //   odometry_filtered_pub_.publish(odometry_filtered);
 
-      nav_msgs::Odometry reference_angles;
-      position_controller_.GetReferenceAngles(&reference_angles);
-      reference_angles.header.stamp = odometry_msg->header.stamp;
-      reference_angles_pub_.publish(reference_angles);
+    //   nav_msgs::Odometry reference_angles;
+    //   position_controller_.GetReferenceAngles(&reference_angles);
+    //   reference_angles.header.stamp = odometry_msg->header.stamp;
+    //   reference_angles_pub_.publish(reference_angles);
 
-      nav_msgs::Odometry smoothed_reference;
-      position_controller_.GetTrajectory(&smoothed_reference);
-      smoothed_reference.header.stamp = odometry_msg->header.stamp;
-      smoothed_reference_pub_.publish(smoothed_reference);
+    //   nav_msgs::Odometry smoothed_reference;
+    //   position_controller_.GetTrajectory(&smoothed_reference);
+    //   smoothed_reference.header.stamp = odometry_msg->header.stamp;
+    //   smoothed_reference_pub_.publish(smoothed_reference);
 
-      nav_msgs::Odometry uTerr_components;
-      position_controller_.GetUTerrComponents(&uTerr_components);
-      uTerr_components.header.stamp = odometry_msg->header.stamp;
-      uTerr_components_pub_.publish(uTerr_components);
+    //   nav_msgs::Odometry uTerr_components;
+    //   position_controller_.GetUTerrComponents(&uTerr_components);
+    //   uTerr_components.header.stamp = odometry_msg->header.stamp;
+    //   uTerr_components_pub_.publish(uTerr_components);
 
-      nav_msgs::Odometry zVelocity_components;
-      position_controller_.GetVelocityAlongZComponents(&zVelocity_components);
-      zVelocity_components.header.stamp = odometry_msg->header.stamp;
-      zVelocity_components_pub_.publish(zVelocity_components);
+    //   nav_msgs::Odometry zVelocity_components;
+    //   position_controller_.GetVelocityAlongZComponents(&zVelocity_components);
+    //   zVelocity_components.header.stamp = odometry_msg->header.stamp;
+    //   zVelocity_components_pub_.publish(zVelocity_components);
 
-      nav_msgs::Odometry positionAndVelocityErrors;
-      position_controller_.GetPositionAndVelocityErrors(&positionAndVelocityErrors);
-      positionAndVelocityErrors.header.stamp = odometry_msg->header.stamp;
-      positionAndVelocityErrors_pub_.publish(positionAndVelocityErrors);
+    //   nav_msgs::Odometry positionAndVelocityErrors;
+    //   position_controller_.GetPositionAndVelocityErrors(&positionAndVelocityErrors);
+    //   positionAndVelocityErrors.header.stamp = odometry_msg->header.stamp;
+    //   positionAndVelocityErrors_pub_.publish(positionAndVelocityErrors);
 
-      nav_msgs::Odometry angularAndAngularVelocityErrors;
-      position_controller_.GetAngularAndAngularVelocityErrors(&angularAndAngularVelocityErrors);
-      angularAndAngularVelocityErrors.header.stamp = odometry_msg->header.stamp;
-      angularAndAngularVelocityErrors_pub_.publish(angularAndAngularVelocityErrors);
+    //   nav_msgs::Odometry angularAndAngularVelocityErrors;
+    //   position_controller_.GetAngularAndAngularVelocityErrors(&angularAndAngularVelocityErrors);
+    //   angularAndAngularVelocityErrors.header.stamp = odometry_msg->header.stamp;
+    //   angularAndAngularVelocityErrors_pub_.publish(angularAndAngularVelocityErrors);
 
-      nav_msgs::Odometry filtered_errors;
-      filtered_errors.pose.pose.position.x = odometry_filtered.pose.pose.position.x - odometry_gt_.pose.pose.position.x;
-      filtered_errors.pose.pose.position.y = odometry_filtered.pose.pose.position.y - odometry_gt_.pose.pose.position.y;
-      filtered_errors.pose.pose.position.z = odometry_filtered.pose.pose.position.z - odometry_gt_.pose.pose.position.z;
-      filtered_errors.twist.twist.linear.x = odometry_filtered.twist.twist.linear.x - odometry_gt_.twist.twist.linear.x;
-      filtered_errors.twist.twist.linear.y = odometry_filtered.twist.twist.linear.y - odometry_gt_.twist.twist.linear.y;
-      filtered_errors.twist.twist.linear.z = odometry_filtered.twist.twist.linear.z - odometry_gt_.twist.twist.linear.z;
+    //   nav_msgs::Odometry filtered_errors;
+    //   filtered_errors.pose.pose.position.x = odometry_filtered.pose.pose.position.x - odometry_gt_.pose.pose.position.x;
+    //   filtered_errors.pose.pose.position.y = odometry_filtered.pose.pose.position.y - odometry_gt_.pose.pose.position.y;
+    //   filtered_errors.pose.pose.position.z = odometry_filtered.pose.pose.position.z - odometry_gt_.pose.pose.position.z;
+    //   filtered_errors.twist.twist.linear.x = odometry_filtered.twist.twist.linear.x - odometry_gt_.twist.twist.linear.x;
+    //   filtered_errors.twist.twist.linear.y = odometry_filtered.twist.twist.linear.y - odometry_gt_.twist.twist.linear.y;
+    //   filtered_errors.twist.twist.linear.z = odometry_filtered.twist.twist.linear.z - odometry_gt_.twist.twist.linear.z;
 
-      filtered_errors.header.stamp = odometry_msg->header.stamp;
-      filtered_errors_pub_.publish(filtered_errors);
+    //   filtered_errors.header.stamp = odometry_msg->header.stamp;
+    //   filtered_errors_pub_.publish(filtered_errors);
 
     }	 
 }
