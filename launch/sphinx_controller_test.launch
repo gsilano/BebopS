@@ -12,19 +12,22 @@
     <arg name="waypoint_filter" default="true"/>
     <arg name="EKFActive" default="false"/>
     
-  <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find teamsannio_med_control)/models"/>
+  <!-- <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find teamsannio_med_control)/models"/>
   <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find teamsannio_med_control)/models"/>
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find teamsannio_med_control)/worlds/$(arg world_name).world" />
-  </include>
+  </include> -->
 
-    <!-- Launch UAV -->
+    <include file="$(find bebop_driver)/launch/bebop_node.launch" /> 
+
+
+    <!-- Launch UAV
     <include file="$(find med_uav_description)/launch/spawn_bebop_only_odometry_and_camera.launch">
        <arg name="name" value="$(arg name)" />
        <arg name="x" value="$(arg x)"/>
        <arg name="y" value="$(arg y)"/>
        <arg name="z" value="$(arg z)"/>
-    </include>
+    </include> -->
 
     <!-- Launch the controller  -->
     <node name="position_controller_node" pkg="teamsannio_med_control" type="position_controller_node" output="screen"> 
