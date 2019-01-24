@@ -96,7 +96,6 @@ class PositionControllerParameters {
         public:
             PositionController();
             ~PositionController();
-            void CalculateRotorVelocities(Eigen::Vector4d* rotor_velocities);
 
             double* GetControllerOuputs();
             void CallPosController();
@@ -106,14 +105,6 @@ class PositionControllerParameters {
             void SetVehicleParameters();
             void SetWaypointFilterParameters();
             void SetFilterParameters();
-            void GetOdometry(nav_msgs::Odometry* odometry_filtered);
-            void GetReferenceAngles(nav_msgs::Odometry* reference_angles);
-            void GetTrajectory(nav_msgs::Odometry* smoothed_trajectory);
-            void GetUTerrComponents(nav_msgs::Odometry* uTerrComponents);
-            void SetLaunchFileParameters();
-            void GetVelocityAlongZComponents(nav_msgs::Odometry* zVelocity_components);
-            void GetPositionAndVelocityErrors(nav_msgs::Odometry* positionAndVelocityErrors);
-            void GetAngularAndAngularVelocityErrors(nav_msgs::Odometry* angularAndAngularVelocityErrors);
             
             PositionControllerParameters controller_parameters_;
             ExtendedKalmanFilter extended_kalman_filter_bebop_;
@@ -210,9 +201,7 @@ class PositionControllerParameters {
             ros::Timer timer3_;
 
             //Callback functions to compute the errors among axis and angles
-            void CallbackAttitude(const ros::TimerEvent& event);
             void CallbackPosition(const ros::TimerEvent& event);
-            void CallbackSaveData(const ros::TimerEvent& event);
 
             nav_msgs::Odometry odometry_filtered_private_;
 
@@ -223,9 +212,6 @@ class PositionControllerParameters {
 
             void SetOdometryEstimated();
             void Quaternion2Euler(double* roll, double* pitch, double* yaw) const;
-            void AttitudeController(double* u_phi, double* u_theta, double* u_psi);
-            void AngularVelocityErrors(double* dot_e_phi_, double* dot_e_theta_, double* dot_e_psi_);
-            void AttitudeErrors(double* e_phi_, double* e_theta_, double* e_psi_);
             void PosController(double* u_T, double* phi_r, double* theta_r, double* u_x, double* u_y, double* u_z, double* u_Terr);
             void PositionErrors(double* e_x, double* e_y, double* e_z);
             void VelocityErrors(double* dot_e_x, double* dot_e_y, double* dot_e_z);

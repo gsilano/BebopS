@@ -77,7 +77,6 @@ namespace teamsannio_med_control {
             nav_msgs::Odometry odometry_gt_;
 
             void MultiDofJointTrajectoryCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& trajectory_reference_msg);
-            void OdometryGTCallback(const nav_msgs::OdometryConstPtr& odometry_msg_gt);
             void OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg);
             void SendTakeoffMsg();
             void SendPilotMsg();
