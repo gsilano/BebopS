@@ -74,7 +74,10 @@ To run the developed task 1, you have to use the launch file provided in the `te
    ```
    $ roslaunch teamsannio_med_uav task1_world1.launch
    ```
+Bugs & Feature Requests
+--------------------------
 
+Please report bugs and request features by using the [Issue Tracker](https://github.com/gsilano/teamsannio_med_control/issues). Furthermore, please see the [Contributing.md](https://github.com/gsilano/teamsannio_med_control/blob/master/CONTRIBUTING.md) file if you plan to help us to improve ROS package features.
 
 YouTube video
 ---------------------------------------------------------
