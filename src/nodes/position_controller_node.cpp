@@ -82,11 +82,11 @@ void PositionControllerNode::SendPilotMsg() {
 
     // all values for vector fields need to be in [-1,...,1]
     // roll angle, phi
-    //linearVector.y = values[0] / maxTiltAngle;
-    linearVector.y = values[0];
+    linearVector.y = values[0] / maxTiltAngle;
+    //linearVector.y = values[0];
     // pitch angle, theta
-    //linearVector.x = values[1] / maxTiltAngle;
-    linearVector.x = values[1];
+    linearVector.x = values[1] / maxTiltAngle;
+    //linearVector.x = values[1];
     // vertical velocity, 
     linearVector.z = values[2] / maxVerticalSpeed;
     // yaw angle, should just be 0
@@ -322,8 +322,6 @@ void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& 
 	    position_controller_.SetOdometry(odometry);
 
 	    Eigen::Vector4d ref_rotor_velocities;
-	    // position_controller_.CalculateRotorVelocities(&ref_rotor_velocities);
-
 	    position_controller_.CallPosController();
         SendPilotMsg();
 
