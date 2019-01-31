@@ -6,12 +6,6 @@
     <arg name="z" default="0.0" />
     <arg name="use_sim_time" default="true"/>
     <arg name="world_name" default="basic"/>
-    <arg name="wind_force" default="0.0"/>
-    <arg name="wind_start" default="0.0"/>
-    <arg name="wind_duration" default="0.0"/>
-    <arg name="wind_direction_x" default="0.0"/>
-    <arg name="wind_direction_y" default="0.0"/>
-    <arg name="wind_direction_z" default="0.0"/>
     <arg name="csvFilesStoring" default="false"/>
     <arg name="csvFilesStoringTime" default="25.0"/> <!-- seconds -->
     <arg name="user_account" default="giuseppe"/> <!-- account name of your pc -->
@@ -25,17 +19,11 @@
   </include>
 
     <!-- Launch UAV -->
-    <include file="$(find med_uav_description)/launch/spawn_bebop.launch">
+    <include file="$(find med_uav_description)/launch/spawn_bebop_without_wind.launch">
        <arg name="name" value="$(arg name)" />
        <arg name="x" value="$(arg x)"/>
        <arg name="y" value="$(arg y)"/>
        <arg name="z" value="$(arg z)"/>
-       <arg name="wind_force" value="$(arg wind_force)"/>
-       <arg name="wind_start" value="$(arg wind_start)"/>
-       <arg name="wind_duration" value="$(arg wind_duration)"/>
-       <arg name="wind_direction_x" value="$(arg wind_direction_x)"/>
-       <arg name="wind_direction_y" value="$(arg wind_direction_y)"/>
-       <arg name="wind_direction_z" value="$(arg wind_direction_z)"/>
     </include>
 
     <!-- Launch the controller  -->
@@ -48,8 +36,8 @@
       <param name="csvFilesStoring" value="$(arg csvFilesStoring)"/>
       <param name="csvFilesStoringTime" value="$(arg csvFilesStoringTime)"/>
       <param name="user_account" value="$(arg user_account)"/>
-      <param name="waypoint_filter" value="$(arg waypoint_filter)"/>
       <param name="EKFActive" value="$(arg EKFActive)"/>
+      <param name="waypoint_filter" value="$(arg waypoint_filter)"/>
       <remap from="/command/motor_speed" to="/gazebo/command/motor_speed" />
       <remap from="/odometry" to="/bebop/odometry" />
       <remap from="/odometry_gt" to="/bebop/odometry_gt" />
@@ -78,8 +66,7 @@
     <node name="orientation_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/orientation_rpy" output="screen" />
 
     <!-- Launch the reference angles plot -->
-    <node name="reference_angles_uT_PhiR_ThetaR" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/referenceAngles/pose/pose/position" output="screen" />
-    <node name="reference_angles_Ux_Uy_Uterr" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/referenceAngles/twist/twist/linear" output="screen" />
+    <node name="reference_angles_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/referenceAngles/pose/pose/position" output="screen" />
 
     <!-- Launch the smoothed trajectory plot -->
     <node name="smoothed_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/smoothedTrajectory/pose/pose/position" output="screen" />
@@ -106,5 +93,6 @@
     <!-- Launch the angular and angular velocities errors plot -->
     <node name="angular_errors_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/angularAndAngularVelocityErrors/pose/pose/position" output="screen" />
     <node name="angular_velocity_errors_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/angularAndAngularVelocityErrors/twist/twist/linear" output="screen" />
+
 
 </launch>

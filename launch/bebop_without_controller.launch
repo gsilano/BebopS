@@ -3,35 +3,22 @@
     <arg name="name" default="bebop"/>
     <arg name="x" default="0.0" />
     <arg name="y" default="0.0" />
-    <arg name="z" default="0.02" />
-    <arg name="world_name" default="basic"/>
-    <arg name="wind_force" default="0.0"/>
-    <arg name="wind_start" default="0.0"/>
-    <arg name="wind_duration" default="0.0"/>
-    <arg name="wind_direction_x" default="0.0"/>
-    <arg name="wind_direction_y" default="0.0"/>
-    <arg name="wind_direction_z" default="1.0"/>
+    <arg name="z" default="0.0" />
+    <arg name="use_sim_time" default="true"/>
+    <arg name="world_name" default="basicTest"/>
     
-  <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find teamsannio_med_control)/models"/>
-  <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find teamsannio_med_control)/models"/>
-  <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find teamsannio_med_control)/worlds/$(arg world_name).world" />
-    <!-- <arg name="debug" value="true"/> -->
-    <!-- <arg name="gui" value="false"/> -->
-  </include>
+    <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find teamsannio_med_control)/models"/>
+    <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find teamsannio_med_control)/models"/>
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+       <arg name="world_name" value="$(find teamsannio_med_control)/worlds/$(arg world_name).world" />
+    </include>
 
     <!-- Launch UAV -->
-    <include file="$(find med_uav_description)/launch/spawn_bebop.launch">
+    <include file="$(find med_uav_description)/launch/spawn_bebop_only_odometry_sensor.launch">
        <arg name="name" value="$(arg name)" />
        <arg name="x" value="$(arg x)"/>
        <arg name="y" value="$(arg y)"/>
        <arg name="z" value="$(arg z)"/>
-       <arg name="wind_force" value="$(arg wind_force)"/>
-       <arg name="wind_start" value="$(arg wind_start)"/>
-       <arg name="wind_duration" value="$(arg wind_duration)"/>
-       <arg name="wind_direction_x" value="$(arg wind_direction_x)"/>
-       <arg name="wind_direction_y" value="$(arg wind_direction_y)"/>
-       <arg name="wind_direction_z" value="$(arg wind_direction_z)"/>
     </include>
 
 </launch>

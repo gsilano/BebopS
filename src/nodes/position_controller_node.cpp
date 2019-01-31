@@ -19,47 +19,85 @@
 #include <ros/ros.h>
 #include <mav_msgs/default_topics.h>
 #include <ros/console.h> 
+#include <math.h>
 
 #include "position_controller_node.h"
 
 #include "teamsannio_med_control/parameters_ros.h"
 #include "teamsannio_msgs/default_topics.h"
+#include "geometry_msgs/Twist.h"
+#include "geometry_msgs/Vector3.h"
+#include "std_msgs/Empty.h"
+
+#include "teamsannio_med_control/position_controller.h"
 
 namespace teamsannio_med_control {
 
+//Constructor
 PositionControllerNode::PositionControllerNode() {
 
     ROS_INFO_ONCE("Started position controller");
-
+    //The vehicle and controller parameters are initialized
     InitializeParams();
-
     ros::NodeHandle nh;
-
+    //To get the trajectory to follow
     cmd_multi_dof_joint_trajectory_sub_ = nh.subscribe(mav_msgs::default_topics::COMMAND_TRAJECTORY, 1,  &PositionControllerNode::MultiDofJointTrajectoryCallback, this);
-
-    odometry_sub_ = nh.subscribe(mav_msgs::default_topics::ODOMETRY, 1, &PositionControllerNode::OdometryCallback, this);
-
-    motor_velocity_reference_pub_ = nh.advertise<mav_msgs::Actuators>(mav_msgs::default_topics::COMMAND_ACTUATORS, 1);
-
-    odometry_sub_gt_ = nh.subscribe(teamsannio_msgs::default_topics::ODOMETRY_GT, 1, &PositionControllerNode::OdometryGTCallback, this);
-
-    odometry_filtered_pub_ = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::FILTERED_OUTPUT, 1);
-
-    filtered_errors_pub_ = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::STATE_ERRORS, 1);
-
-    reference_angles_pub_ = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::REFERENCE_ANGLES, 1);
-
-    smoothed_reference_pub_  = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::SMOOTHED_TRAJECTORY, 1);
+    //To get data coming from the the virtual odometry sensor
+    takeoff_pub_ = nh.advertise<std_msgs::Empty>("/bebop/takeoff", 1);
+    piloting_pub_ = nh.advertise<geometry_msgs::Twist>("/bebop/cmd_vel", 1);
+    ROS_INFO("initialized publishers!");
+    odometry_sub_ = nh.subscribe("/bebop/odom", 1, &PositionControllerNode::OdometryCallback, this, ros::TransportHints().tcpNoDelay(true));
+    ROS_INFO("initialized subscribers");
 
 }
 
+//Destructor
 PositionControllerNode::~PositionControllerNode(){}
 
+void PositionControllerNode::SendTakeoffMsg() {
+    // TODO: callback logic for takeoff
+    ROS_INFO("making the drone takeoff");
+    std_msgs::Empty takeoffMsg;
+    takeoff_pub_.publish(takeoffMsg);
+    hasTakenOff_ = true;
+}
+
+void PositionControllerNode::SendPilotMsg() {
+    // TODO: callback logic for piloting (cmd_vel topic)
+    // publish to cmd_vel with uT, phiR, thetaR, and psiR (0)
+    // &control_.uT, &control_.phiR, &control_.thetaR, &u_x, &u_y, &u_z, &u_Terr
+    geometry_msgs::Twist pilotMsg;
+    geometry_msgs::Vector3 linearVector;
+    geometry_msgs::Vector3 angularVector;
+
+    // TODO: move these constants to other file
+    double maxTiltAngle = M_PI / 2;
+    // todo: change this speed according to pasquale
+    double maxVerticalSpeed = 148.788;
+
+    double* values;
+    values = position_controller_.GetControllerOuputs();
+
+    ROS_INFO("the expected phi is: [%lf], expected theta is [%lf], expected thrust is [%lf]", values[0], values[1], values[2]);
+
+    // all values for vector fields need to be in [-1,...,1]
+    // roll angle, phi
+    linearVector.y = values[0] / maxTiltAngle;
+    //linearVector.y = values[0];
+    // pitch angle, theta
+    linearVector.x = values[1] / maxTiltAngle;
+    //linearVector.x = values[1];
+    // vertical velocity, 
+    linearVector.z = values[2] / maxVerticalSpeed;
+    // yaw angle, should just be 0
+    angularVector.z = 0.0;
+
+    pilotMsg.linear = linearVector;
+    pilotMsg.angular = angularVector;
+    piloting_pub_.publish(pilotMsg);
+}
+
 void PositionControllerNode::MultiDofJointTrajectoryCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& msg) {
-  // Clear all pending commands.
-  command_timer_.stop();
-  commands_.clear();
-  command_waiting_times_.clear();
 
   const size_t n_commands = msg->points.size();
 
@@ -70,11 +108,9 @@ void PositionControllerNode::MultiDofJointTrajectoryCallback(const trajectory_ms
 
   mav_msgs::EigenTrajectoryPoint eigen_reference;
   mav_msgs::eigenTrajectoryPointFromMsg(msg->points.front(), &eigen_reference);
-  commands_.push_front(eigen_reference);
 
   // We can trigger the first command immediately.
-  position_controller_.waypoint_filter_.SetTrajectoryPoint(eigen_reference);
-  commands_.pop_front();
+  position_controller_.SetTrajectoryPoint(eigen_reference);
 
   if (n_commands >= 1) {
     waypointHasBeenPublished_ = true;
@@ -85,7 +121,8 @@ void PositionControllerNode::MultiDofJointTrajectoryCallback(const trajectory_ms
 void PositionControllerNode::InitializeParams() {
   ros::NodeHandle pnh("~");
 
-  // Read parameters from rosparam.
+  // Read parameters from rosparam. The parameters are read by the YAML file and they
+  // are used to create the "controller_parameters_" object
   GetRosParameter(pnh, "beta_xy/beta_x",
                   position_controller_.controller_parameters_.beta_xy_.x(),
                   &position_controller_.controller_parameters_.beta_xy_.x());
@@ -125,9 +162,30 @@ void PositionControllerNode::InitializeParams() {
   GetRosParameter(pnh, "mu_psi/mu_psi",
                   position_controller_.controller_parameters_.mu_psi_,
                   &position_controller_.controller_parameters_.mu_psi_);
+				  
+  GetRosParameter(pnh, "U_xyz/U_x",
+                  position_controller_.controller_parameters_.U_q_.x(),
+                  &position_controller_.controller_parameters_.U_q_.x());
+  GetRosParameter(pnh, "U_xyz/U_y",
+                  position_controller_.controller_parameters_.U_q_.y(),
+                  &position_controller_.controller_parameters_.U_q_.y());
+  GetRosParameter(pnh, "U_xyz/U_z",
+                  position_controller_.controller_parameters_.U_q_.z(),
+                  &position_controller_.controller_parameters_.U_q_.z());
 
+  //Analogously, the object "vehicle_parameters_" is created
   GetVehicleParameters(pnh, &position_controller_.vehicle_parameters_);
 
+  //Waypoint Filter parameters
+  GetRosParameter(pnh, "Tsf",
+                  position_controller_.waypoint_filter_parameters_.tsf_,
+                  &position_controller_.waypoint_filter_parameters_.tsf_);
+
+  GetRosParameter(pnh, "H",
+                  position_controller_.waypoint_filter_parameters_.h_,
+                  &position_controller_.waypoint_filter_parameters_.h_);
+
+  //The object "filter_parameters_"
   GetRosParameter(pnh, "dev_x",
                   position_controller_.filter_parameters_.dev_x_,
                   &position_controller_.filter_parameters_.dev_x_);
@@ -193,83 +251,79 @@ void PositionControllerNode::InitializeParams() {
   position_controller_.SetControllerGains();
   position_controller_.SetVehicleParameters();
   position_controller_.SetFilterParameters();
+  position_controller_.SetWaypointFilterParameters();
+
+  //Reading the parameters come from the launch file
+  bool waypointFilterActive;
+  bool dataStoringActive;
+  bool EKFActive;
+  double dataStoringTime;
+  std::string user;
+
+  if (pnh.getParam("user_account", user)){
+	  ROS_INFO("Got param 'user_account': %s", user.c_str());
+	  position_controller_.user_ = user;
+  }
+  else
+      ROS_ERROR("Failed to get param 'user'");
+
+  if (pnh.getParam("waypoint_filter", waypointFilterActive)){
+    ROS_INFO("Got param 'waypoint_filter': %d", waypointFilterActive);
+    position_controller_.waypointFilter_active_ = waypointFilterActive;
+  }
+  else
+      ROS_ERROR("Failed to get param 'waypoint_filter'");
+
+  if (pnh.getParam("csvFilesStoring", dataStoringActive)){
+	  ROS_INFO("Got param 'csvFilesStoring': %d", dataStoringActive);
+	  position_controller_.dataStoring_active_ = dataStoringActive;
+  }
+  else
+      ROS_ERROR("Failed to get param 'csvFilesStoring'");
+
+  if (pnh.getParam("EKFActive", EKFActive)){
+    ROS_INFO("Got param 'EKFActive': %d", EKFActive);
+    position_controller_.EKF_active_ = EKFActive;
+  }
+  else
+      ROS_ERROR("Failed to get param 'EKFActive'");
+
+  if (pnh.getParam("csvFilesStoringTime", dataStoringTime)){
+	  ROS_INFO("Got param 'csvFilesStoringTime': %f", dataStoringTime);
+	  position_controller_.dataStoringTime_ = dataStoringTime;
+  }
+  else
+      ROS_ERROR("Failed to get param 'csvFilesStoringTime'");
+
 
 }
 
 void PositionControllerNode::Publish(){
 }
 
-void PositionControllerNode::OdometryGTCallback(const nav_msgs::OdometryConstPtr& odometry_msg_gt) {
 
-    ROS_INFO_ONCE("PositionController got first odometry ground truth message.");
-
-    if (waypointHasBeenPublished_){
-
-       EigenOdometry odometry_gt;
-       eigenOdometryFromMsg(odometry_msg_gt, &odometry_gt);
-
-       odometry_gt_.pose.pose.position.x = odometry_gt.position[0];
-       odometry_gt_.pose.pose.position.y = odometry_gt.position[1];
-       odometry_gt_.pose.pose.position.z = odometry_gt.position[2];
-       odometry_gt_.twist.twist.linear.x = odometry_gt.velocity[0];
-       odometry_gt_.twist.twist.linear.y = odometry_gt.velocity[1];
-       odometry_gt_.twist.twist.linear.z = odometry_gt.velocity[2];
-
-    }
-}
-
+/*
+    Main callback function for the 
+*/
 void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg) {
 
     ROS_INFO_ONCE("PositionController got first odometry message.");
 
     if (waypointHasBeenPublished_){
+        ROS_INFO("Waypoint has been published");
+        if (!hasTakenOff_) {
+            SendTakeoffMsg();
+        }
 
-	    //This functions allows to put the odometry message into the odometry variable--> _position, _orientation,_velocit_body,
-            //_angular_velocity
+	    //These functions allow to put the odometry message into the odometry variable --> _position, _orientation,_velocit_body,
+        //_angular_velocity
 	    EigenOdometry odometry;
 	    eigenOdometryFromMsg(odometry_msg, &odometry);
 	    position_controller_.SetOdometry(odometry);
 
 	    Eigen::Vector4d ref_rotor_velocities;
-	    position_controller_.CalculateRotorVelocities(&ref_rotor_velocities);
-
-	    //creating a new mav message. actuator_msg is used to send the velocities of the propellers.  
-	    mav_msgs::ActuatorsPtr actuator_msg(new mav_msgs::Actuators);
-
-	    //we use clear because we later want to be sure that we used the previously calculated velocity.
-	    actuator_msg->angular_velocities.clear();
-	    //for all propellers, we put them into actuator_msg so they will later be used to control the crazyflie.
-	    for (int i = 0; i < ref_rotor_velocities.size(); i++)
-	       actuator_msg->angular_velocities.push_back(ref_rotor_velocities[i]);
-	    actuator_msg->header.stamp = odometry_msg->header.stamp;
-
-	    motor_velocity_reference_pub_.publish(actuator_msg);
-
-            nav_msgs::Odometry odometry_filtered;
-            position_controller_.GetOdometry(&odometry_filtered);
-            odometry_filtered.header.stamp = odometry_msg->header.stamp;
-            odometry_filtered_pub_.publish(odometry_filtered);
-
-            nav_msgs::Odometry reference_angles;
-            position_controller_.GetReferenceAngles(&reference_angles);
-            reference_angles.header.stamp = odometry_msg->header.stamp;
-            reference_angles_pub_.publish(reference_angles);
-
-            nav_msgs::Odometry smoothed_reference;
-            position_controller_.GetTrajectory(&smoothed_reference);
-            smoothed_reference.header.stamp = odometry_msg->header.stamp;
-            smoothed_reference_pub_.publish(smoothed_reference);
-
-            nav_msgs::Odometry filtered_errors;
-            filtered_errors.pose.pose.position.x = odometry_filtered.pose.pose.position.x - odometry_gt_.pose.pose.position.x;
-            filtered_errors.pose.pose.position.y = odometry_filtered.pose.pose.position.y - odometry_gt_.pose.pose.position.y;
-            filtered_errors.pose.pose.position.z = odometry_filtered.pose.pose.position.z - odometry_gt_.pose.pose.position.z;
-            filtered_errors.twist.twist.linear.x = odometry_filtered.twist.twist.linear.x - odometry_gt_.twist.twist.linear.x;
-            filtered_errors.twist.twist.linear.y = odometry_filtered.twist.twist.linear.y - odometry_gt_.twist.twist.linear.y;
-            filtered_errors.twist.twist.linear.z = odometry_filtered.twist.twist.linear.z - odometry_gt_.twist.twist.linear.z;
-
-            filtered_errors.header.stamp = odometry_msg->header.stamp;
-            filtered_errors_pub_.publish(filtered_errors);
+	    position_controller_.CallPosController();
+        SendPilotMsg();
 
     }	 
 }

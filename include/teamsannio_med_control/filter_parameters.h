@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-#ifndef _FILTER_PARAMTERS_H_
-#define _FILTER_PARAMTERS_H_
+#ifndef _FILTER_PARAMETERS_H_
+#define _FILTER_PARAMETERS_H_
 
 #include <Eigen/Eigen>
 #include <ros/ros.h>
@@ -73,4 +73,4 @@ class FilterParameters {
 
 }
 
-#endif // _FILTER_PARAMTERS_H_
+#endif // _FILTER_PARAMETERS_H_

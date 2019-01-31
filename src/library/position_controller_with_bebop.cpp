@@ -96,20 +96,20 @@ PositionControllerWithBebop::PositionControllerWithBebop()
             command_trajectory_.position_W[1] = 0;
             command_trajectory_.position_W[2] = 0;
 
-	    filter_parameters_.dev_x_ = 0; 
-	    filter_parameters_.dev_y_ = 0; 
-	    filter_parameters_.dev_z_ = 0; 
-	    filter_parameters_.dev_vx_ = 0;  
-	    filter_parameters_.dev_vy_ = 0;
-	    filter_parameters_.dev_vz_ = 0;
-	    filter_parameters_.Qp_x_ = 0; 
-	    filter_parameters_.Qp_y_ = 0; 
-	    filter_parameters_.Qp_z_ = 0; 
-	    filter_parameters_.Qp_vx_ = 0;  
-	    filter_parameters_.Qp_vy_ = 0;
-	    filter_parameters_.Qp_vz_ = 0;
-	    filter_parameters_.Rp_ = Eigen::MatrixXf::Zero(6,6);
-	    filter_parameters_.Qp_ = Eigen::MatrixXf::Identity(6,6);
+            filter_parameters_.dev_x_ = 0;
+            filter_parameters_.dev_y_ = 0;
+            filter_parameters_.dev_z_ = 0;
+            filter_parameters_.dev_vx_ = 0;
+            filter_parameters_.dev_vy_ = 0;
+            filter_parameters_.dev_vz_ = 0;
+            filter_parameters_.Qp_x_ = 0;
+            filter_parameters_.Qp_y_ = 0;
+            filter_parameters_.Qp_z_ = 0;
+            filter_parameters_.Qp_vx_ = 0;
+            filter_parameters_.Qp_vy_ = 0;
+            filter_parameters_.Qp_vz_ = 0;
+            filter_parameters_.Rp_ = Eigen::MatrixXf::Zero(6,6);
+            filter_parameters_.Qp_ = Eigen::MatrixXf::Identity(6,6);
 
             land_pub_ = n4_.advertise<std_msgs::Empty>(bebop_msgs::default_topics::LAND, 1);
             reset_pub_ = n4_.advertise<std_msgs::Empty>(bebop_msgs::default_topics::RESET, 1);
@@ -231,8 +231,8 @@ void PositionControllerWithBebop::SetOdometryEstimated() {
 void PositionControllerWithBebop::GetReferenceAngles(nav_msgs::Odometry* reference_angles){
     assert(reference_angles);
 
-   reference_angles->pose.pose.position.x = control_.roll*180/M_PI;
-   reference_angles->pose.pose.position.y = control_.pitch*180/M_PI;
+   reference_angles->pose.pose.position.x = control_.phiR*180/M_PI;
+   reference_angles->pose.pose.position.y = control_.thetaR*180/M_PI;
 
    double u_x, u_y, u_T, u_Terr;
    PosController(&u_x, &u_y, &u_T, &u_Terr);
@@ -256,14 +256,14 @@ void PositionControllerWithBebop::CalculateCommandSignals(geometry_msgs::Twist* 
     }
     
     double u_phi, u_theta;
-    AttitudeController(&u_phi, &u_theta, &control_.yawRate);
+    AttitudeController(&u_phi, &u_theta, &control_.dotPsi);
     
     //The commands are normalized to take into account the real commands that can be send to the drone
     //Them range is between -1 and 1.
     double theta_ref_degree, phi_ref_degree, yawRate_ref_degree;
-    theta_ref_degree = control_.pitch * (180/M_PI);
-    phi_ref_degree = control_.roll * (180/M_PI);
-    yawRate_ref_degree = control_.yawRate * (180/M_PI);
+    theta_ref_degree = control_.thetaR * (180/M_PI);
+    phi_ref_degree = control_.phiR * (180/M_PI);
+    yawRate_ref_degree = control_.dotPsi * (180/M_PI);
 
     double linearX, linearY, linearZ, angularZ;
     linearX = theta_ref_degree/MAX_TILT_ANGLE;
@@ -426,10 +426,10 @@ void PositionControllerWithBebop::AttitudeErrors(double* e_phi, double* e_theta,
    double psi_r;
    psi_r = command_trajectory_.getYaw();
    
-   ReferenceAngles(&control_.roll, &control_.pitch);
+   ReferenceAngles(&control_.phiR, &control_.thetaR);
 
-   *e_phi = control_.roll - state_.attitude.roll;
-   *e_theta = control_.pitch - state_.attitude.pitch;
+   *e_phi = control_.phiR - state_.attitude.roll;
+   *e_theta = control_.thetaR - state_.attitude.pitch;
    *e_psi = psi_r - state_.attitude.yaw;
 
 }

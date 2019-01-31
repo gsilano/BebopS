@@ -125,10 +125,10 @@ typedef struct state_s {
 } state_t;
 
 typedef struct control_s {
-  double roll;
-  double pitch;
-  double yawRate;
-  double thrust;
+  double phiR;
+  double thetaR;
+  double dotPsi;
+  double uT;
 } control_t;
 
 }

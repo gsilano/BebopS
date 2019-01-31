@@ -1,0 +1,4 @@
+# Waypoint filter parameters
+Tsf: 1.5 # Waypoint filter time constant [s]
+H: 0.01 # Sampling time [s]
+

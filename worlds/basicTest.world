@@ -1,12 +1,14 @@
 <?xml version="1.0" ?>
 <sdf version="1.4">
   <world name="default">
+
     <include>
       <uri>model://ground_plane</uri>
     </include>
     <include>
       <uri>model://sun</uri>
     </include>
+
     <spherical_coordinates>
       <surface_model>EARTH_WGS84</surface_model>
       <latitude_deg>47.3667</latitude_deg>
@@ -14,6 +16,7 @@
       <elevation>500.0</elevation>
       <heading_deg>0</heading_deg>
     </spherical_coordinates>
+
     <physics type='ode'>
       <ode>
         <solver>
@@ -28,10 +31,12 @@
           <contact_surface_layer>0.001</contact_surface_layer>
         </constraints>
       </ode>
-      <max_step_size>0.001</max_step_size>
-      <real_time_factor>1</real_time_factor>
-      <real_time_update_rate>1000</real_time_update_rate>
+
+      <max_step_size>0.0001</max_step_size>
+      <real_time_factor>0</real_time_factor>
+      <real_time_update_rate>10000</real_time_update_rate>
       <gravity>0 0 -9.8</gravity>
+
     </physics>
   </world>
 </sdf>

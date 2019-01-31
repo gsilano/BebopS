@@ -50,6 +50,9 @@ class ExtendedKalmanFilter {
      void SetVehicleParameters(double m, double g);
      void SetFilterParameters(FilterParameters *filter_parameters_);
 
+     //Such function is used to disable the EKF
+     void Estimator(state_t *state_, EigenOdometry* odometry_);
+
   private:
 
      EigenOdometry odometry_private_;
@@ -70,7 +73,8 @@ class ExtendedKalmanFilter {
      void Quaternion2Euler(double* roll, double* pitch, double* yaw) const;
      void AttitudeAddingNoise(double *phin, double *thetan, double* psin, double phi, double theta, double psi);
      void SetOdometry(const EigenOdometry& odometry);
-     void Correct();
+     void CorrectWithoutNoise();
+     void CorrectWithNoise();
      void PredictWithoutNoise();
      void PredictWithNoise();
 

@@ -25,6 +25,9 @@
 #include <mav_msgs/eigen_mav_msgs.h>
 #include <nav_msgs/Odometry.h>
 #include <ros/ros.h>
+#include "stabilizer_types.h"
+
+#include "waypointfilter_parameters.h"
 
 using namespace std;
 
@@ -39,10 +42,15 @@ namespace teamsannio_med_control {
 
 		    void SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory_positionControllerNode);
 		    void GetTrajectoryPoint(mav_msgs::EigenTrajectoryPoint* command_trajectory_positionController);
-                    void TrajectoryGeneration();
+        void TrajectoryGeneration();
+        void SetParameters(WaypointFilterParameters *waypointFilter_parameters_);
+        void Initialize(state_t state_);
 
 		    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	      private:
+
+		    double Tsf_, H_;
+		    bool filter_initialized_;
 
 		    mav_msgs::EigenTrajectoryPoint command_trajectory_private_;
 		    mav_msgs::EigenTrajectoryPoint command_trajectory_toSend_;

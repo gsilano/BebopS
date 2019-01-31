@@ -28,6 +28,7 @@
 
 #include "extendedKalmanFilter.h"
 #include "waypoint_filter.h"
+#include "waypointfilter_parameters.h"
 #include "filter_parameters.h"
 #include "stabilizer_types.h"
 #include "parameters.h"
@@ -55,6 +56,8 @@ static const double MuDefaultRollController = 0.09;
 static const double MuDefaultPitchController = 0.26;
 static const double MuDefaultYawRateController = 0.04;
 
+static const Eigen::Vector3d UqDefaultXYZ = Eigen::Vector3d(1.1810, 1.1810, 4.6697);
+
 class PositionControllerParameters {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -68,7 +71,8 @@ class PositionControllerParameters {
         mu_z_(MuDefaultAltitudeController),
         mu_theta_(MuDefaultPitchController),
         mu_phi_(MuDefaultRollController),
-        mu_psi_(MuDefaultYawRateController){
+        mu_psi_(MuDefaultYawRateController),
+	U_q_(UqDefaultXYZ){
   }
 
   Eigen::Vector2d beta_xy_;
@@ -84,34 +88,42 @@ class PositionControllerParameters {
   double mu_phi_;
   double mu_theta_;
   double mu_psi_;
+  
+  Eigen::Vector3d U_q_;
 };
     
     class PositionController{
         public:
             PositionController();
             ~PositionController();
-            void CalculateRotorVelocities(Eigen::Vector4d* rotor_velocities);
 
+            double* GetControllerOuputs();
+            void CallPosController();
             void SetOdometry(const EigenOdometry& odometry);
-            void SetTrajectoryPoint();
+            void SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory_positionControllerNode);
             void SetControllerGains();
             void SetVehicleParameters();
+            void SetWaypointFilterParameters();
             void SetFilterParameters();
-            void GetOdometry(nav_msgs::Odometry* odometry_filtered);
-            void GetReferenceAngles(nav_msgs::Odometry* reference_angles);
-            void GetTrajectory(nav_msgs::Odometry* smoothed_trajectory);
             
             PositionControllerParameters controller_parameters_;
             ExtendedKalmanFilter extended_kalman_filter_bebop_;
             VehicleParameters vehicle_parameters_;
             FilterParameters filter_parameters_;
+            WaypointFilterParameters waypoint_filter_parameters_;
             WaypointFilter waypoint_filter_;
+
+            //Launch file parameters
+            std::string user_;
+            double dataStoringTime_;
+            bool dataStoring_active_;
+            bool waypointFilter_active_;
+            bool EKF_active_;
 
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         private:
             //Boolean variables to active/unactive the controller and the data storage
             bool controller_active_;
-	    bool dataStoring_active_;
 
             //Wall clock time offset variable
             double wallSecsOffset_;
@@ -124,7 +136,6 @@ class PositionControllerParameters {
             ros::NodeHandle clientHandleAttitude_;
             ros::ServiceClient clientAttitude_;
             gazebo_msgs::GetWorldProperties my_messageAttitude_;
-                         
 
             //Sting vectors used to stare data
             std::vector<string> listControlSignals_;
@@ -138,6 +149,13 @@ class PositionControllerParameters {
             std::vector<string> listDerivativeAttitudeErrors_;
             std::vector<string> listTimeAttitudeErrors_;
             std::vector<string> listTimePositionErrors_;
+            std::vector<string> listDroneAngularVelocitiesABC_;
+            std::vector<string> listDroneTrajectoryReference_;
+            std::vector<string> listControlMixerTermsSaturated_;
+	    std::vector<string> listControlMixerTermsUnsaturated_;
+	    std::vector<string> listDroneLinearVelocitiesABC_;
+	    std::vector<string> listDronePosition_;
+            std::vector<string> listControlMixerTermsUnSaturatedBefore_;
           
             //Controller gains
             double beta_x_, beta_y_, beta_z_;
@@ -148,6 +166,11 @@ class PositionControllerParameters {
 
             double mu_x_, mu_y_, mu_z_;
             double mu_phi_, mu_theta_, mu_psi_;
+			
+	    double lambda_x_, lambda_y_, lambda_z_;
+	    double K_x_1_, K_x_2_;
+	    double K_y_1_, K_y_2_;
+	    double K_z_1_, K_z_2_;
 
             //Position and linear velocity errors
             double e_x_;
@@ -178,9 +201,7 @@ class PositionControllerParameters {
             ros::Timer timer3_;
 
             //Callback functions to compute the errors among axis and angles
-            void CallbackAttitude(const ros::TimerEvent& event);
             void CallbackPosition(const ros::TimerEvent& event);
-            void CallbackSaveData(const ros::TimerEvent& event);
 
             nav_msgs::Odometry odometry_filtered_private_;
 
@@ -191,13 +212,9 @@ class PositionControllerParameters {
 
             void SetOdometryEstimated();
             void Quaternion2Euler(double* roll, double* pitch, double* yaw) const;
-            void AttitudeController(double* u_phi, double* u_theta, double* u_psi);
-            void AngularVelocityErrors(double* dot_e_phi_, double* dot_e_theta_, double* dot_e_psi_);
-            void AttitudeErrors(double* e_phi_, double* e_theta_, double* e_psi_);
-            void PosController(double* u_x, double* u_y, double* u_T, double* u_Terr);
+            void PosController(double* u_T, double* phi_r, double* theta_r, double* u_x, double* u_y, double* u_z, double* u_Terr);
             void PositionErrors(double* e_x, double* e_y, double* e_z);
             void VelocityErrors(double* dot_e_x, double* dot_e_y, double* dot_e_z);
-            void ReferenceAngles(double* phi_r, double* theta_r);
 
     };
 

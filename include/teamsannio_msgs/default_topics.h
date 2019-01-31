@@ -29,6 +29,14 @@ namespace teamsannio_msgs {
         static constexpr char REFERENCE_ANGLES[] = "referenceAngles";
         static constexpr char SMOOTHED_TRAJECTORY[] = "smoothedTrajectory";
 
+        static constexpr char U_TERR_COMPONENTS[] = "uTerrComponents";
+
+        static constexpr char Z_VELOCITY_COMPONENTS[] = "zVelocityComponents";
+
+        static constexpr char POSITION_AND_VELOCITY_ERRORS[] = "positionAndVelocityErrors";
+
+        static constexpr char ANGULAR_AND_ANGULAR_VELOCITY_ERRORS[] = "angularAndAngularVelocityErrors";
+
 
 	}  // end namespace default_topics
 }  // end namespace teamsannio_msgs

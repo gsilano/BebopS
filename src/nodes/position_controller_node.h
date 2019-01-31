@@ -50,6 +50,7 @@ namespace teamsannio_med_control {
         private:
 
             bool waypointHasBeenPublished_ = false;
+            bool hasTakenOff_ = false;
 
             PositionController position_controller_;
 
@@ -61,20 +62,24 @@ namespace teamsannio_med_control {
             ros::Subscriber odometry_sub_gt_;
 
             //publisher
+            ros::Publisher piloting_pub_;
+            ros::Publisher takeoff_pub_;
             ros::Publisher motor_velocity_reference_pub_;
             ros::Publisher odometry_filtered_pub_;
             ros::Publisher filtered_errors_pub_;
             ros::Publisher reference_angles_pub_;
             ros::Publisher smoothed_reference_pub_;
+            ros::Publisher uTerr_components_pub_;
+            ros::Publisher zVelocity_components_pub_;
+            ros::Publisher positionAndVelocityErrors_pub_;
+            ros::Publisher angularAndAngularVelocityErrors_pub_;
 
-            mav_msgs::EigenTrajectoryPointDeque commands_;
             nav_msgs::Odometry odometry_gt_;
-            std::deque<ros::Duration> command_waiting_times_;
-            ros::Timer command_timer_;
 
             void MultiDofJointTrajectoryCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& trajectory_reference_msg);
-            void OdometryGTCallback(const nav_msgs::OdometryConstPtr& odometry_msg_gt);
             void OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg);
+            void SendTakeoffMsg();
+            void SendPilotMsg();
 
 
     };
