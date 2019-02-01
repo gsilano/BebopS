@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.com/gsilano/teamsannio_med_control.svg?token=j5Gz4tcDJ28z8njKZCzL&branch=master)](https://travis-ci.com/gsilano/teamsannio_med_control)
+[![Build Status](https://travis-ci.com/gsilano/BebopS.svg?token=j5Gz4tcDJ28z8njKZCzL&branch=master)](https://travis-ci.com/gsilano/BebopS)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 # teamsannio_med_control
 
@@ -74,7 +75,10 @@ To run the developed task 1, you have to use the launch file provided in the `te
    ```
    $ roslaunch teamsannio_med_uav task1_world1.launch
    ```
+Bugs & Feature Requests
+--------------------------
 
+Please report bugs and request features by using the [Issue Tracker](https://github.com/gsilano/teamsannio_med_control/issues). Furthermore, please see the [Contributing.md](https://github.com/gsilano/teamsannio_med_control/blob/master/CONTRIBUTING.md) file if you plan to help us to improve ROS package features.
 
 YouTube video
 ---------------------------------------------------------
