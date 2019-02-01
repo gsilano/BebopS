@@ -65,9 +65,9 @@ namespace bebopS {
 
 /** Attitude in euler angle form */
 typedef struct attitude_s {
-  double roll;
-  double pitch;
-  double yaw;
+  double roll; //phi
+  double pitch; //theta
+  double yaw; //psi
 } attitude_t;
 
 /* x,y,z vector */
@@ -125,10 +125,10 @@ typedef struct state_s {
 } state_t;
 
 typedef struct control_s {
-  double phiR;
-  double thetaR;
-  double dotPsi;
-  double uT;
+  double phiR;     // rad
+  double thetaR;   // rad
+  double dotPsi;   // rad/s
+  double uT;       // m/s^2
 } control_t;
 
 }

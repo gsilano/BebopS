@@ -50,7 +50,7 @@ class ExtendedKalmanFilter {
      void SetVehicleParameters(double m, double g);
      void SetFilterParameters(FilterParameters *filter_parameters_);
 
-     //Such function is used to disable the EKF
+     //The function is used to disable the Extended Kalman Filter
      void Estimator(state_t *state_, EigenOdometry* odometry_);
 
   private:
@@ -78,7 +78,7 @@ class ExtendedKalmanFilter {
      void PredictWithoutNoise();
      void PredictWithNoise();
 
-};
+   };
 
 }
 

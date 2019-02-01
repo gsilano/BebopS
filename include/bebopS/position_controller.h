@@ -40,21 +40,21 @@ using namespace std;
 
 namespace bebopS {
 
-// Default values for the position controller of the Bebop. XYController [x,y], Roll Control [phi],
-// Pitch Control [theta], Altitude Control [z], Yaw Control  [psi] 
-static const Eigen::Vector2d kPDefaultXYController = Eigen::Vector2d(-1.3351, -1.1307);
-static const double kPDefaultAltitudeController = -1.5994;
+// Default values for the Parrot Bebop controller. For more information about the control architecture, please take a look
+// at the publications page into the Wiki section.
+static const Eigen::Vector2d kPDefaultXYController = Eigen::Vector2d(-26.4259, -26.3627);
+static const double kPDefaultAltitudeController = -27.2277;
 
-static const double kPDefaultRollController = -2.2616;
-static const double kPDefaultPitchController = -2.7457;
-static const double kPDefaultYawRateController = -1.8249;
+static const double kPDefaultRollController = -1.7514;
+static const double kPDefaultPitchController = -1.7513;
+static const double kPDefaultYawRateController = -14.3431;
 
-static const Eigen::Vector2d MuDefaultXYController = Eigen::Vector2d(0.08, 0.03);
-static const double MuDefaultAltitudeController = 0.12;
+static const Eigen::Vector2d MuDefaultXYController = Eigen::Vector2d(1, 1);
+static const double MuDefaultAltitudeController = 1;
 
-static const double MuDefaultRollController = 0.09;
-static const double MuDefaultPitchController = 0.26;
-static const double MuDefaultYawRateController = 0.04;
+static const double MuDefaultRollController = 0.0544;
+static const double MuDefaultPitchController = 0.0543;
+static const double MuDefaultYawRateController = 0.44;
 
 static const Eigen::Vector3d UqDefaultXYZ = Eigen::Vector3d(1.1810, 1.1810, 4.6697);
 

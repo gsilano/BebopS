@@ -20,6 +20,7 @@ template<typename T> inline void GetRosParameter(const ros::NodeHandle& nh,
   }
 }
 
+// The function allows to take data from the yaml file describing the quadrotor paramters
 inline void GetVehicleParameters(const ros::NodeHandle& nh, VehicleParameters* vehicle_parameters) {
   GetRosParameter(nh, "mass",
                   vehicle_parameters->mass_,

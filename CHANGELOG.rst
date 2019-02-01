@@ -2,10 +2,12 @@
 Changelog for package BebopS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-0.1.7 (2019-01-31)
+0.2.0 (2019-01-31)
 ------------------
 * The package has been renamed considering the aim of the repository. Therefore, the CMake and include files have been modified based on these changes.
 * The files contained into the med_uav_description folder have been moved to the BebopS repository
+* The controller architecture, which follows the position_controller.cpp library, has been modified as described in the ECC'19 paper. For more information on how it works, please take a look at the publications section into the Wiki section.
+* When simulating the Parrot Bebop 2 that follows a path along the scenario (it is described through a sequence of waypoints), it is possible to decide which sensor will be simulated or not and also decide whether the real-time plots should be shown.
 * Contributors: Giuseppe Silano, Luigi Iannelli
 
 0.1.6 (2018-06-18)

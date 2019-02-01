@@ -21,7 +21,7 @@
 
 namespace bebopS {
 
-// Default vehicle parameters
+// Default Bebop 2 parameters
 static constexpr double kDefaultMass = 0.5;
 static constexpr double kDefaultArmLength = 0.12905;
 static constexpr double kDefaultInertiaXx = 0.00389;

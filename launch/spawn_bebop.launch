@@ -13,12 +13,22 @@
   <arg name="wind_direction_y" default="0.0"/>
   <arg name="wind_direction_z" default="0.0"/>
   <arg name="enable_ground_truth" default="true"/>
+  <arg name="enable_odometry_sensor_with_noise" default="false"/>
+  <arg name="disable_odometry_sensor_with_noise" default="true"/>
+  <arg name="enable_ground_truth_sensor" default="false"/>
+  <arg name="enable_wind_plugin" default="false"/>
+  <arg name="enable_laser1D" default="false"/>
   <arg name="model" value="$(find bebopS)/urdf/bebop.urdf.xacro" />
 
   <!-- send the robot XML to param server -->
   <param name="robot_description" command="
     $(find xacro)/xacro --inorder '$(arg model)'
     enable_ground_truth:='$(arg enable_ground_truth)'
+    enable_odometry_sensor_with_noise:='$(arg enable_odometry_sensor_with_noise)'
+    disable_odometry_sensor_with_noise:='$(arg disable_odometry_sensor_with_noise)'
+    enable_ground_truth_sensor:='$(arg enable_ground_truth_sensor)'
+    enable_wind_plugin:='$(arg enable_wind_plugin)'
+    enable_laser1D:='$(arg enable_laser1D)'
     namespace:=$(arg name)
     wind_force:=$(arg wind_force)
     wind_start:=$(arg wind_start)
