@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-#include "teamsannio_med_control/waypoint_filter.h"
+#include "bebopS/waypoint_filter.h"
 
 #include <Eigen/Eigen>
 #include <chrono>
@@ -27,7 +27,7 @@
 
 using namespace std;
 
-namespace teamsannio_med_control {
+namespace bebopS {
 
 WaypointFilter::WaypointFilter()
          :filter_initialized_(false){

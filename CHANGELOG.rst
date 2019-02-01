@@ -1,6 +1,12 @@
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Changelog for package teamsannio_med_control
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Changelog for package BebopS
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+0.1.7 (2019-01-31)
+------------------
+* The package has been renamed considering the aim of the repository. Therefore, the CMake and include files have been modified based on these changes.
+* The files contained into the med_uav_description folder have been moved to the BebopS repository
+* Contributors: Giuseppe Silano, Luigi Iannelli
 
 0.1.6 (2018-06-18)
 ------------------

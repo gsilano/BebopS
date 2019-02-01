@@ -16,9 +16,9 @@
  * limitations under the License.
  */
 
-#include "teamsannio_med_control/transform_datatypes.h"
-#include "teamsannio_med_control/Matrix3x3.h"
-#include "teamsannio_med_control/Quaternion.h"
+#include "bebopS/transform_datatypes.h"
+#include "bebopS/Matrix3x3.h"
+#include "bebopS/Quaternion.h"
 
 #include <math.h> 
 #include <ros/ros.h>

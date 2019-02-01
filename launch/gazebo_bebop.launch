@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+
+<launch>
+    <arg name="name" default="bebop" />
+    <arg name="x" default="0.0" />
+    <arg name="y" default="0.0" />
+    <arg name="z" default="0.02" />
+    <arg name="wind_force" default="10.0"/>
+    <arg name="wind_start" default="5.0"/>
+    <arg name="wind_duration" default="10.0"/>
+    <arg name="wind_direction_x" default="1.0"/>
+    <arg name="wind_direction_y" default="0.0"/>
+    <arg name="wind_direction_z" default="0.0"/>
+    
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="paused" value="false" />
+        <arg name="use_sim_time" value="true"/>
+    </include>
+    
+    <include file="$(find bebopS)/launch/spawn_bebop.launch">
+        <arg name="name" value="$(arg name)" />
+        <arg name="x" value="$(arg x)"/>
+        <arg name="y" value="$(arg y)"/>
+        <arg name="z" value="$(arg z)"/>
+        <arg name="wind_force" value="$(arg wind_force)"/>
+        <arg name="wind_start" value="$(arg wind_start)"/>
+        <arg name="wind_duration" value="$(arg wind_duration)"/>
+        <arg name="wind_direction_x" value="$(arg wind_direction_x)"/>
+        <arg name="wind_direction_y" value="$(arg wind_direction_y)"/>
+        <arg name="wind_direction_z" value="$(arg wind_direction_z)"/>
+    </include>
+
+</launch>

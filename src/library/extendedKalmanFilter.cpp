@@ -16,12 +16,12 @@
  * limitations under the License.
  */
 
-#include "teamsannio_med_control/extendedKalmanFilter.h"
-#include "teamsannio_med_control/transform_datatypes.h"
-#include "teamsannio_med_control/Matrix3x3.h"
-#include "teamsannio_med_control/Quaternion.h" 
-#include "teamsannio_med_control/stabilizer_types.h"
-#include "teamsannio_med_control/common.h"
+#include "bebopS/extendedKalmanFilter.h"
+#include "bebopS/transform_datatypes.h"
+#include "bebopS/Matrix3x3.h"
+#include "bebopS/Quaternion.h" 
+#include "bebopS/stabilizer_types.h"
+#include "bebopS/common.h"
 
 #include <math.h> 
 #include <ros/ros.h>
@@ -35,7 +35,7 @@
 
 #define TsP                       10e-3  /* Position control sampling time */
 
-namespace teamsannio_med_control {
+namespace bebopS {
 
 ExtendedKalmanFilter::ExtendedKalmanFilter()
        :Xp_(Eigen::VectorXf::Zero(6)), 

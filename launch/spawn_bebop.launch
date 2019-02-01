@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+
+<launch>
+  <arg name="name" default="bebop"/>
+  <arg name="tf_prefix" default="$(arg name)"/>
+  <arg name="x" default="0.0"/>
+  <arg name="y" default="0.0"/>
+  <arg name="z" default="0.031"/>
+  <arg name="wind_force" default="0.0"/>
+  <arg name="wind_start" default="0.0"/>
+  <arg name="wind_duration" default="0.0"/>
+  <arg name="wind_direction_x" default="0.0"/>
+  <arg name="wind_direction_y" default="0.0"/>
+  <arg name="wind_direction_z" default="0.0"/>
+  <arg name="enable_ground_truth" default="true"/>
+  <arg name="model" value="$(find bebopS)/urdf/bebop.urdf.xacro" />
+
+  <!-- send the robot XML to param server -->
+  <param name="robot_description" command="
+    $(find xacro)/xacro --inorder '$(arg model)'
+    enable_ground_truth:='$(arg enable_ground_truth)'
+    namespace:=$(arg name)
+    wind_force:=$(arg wind_force)
+    wind_start:=$(arg wind_start)
+    wind_duration:=$(arg wind_duration)
+    wind_direction_x:=$(arg wind_direction_x)
+    wind_direction_y:=$(arg wind_direction_y)
+    wind_direction_z:=$(arg wind_direction_z)
+    "
+  />
+  <param name="tf_prefix" type="string" value="$(arg tf_prefix)" />
+
+  <!-- push robot_description to factory and spawn robot in gazebo -->
+  <node name="spawn_robot" pkg="gazebo_ros" type="spawn_model"
+   args="-param robot_description
+         -urdf
+         -x $(arg x)
+         -y $(arg y)
+         -z $(arg z)
+         -model $(arg name)"
+   respawn="false" output="screen" >
+  </node>
+
+</launch>

@@ -1,4 +1,5 @@
 <?xml version="1.0"?>
+
 <launch>
     <arg name="name" default="bebop"/>
     <arg name="x" default="0.0" />
@@ -18,14 +19,14 @@
     <arg name="waypoint_filter" default="true"/>
     <arg name="EKFActive" default="false"/>
     
-  <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find teamsannio_med_control)/models"/>
-  <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find teamsannio_med_control)/models"/>
+  <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find bebopS)/models"/>
+  <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find bebopS)/models"/>
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find teamsannio_med_control)/worlds/$(arg world_name).world" />
+    <arg name="world_name" value="$(find bebopS)/worlds/$(arg world_name).world" />
   </include>
 
     <!-- Launch UAV -->
-    <include file="$(find med_uav_description)/launch/spawn_bebop.launch">
+    <include file="$(find bebopS)/launch/spawn_bebop.launch">
        <arg name="name" value="$(arg name)" />
        <arg name="x" value="$(arg x)"/>
        <arg name="y" value="$(arg y)"/>
@@ -39,11 +40,11 @@
     </include>
 
     <!-- Launch the controller  -->
-    <node name="position_controller_node" pkg="teamsannio_med_control" type="position_controller_node" output="screen"> 
-      <rosparam command="load" file="$(find teamsannio_med_control)/resource/controller_bebop.yaml" />
-      <rosparam command="load" file="$(find teamsannio_med_control)/resource/bebop.yaml" />
-      <rosparam command="load" file="$(find teamsannio_med_control)/resource/EKF_matrix.yaml" />
-      <rosparam command="load" file="$(find teamsannio_med_control)/resource/waypoint_filter.yaml" />
+    <node name="position_controller_node" pkg="bebopS" type="position_controller_node" output="screen"> 
+      <rosparam command="load" file="$(find bebopS)/resource/controller_bebop.yaml" />
+      <rosparam command="load" file="$(find bebopS)/resource/bebop.yaml" />
+      <rosparam command="load" file="$(find bebopS)/resource/EKF_matrix.yaml" />
+      <rosparam command="load" file="$(find bebopS)/resource/waypoint_filter.yaml" />
       <param name="use_sim_time" value="$(arg use_sim_time)" />
       <param name="csvFilesStoring" value="$(arg csvFilesStoring)"/>
       <param name="csvFilesStoringTime" value="$(arg csvFilesStoringTime)"/>
@@ -66,7 +67,7 @@
 
     <!-- Launch the trajectory generator -->
    <group ns="$(arg name)">
-       <node name="waypoint_example" pkg="teamsannio_med_control" type="waypoint_example" output="screen" args="$(find teamsannio_med_control)/resource/waypoints.txt"/>   
+       <node name="waypoint_example" pkg="bebopS" type="waypoint_example" output="screen" args="$(find bebopS)/resource/waypoints.txt"/>   
     </group>
 
 

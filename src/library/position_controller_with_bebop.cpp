@@ -16,11 +16,11 @@
  * limitations under the License.
  */
 
-#include "teamsannio_med_control/position_controller_with_bebop.h"
-#include "teamsannio_med_control/transform_datatypes.h"
-#include "teamsannio_med_control/Matrix3x3.h"
-#include "teamsannio_med_control/Quaternion.h" 
-#include "teamsannio_med_control/stabilizer_types.h"
+#include "bebopS/position_controller_with_bebop.h"
+#include "bebopS/transform_datatypes.h"
+#include "bebopS/Matrix3x3.h"
+#include "bebopS/Quaternion.h" 
+#include "bebopS/stabilizer_types.h"
 
 #include "bebop_msgs/default_topics.h"
 
@@ -55,7 +55,7 @@
 #define MAX_POS_Z                     1 /* Max position before emergency state along z-axis */
 #define MAX_VEL_ERR                   1 /* Max velocity error before emergency state */
 
-namespace teamsannio_med_control {
+namespace bebopS {
 
 PositionControllerWithBebop::PositionControllerWithBebop()
     : controller_active_(false),

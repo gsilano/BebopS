@@ -16,11 +16,11 @@
  * limitations under the License.
  */
 
-#include "teamsannio_med_control/position_controller.h"
-#include "teamsannio_med_control/transform_datatypes.h"
-#include "teamsannio_med_control/Matrix3x3.h"
-#include "teamsannio_med_control/Quaternion.h" 
-#include "teamsannio_med_control/stabilizer_types.h"
+#include "bebopS/position_controller.h"
+#include "bebopS/transform_datatypes.h"
+#include "bebopS/Matrix3x3.h"
+#include "bebopS/Quaternion.h" 
+#include "bebopS/stabilizer_types.h"
 
 #include <math.h> 
 #include <time.h>
@@ -47,7 +47,7 @@
 
 using namespace std;
 
-namespace teamsannio_med_control {
+namespace bebopS {
 
 PositionController::PositionController()
     : controller_active_(false),
@@ -119,7 +119,7 @@ PositionController::PositionController()
               0}) //Angular velocity z)
               {  
 
-			          //Initializing the structure employed to set the command signals
+			//Initializing the structure employed to set the command signals
             		command_trajectory_.setFromYaw(0);
             		command_trajectory_.position_W[0] = 0;
             		command_trajectory_.position_W[1] = 0;
@@ -141,7 +141,7 @@ PositionController::PositionController()
             		filter_parameters_.Rp_ = Eigen::MatrixXf::Zero(6,6);
             		filter_parameters_.Qp_ = Eigen::MatrixXf::Identity(6,6);
 
-            	  //The timers are used to fix the working frequency of the Outer and Inner loop
+            	        //The timers are used to fix the working frequency of the Outer and Inner loop
             		timer1_ = n1_.createTimer(ros::Duration(TsA), &PositionController::CallbackAttitude, this, false, true);
             		timer2_ = n2_.createTimer(ros::Duration(TsP), &PositionController::CallbackPosition, this, false, true);
 
@@ -402,12 +402,12 @@ void PositionController::SetLaunchFileParameters(){
 		listDerivativeAttitudeErrors_.clear();
 		listTimeAttitudeErrors_.clear();
 		listTimePositionErrors_.clear();
-    listDroneAngularVelocitiesABC_.clear();
-    listDroneTrajectoryReference_.clear();
-    listControlMixerTermsSaturated_.clear();
-    listControlMixerTermsUnsaturated_.clear();
-    listDronePosition_.clear();
-    listControlMixerTermsUnSaturatedBefore_.clear();
+	        listDroneAngularVelocitiesABC_.clear();
+	        listDroneTrajectoryReference_.clear();
+	        listControlMixerTermsSaturated_.clear();
+	        listControlMixerTermsUnsaturated_.clear();
+	        listDronePosition_.clear();
+	        listControlMixerTermsUnSaturatedBefore_.clear();
 
 		//the client needed to get information about the Gazebo simulation environment both the attitude and position errors
 		clientAttitude_ = clientHandleAttitude_.serviceClient<gazebo_msgs::GetWorldProperties>("/gazebo/get_world_properties");
@@ -632,8 +632,7 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     if(dataStoring_active_){
       //Saving the unsaturated values before the limiting
       std::stringstream tempControlMixerTermsUnSaturatedBefore;
-      tempControlMixerTermsUnSaturatedBefore << not_saturated_1 << "," << not_saturated_2 << "," << not_saturated_3 << "," << not_saturated_4 << "," << odometry_.timeStampSec << ","
-          << odometry_.timeStampNsec << "\n";
+      tempControlMixerTermsUnSaturatedBefore << not_saturated_1 << "," << not_saturated_2 << "," << not_saturated_3 << "," << not_saturated_4 << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
       listControlMixerTermsUnSaturatedBefore_.push_back(tempControlMixerTermsUnSaturatedBefore.str());
     }

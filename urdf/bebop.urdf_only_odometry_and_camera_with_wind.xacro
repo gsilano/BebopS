@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+
+<robot name="bebop" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:property name="namespace" value="$(arg namespace)" />
+  <xacro:property name="wind_force" value="$(arg wind_force)" />
+  <xacro:property name="wind_start" value="$(arg wind_start)" />
+  <xacro:property name="wind_duration" value="$(arg wind_duration)" />
+  <xacro:property name="wind_direction_x" value="$(arg wind_direction_x)" />
+  <xacro:property name="wind_direction_y" value="$(arg wind_direction_y)" />
+  <xacro:property name="wind_direction_z" value="$(arg wind_direction_z)" />
+
+  <!-- Instantiate bebop "mechanics" -->
+  	<xacro:include filename="$(find bebopS)/urdf/bebop_base.urdf.xacro" />
+  	<xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro" />
+
+  	<!-- Realistic odometry sensor with noise -->
+	<xacro:odometry_plugin_macro
+		namespace="${namespace}"
+		odometry_sensor_suffix=""
+		parent_link="base_link"
+		pose_topic="pose"
+		pose_with_covariance_topic="pose_with_covariance"
+		position_topic="position"
+		transform_topic="transform"
+		odometry_topic="odometry"
+		parent_frame_id="world"
+		child_frame_id="${namespace}/base_link"
+		mass_odometry_sensor="0.01"
+		measurement_divisor="4"
+		measurement_delay="0"
+		unknown_delay="0.0"
+		noise_normal_position="0.0 0.0 0.0"
+		noise_normal_quaternion="0.0 0.0 0.0"
+		noise_normal_linear_velocity="0.0 0.0 0.0"
+		noise_normal_angular_velocity="0.0 0.0 0.0"
+		noise_uniform_position="0.0 0.0 0.0"
+		noise_uniform_quaternion="0.0 0.0 0.0"
+		noise_uniform_linear_velocity="0.0 0.0 0.0"
+		noise_uniform_angular_velocity="0.0 0.0 0.0"
+		enable_odometry_map="false"
+		odometry_map=""
+		image_scale="">
+		<inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" /> <!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
+		<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+	</xacro:odometry_plugin_macro>
+
+	<!-- Instantiate a wind plugin -->
+	<gazebo>
+	    <!-- wind plugin -->
+	    <plugin name="wind_plugin" filename="librotors_gazebo_wind_plugin.so">
+	      <robotNamespace>$(arg namespace)/</robotNamespace>
+	      <xyzOffset>0 0 0</xyzOffset>
+	      <frameId>base_link</frameId>
+	      <linkName>base_link</linkName>
+	      <windDirection>1 1 -0.3</windDirection>
+	      <windForceMean>0</windForceMean>
+	      <windForceVariance>0.0</windForceVariance>
+	      <windGustDirection>$(arg wind_direction_x) $(arg wind_direction_y) $(arg wind_direction_z)</windGustDirection>
+	      <windGustStart>$(arg wind_start)</windGustStart>
+	      <windGustDuration>$(arg wind_duration)</windGustDuration>
+	      <windGustForceMean>$(arg wind_force)</windGustForceMean>
+	      <windGustForceVariance>0</windGustForceVariance>
+	    </plugin>
+	</gazebo>
+  
+</robot>
+
