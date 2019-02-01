@@ -12,15 +12,20 @@
     <arg name="wind_direction_x" default="0.0"/>
     <arg name="wind_direction_y" default="0.0"/>
     <arg name="wind_direction_z" default="1.0"/>
+    <arg name="csvFilesStoring" default="false"/>
+    <arg name="csvFilesStoringTime" default="15.0"/> <!-- seconds -->
+    <arg name="user_account" default="giuseppe"/>
+    <arg name="waypoint_filter" default="true"/>
+    <arg name="EKFActive" default="false"/>
     
-  <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find teamsannio_med_control)/models"/>
-  <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find teamsannio_med_control)/models"/>
+  <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find bebopS)/models"/>
+  <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find bebopS)/models"/>
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find teamsannio_med_control)/worlds/$(arg world_name).world" />
+    <arg name="world_name" value="$(find bebopS)/worlds/$(arg world_name).world" />
   </include>
 
     <!-- Launch UAV -->
-    <include file="$(find med_uav_description)/launch/spawn_bebop.launch">
+    <include file="$(find bebopS)/launch/spawn_bebop.launch">
        <arg name="name" value="$(arg name)" />
        <arg name="x" value="$(arg x)"/>
        <arg name="y" value="$(arg y)"/>
@@ -34,11 +39,17 @@
     </include>
 
     <!-- Launch the controller  -->
-    <node name="position_controller_node" pkg="teamsannio_med_control" type="position_controller_node" output="screen"> 
-      <rosparam command="load" file="$(find teamsannio_med_control)/resource/controller_bebop.yaml" />
-      <rosparam command="load" file="$(find teamsannio_med_control)/resource/bebop.yaml" />
-      <rosparam command="load" file="$(find teamsannio_med_control)/resource/EKF_matrix.yaml" />
+    <node name="position_controller_node" pkg="bebopS" type="position_controller_node" output="screen"> 
+      <rosparam command="load" file="$(find bebopS)/resource/controller_bebop.yaml" />
+      <rosparam command="load" file="$(find bebopS)/resource/bebop.yaml" />
+      <rosparam command="load" file="$(find bebopS)/resource/EKF_matrix.yaml" />
+      <rosparam command="load" file="$(find bebopS)/resource/waypoint_filter.yaml" />
       <param name="use_sim_time" value="$(arg use_sim_time)" />
+      <param name="csvFilesStoring" value="$(arg csvFilesStoring)"/>
+      <param name="csvFilesStoringTime" value="$(arg csvFilesStoringTime)"/>
+      <param name="user_account" value="$(arg user_account)"/>
+      <param name="waypoint_filter" value="$(arg waypoint_filter)"/>
+      <param name="EKFActive" value="$(arg EKFActive)"/>
       <remap from="/command/motor_speed" to="/gazebo/command/motor_speed" />
       <remap from="/odometry" to="/bebop/odometry" />
       <remap from="/odometry_gt" to="/bebop/odometry_gt" />
@@ -51,12 +62,12 @@
 
     <!-- Launch the trajectory generator -->
    <group ns="$(arg name)">
-       <node name="hovering_example" pkg="teamsannio_med_control" type="hovering_example" output="screen"/>   
+       <node name="hovering_example" pkg="bebopS" type="hovering_example" output="screen"/>   
     </group>
 
     <!-- Launch the trajectory plot -->
     <node name="position_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/odometry/pose/pose/position" output="screen" />
-    <node name="quaternion_to_rpy" pkg="teamsannio_med_control" type="quaternion_to_rpy" output="screen" >
+    <node name="quaternion_to_rpy" pkg="bebopS" type="quaternion_to_rpy" output="screen" >
        <remap from="/odometry" to="/bebop/odometry" />
        <remap from="/orientation_rpy" to="/bebop/orientation_rpy" />
     </node>
@@ -70,10 +81,11 @@
     <node name="smoothed_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/smoothedTrajectory/pose/pose/position" output="screen" />
 
     <!-- Launch the filtered output plot -->
-    <node name="position_plot_gt" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/filteredOutput/pose/pose/position" output="screen" />
+    <node name="position_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/filteredOutput/pose/pose/position" output="screen" />
+    <node name="velocity_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/filteredOutput/twist/twist/linear" output="screen" />
 
     <!-- Launch the state errors plot -->
-    <node name="state_errors_position_plot_gt" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/stateErrors/pose/pose/position" output="screen" />
-    <node name="state_errors_velocity_plot_gt" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/stateErrors/twist/twist/linear" output="screen" />
+    <node name="state_errors_position_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/stateErrors/pose/pose/position" output="screen" />
+    <node name="state_errors_velocity_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/stateErrors/twist/twist/linear" output="screen" />
 
 </launch>

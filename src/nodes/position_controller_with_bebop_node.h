@@ -31,12 +31,12 @@
 #include <ros/ros.h>
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
 
-#include "teamsannio_med_control/common.h"
-#include "teamsannio_med_control/position_controller_with_bebop.h"
-#include "teamsannio_med_control/parameters_ros.h"
-#include "teamsannio_med_control/parameters.h"
+#include "bebopS/common.h"
+#include "bebopS/position_controller_with_bebop.h"
+#include "bebopS/parameters_ros.h"
+#include "bebopS/parameters.h"
 
-namespace teamsannio_med_control {
+namespace bebopS {
 
     class PositionControllerWithBebopNode{
         public:

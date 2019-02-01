@@ -16,9 +16,9 @@
  * limitations under the License.
  */
 
-#include "teamsannio_med_control/transform_datatypes.h"
-#include "teamsannio_med_control/Matrix3x3.h"
-#include "teamsannio_med_control/Quaternion.h"
+#include "bebopS/transform_datatypes.h"
+#include "bebopS/Matrix3x3.h"
+#include "bebopS/Quaternion.h"
 
 #include <math.h> 
 #include <ros/ros.h>
@@ -48,7 +48,7 @@ void MsgCallback(const nav_msgs::Odometry odometry_msg)
                      odometry.orientation_W_B.w());
     tf::Matrix3x3 m(q);
 
-    // the tf::Quaternion has a method to acess roll pitch and yaw
+    // the tf::Quaternion has a method to access roll pitch and yaw
     double roll, pitch, yaw;
     m.getRPY(roll, pitch, yaw);
 
@@ -82,7 +82,7 @@ int main(int argc, char **argv){
 
     quat_subscriber = n.subscribe(mav_msgs::default_topics::ODOMETRY, 1, MsgCallback);
 
-    // check for incoming quaternions untill ctrl+c is pressed
+    // check for incoming quaternions until ctrl+c is pressed
     ROS_DEBUG("waiting for quaternion");
 
     ros::spin();

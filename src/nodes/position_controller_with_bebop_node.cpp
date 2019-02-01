@@ -17,18 +17,19 @@
  */
 
 #include <ros/ros.h>
+#include <mav_msgs/default_topics.h>
 #include <ros/console.h> 
 
 #include <std_msgs/Empty.h>
 
 #include "position_controller_with_bebop_node.h"
 
-#include "teamsannio_med_control/parameters_ros.h"
+#include "bebopS/parameters_ros.h"
 
-#include "teamsannio_msgs/default_topics.h"
+#include "bebopS_msgs/default_topics.h"
 #include "bebop_msgs/default_topics.h"
 
-namespace teamsannio_med_control {
+namespace bebopS {
 
 PositionControllerWithBebopNode::PositionControllerWithBebopNode() {
 
@@ -46,11 +47,11 @@ PositionControllerWithBebopNode::PositionControllerWithBebopNode() {
 
     takeoff_pub_ = nh.advertise<std_msgs::Empty>(bebop_msgs::default_topics::TAKE_OFF, 1);
 
-    odometry_filtered_pub_ = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::FILTERED_OUTPUT, 1);
+    odometry_filtered_pub_ = nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::FILTERED_OUTPUT, 1);
 
-    reference_angles_pub_ = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::REFERENCE_ANGLES, 1);
+    reference_angles_pub_ = nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::REFERENCE_ANGLES, 1);
 
-    smoothed_reference_pub_  = nh.advertise<nav_msgs::Odometry>(teamsannio_msgs::default_topics::SMOOTHED_TRAJECTORY, 1);
+    smoothed_reference_pub_  = nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::SMOOTHED_TRAJECTORY, 1);
 
 }
 
@@ -255,7 +256,7 @@ int main(int argc, char** argv){
 
     ros::NodeHandle nh2;
     
-    teamsannio_med_control::PositionControllerWithBebopNode position_controller_with_bebop_node;
+    bebopS::PositionControllerWithBebopNode position_controller_with_bebop_node;
 
     ros::spin();
 
