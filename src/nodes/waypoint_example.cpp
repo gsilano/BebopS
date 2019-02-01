@@ -32,7 +32,9 @@
 class WaypointWithTime {
  public:
   WaypointWithTime()
-      : waiting_time(0) {
+      : waiting_time(0),
+        position(0, 0, 0),
+        yaw(0) {
   }
 
   WaypointWithTime(double t, float x, float y, float z, float _yaw)

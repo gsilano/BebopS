@@ -52,18 +52,25 @@ PositionControllerNode::PositionControllerNode() {
     //Need to represent the variables into the plots
     odometry_filtered_pub_ = nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::FILTERED_OUTPUT, 1);
 
+    //Just for data plotting
     filtered_errors_pub_ = nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::STATE_ERRORS, 1);
 
+    //Just for data plotting
     reference_angles_pub_ = nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::REFERENCE_ANGLES, 1);
 
+    //Just for data plotting
     smoothed_reference_pub_  = nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::SMOOTHED_TRAJECTORY, 1);
 
+    //Just for data plotting
     uTerr_components_pub_  = nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::U_TERR_COMPONENTS, 1);
 
+    //Just for data plotting
     zVelocity_components_pub_ = nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::Z_VELOCITY_COMPONENTS, 1);
 
+    //Just for data plotting
     positionAndVelocityErrors_pub_= nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::POSITION_AND_VELOCITY_ERRORS, 1);
 
+    //Just for data plotting
     angularAndAngularVelocityErrors_pub_= nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::ANGULAR_AND_ANGULAR_VELOCITY_ERRORS, 1);
 
 }
@@ -222,6 +229,7 @@ void PositionControllerNode::InitializeParams() {
   position_controller_.filter_parameters_.Qp_(4,4) = position_controller_.filter_parameters_.Qp_vy_;                     
   position_controller_.filter_parameters_.Qp_(5,5) = position_controller_.filter_parameters_.Qp_vz_;
 
+  // The controller gains, vehicle, filter and waypoint paramters are set
   position_controller_.SetControllerGains();
   position_controller_.SetVehicleParameters();
   position_controller_.SetFilterParameters();
@@ -277,6 +285,7 @@ void PositionControllerNode::InitializeParams() {
 void PositionControllerNode::Publish(){
 }
 
+// Odometry ground truth callback
 void PositionControllerNode::OdometryGTCallback(const nav_msgs::OdometryConstPtr& odometry_msg_gt) {
 
     ROS_INFO_ONCE("PositionController got first odometry ground truth message.");
@@ -296,6 +305,7 @@ void PositionControllerNode::OdometryGTCallback(const nav_msgs::OdometryConstPtr
     }
 }
 
+// Odometry callback
 void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg) {
 
     ROS_INFO_ONCE("PositionController got first odometry message.");
@@ -303,7 +313,7 @@ void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& 
     if (waypointHasBeenPublished_){
 
 	      //These functions allow to put the odometry message into the odometry variable --> _position, _orientation,_velocit_body,
-              //_angular_velocity
+        //_angular_velocity
 	      EigenOdometry odometry;
 	      eigenOdometryFromMsg(odometry_msg, &odometry);
 	      position_controller_.SetOdometry(odometry);
@@ -329,36 +339,43 @@ void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& 
 	      odometry_filtered.header.stamp = odometry_msg->header.stamp;
 	      odometry_filtered_pub_.publish(odometry_filtered);
 
+	      // Just for data plotting
 	      nav_msgs::Odometry reference_angles;
 	      position_controller_.GetReferenceAngles(&reference_angles);
 	      reference_angles.header.stamp = odometry_msg->header.stamp;
 	      reference_angles_pub_.publish(reference_angles);
 
+	      // Just for data plotting
 	      nav_msgs::Odometry smoothed_reference;
 	      position_controller_.GetTrajectory(&smoothed_reference);
 	      smoothed_reference.header.stamp = odometry_msg->header.stamp;
 	      smoothed_reference_pub_.publish(smoothed_reference);
 
+	      // Just for data plotting
 	      nav_msgs::Odometry uTerr_components;
 	      position_controller_.GetUTerrComponents(&uTerr_components);
 	      uTerr_components.header.stamp = odometry_msg->header.stamp;
 	      uTerr_components_pub_.publish(uTerr_components);
 
+	      // Just for data plotting
 	      nav_msgs::Odometry zVelocity_components;
 	      position_controller_.GetVelocityAlongZComponents(&zVelocity_components);
 	      zVelocity_components.header.stamp = odometry_msg->header.stamp;
 	      zVelocity_components_pub_.publish(zVelocity_components);
 
+	      // Just for data plotting
 	      nav_msgs::Odometry positionAndVelocityErrors;
 	      position_controller_.GetPositionAndVelocityErrors(&positionAndVelocityErrors);
 	      positionAndVelocityErrors.header.stamp = odometry_msg->header.stamp;
 	      positionAndVelocityErrors_pub_.publish(positionAndVelocityErrors);
 
+	      // Just for data plotting
 	      nav_msgs::Odometry angularAndAngularVelocityErrors;
 	      position_controller_.GetAngularAndAngularVelocityErrors(&angularAndAngularVelocityErrors);
 	      angularAndAngularVelocityErrors.header.stamp = odometry_msg->header.stamp;
 	      angularAndAngularVelocityErrors_pub_.publish(angularAndAngularVelocityErrors);
 
+	      // Just for data plotting
 	      nav_msgs::Odometry filtered_errors;
 	      filtered_errors.pose.pose.position.x = odometry_filtered.pose.pose.position.x - odometry_gt_.pose.pose.position.x;
 	      filtered_errors.pose.pose.position.y = odometry_filtered.pose.pose.position.y - odometry_gt_.pose.pose.position.y;
