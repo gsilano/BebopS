@@ -85,6 +85,19 @@ These value can be modified before simulating the drone behavior acting on the l
    
 Finally, the waypoint and Kalman filters, as well as the data storage, can be enabled/disabled by using the variables: `csvFilesStoring`, `csvFilesStoringTime` (simulation time after which the data will be saved), `user_account` (required to define the storage path), `waypoint_filter` and `EKFActive`.   
 
+While, running in a terminal the command
+
+   ```
+   $ roslaunch bebops task1_world.launch
+   ```
+   
+the Parrot Bebop takes off from the ground and keeps indefinitely the hovering position subjected to wind gusts (up to 0.5 N) for a minute. Conversely, 
+
+   ```
+   $ roslaunch bebops task2_world.launch
+   ```
+   
+the drone starts to follow the trajectory expressed as a sequence of waypoints (x_r, y_r, z_r and \psi_r) published at a settled time (t_0, t_1, t_3, etc.), as described in `waypoint.txt` file. To avoid system instabilities, a waypoint filter is employed to smooth the trajectory.
 
 Bugs & Feature Requests
 --------------------------
