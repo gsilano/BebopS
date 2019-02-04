@@ -68,8 +68,23 @@ Basic Usage
 Launching the simulation is quite simple, so as customizing it: it is enough to run in a terminal the command
 
    ```
-   $ roslaunch bebops task1_world1.launch
+   $ roslaunch bebops bebop_without_controller.launch
    ```
+   
+> **Note** The first run of gazebo might take considerably long, as it will download some models from an online database. To avoid any problems when starting the simulation for the first time, you may run the `gazebo` command in the terminal line.
+
+The `bebop_without_controller.launch` file lets simulate the Parrot Bebop dynamics when no controllers are in the loop. Therefore, the drone pose can be modified by publishing the propellers angular velocity on the `/gazebo/command/motor_speed` topic. Moreover, external disturbances can also be simulated by varying the contents of the variables: `wind_force` (it represents the wind force expressed in Newton), `wind_start` (it indicates the time in seconds after which external forces will begin to act), `wind_duration` (the inveral time), `wind_direction` (the wind direction along the x, y and z-axis, its values are bounded between [-1, 1]). 
+
+To speed up the simulation, a certain set of sensors can be included when simulating the drone dynamics by varying the flags: `enable_odometry_sensor_with_noise`/`disable_odometry_sensor_with_noise` (it includes the odometry sensor with bias and noise terms), `enable_ground_truth_sensor` (it enables the ground truth sensor), `enable_wind_plugin` (even external disturbances will be simulated) and `enable_laser1D` (it enables the 1-D laser scanner).
+
+These value can be modified before simulating the drone behavior acting on the launch file or at runtime by running on the terminal:
+
+   ```
+   $ roslaunch bebops bebop_without_controller.launch enable_odometry_sensor_with_noise:=true
+   ```
+   
+Finally, the waypoint and Kalman filters, as well as the data storage, can be enabled/disabled by using the variables: `csvFilesStoring`, `csvFilesStoringTime` (simulation time after which the data will be saved), `user_account` (required to define the storage path), `waypoint_filter` and `EKFActive`.   
+
 
 Bugs & Feature Requests
 --------------------------
@@ -78,9 +93,7 @@ Please report bugs and request features by using the [Issue Tracker](https://git
 
 YouTube video
 ---------------------------------------------------------
-A YouTube video showing as the platform works is reported. The chosen sampling time (0.01ms) makes the simulation very slow. Indeed, to simulate only 10 seconds (`Sim Time` box in GAZEBO), 1 hour (`Real Time` box) is needed. Thus, the video has been speeded up at thirty-two times. Such behavior is determined by numerical issues occurring when the Euler's method with the 0.01ms sampling time is employed. It may be due to the iterative method (forward Euler) used to approximate the solution of the differential equations describing the aircraft dynamics. 
-
-A waypoint composed by unit components along the axes and the yaw angle equal to zero has been used to test the control system performance. As is shown at the end of the video, the waypoint is reached with a very small error. The RotorS hovering example node has been used to this aim replacing the coordinates in the 3D vector `desired_position` and modifying the Gazebo GUI show up time from 5s to 0.1s.
+A YouTube video showing the Parrot Bebop during the trajectory tracking is reported. The trajectory, described using waypoints, is shown in the `waypoint.txt` file.
 
 [![MED18_Industrial_Challenge, teamsannio proposal](https://github.com/gsilano/teamsannio_med_control/wiki/images/Miniature_YouTube_MED18_Industrial_Challenge_Proposal.png)](https://youtu.be/BvsEA0zH7bU "MED18_Industrial_Challenge, teamsannio proposal")
 
