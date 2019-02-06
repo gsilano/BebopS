@@ -50,8 +50,8 @@ To use the code developed and stored in this repository some preliminary actions
  $ git clone git@github.com:larics/rotors_simulator.git
  $ git clone git@github.com:larics/mav_comm.git
  $ git clone git@github.com:larics/BebopS.git
- $ cd ~/catkin_ws/src/rotors_simulator & git checkout med2018
- $ cd ~/catkin_ws/src/mav_comm & git checkout med2018
+ $ cd ~/catkin_ws/src/rotors_simulator & git checkout med18
+ $ cd ~/catkin_ws/src/mav_comm & git checkout med18
  $ rosdep update
  ```
 
