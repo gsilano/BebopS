@@ -1,6 +1,0 @@
-# Bebop vehicle parameters
-mass: 0.5
-inertia: {xx: 0.00389, xy: 0.0, xz: 0.0, yy: 0.00389, yz: 0.0, zz: 0.0078}
-bf: 8.54858e-6
-bm: 0.016
-l: 0.12905

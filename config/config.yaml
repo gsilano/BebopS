@@ -1,0 +1,4 @@
+sphinx:
+  takeoff: "/bebop/takeoff"
+  land: "/bebop/land"
+  

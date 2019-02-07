@@ -1,54 +1,77 @@
-<package>
+<?xml version="1.0"?>
+<package format="2">
+  <name>takeoff_sphinx_test</name>
+  <version>0.0.0</version>
+  <description>The takeoff_sphinx_test package</description>
 
-  <name>bebopS</name>
-  <version>0.1.7</version>
-  <description>This package aims to simulate the behavior of the Parrot Bebop by using SIL methodologies.</description>
+  <!-- One maintainer tag required, multiple allowed, one person per tag -->
+  <!-- Example:  -->
+  <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
+  <maintainer email="peter@todo.todo">peter</maintainer>
 
-  <maintainer email="giuseppe.silano@unisannio.it">Giuseppe Silano</maintainer>
-  <maintainer email="pasquale.oppido@unisannio.it">Pasquale Oppido</maintainer>
-  <maintainer email="luigi.iannelli@unisannio.it">Luigi Iannelli</maintainer>
-  <maintainer email="antun.ivanovic@gmail.com">Antun Ivanovic</maintainer>
 
-  <author>Giuseppe Silano</author>
-  <author>Pasquale Oppido</author>
-  <author>Luigi Iannelli</author>
-  <author>Antun Ivanovic</author>
+  <!-- One license tag required, multiple allowed, one license per tag -->
+  <!-- Commonly used license strings: -->
+  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
+  <license>TODO</license>
 
-  <license>Apache</license>
 
-  <url type="website">https://github.com/gsilano/BebopS</url>
-  <url type="bugtracker">https://github.com/gsilano/BebopS/issues</url>
+  <!-- Url tags are optional, but multiple are allowed, one per tag -->
+  <!-- Optional attribute type can be: website, bugtracker, or repository -->
+  <!-- Example: -->
+  <!-- <url type="website">http://wiki.ros.org/takeoff_sphinx_test</url> -->
 
+
+  <!-- Author tags are optional, multiple are allowed, one per tag -->
+  <!-- Authors do not have to be maintainers, but could be -->
+  <!-- Example: -->
+  <!-- <author email="jane.doe@example.com">Jane Doe</author> -->
+
+
+  <!-- The *depend tags are used to specify dependencies -->
+  <!-- Dependencies can be catkin packages or system dependencies -->
+  <!-- Examples: -->
+  <!-- Use depend as a shortcut for packages that are both build and exec dependencies -->
+  <!--   <depend>roscpp</depend> -->
+  <!--   Note that this is equivalent to the following: -->
+  <!--   <build_depend>roscpp</build_depend> -->
+  <!--   <exec_depend>roscpp</exec_depend> -->
+  <!-- Use build_depend for packages you need at compile time: -->
+  <!--   <build_depend>message_generation</build_depend> -->
+  <!-- Use build_export_depend for packages you need in order to build against this package: -->
+  <!--   <build_export_depend>message_generation</build_export_depend> -->
+  <!-- Use buildtool_depend for build tool packages: -->
+  <!--   <buildtool_depend>catkin</buildtool_depend> -->
+  <!-- Use exec_depend for packages you need at runtime: -->
+  <!--   <exec_depend>message_runtime</exec_depend> -->
+  <!-- Use test_depend for packages you need only for testing: -->
+  <!--   <test_depend>gtest</test_depend> -->
+  <!-- Use doc_depend for packages you need only for building documentation: -->
+  <!--   <doc_depend>doxygen</doc_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
-
-  <!-- Dependencies needed to compile this package. -->
-  <build_depend>gazebo_plugins</build_depend>
-  <build_depend>rotors_gazebo_plugins</build_depend>
-  <build_depend>gazebo_msgs</build_depend>
-  <build_depend>geometry_msgs</build_depend>
-  <build_depend>mav_msgs</build_depend>
-  <build_depend>nav_msgs</build_depend>
-  <build_depend>std_msgs</build_depend>
   <build_depend>bebop_driver</build_depend>
+  <build_depend>bebop_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>nav_msgs</build_depend>
   <build_depend>roscpp</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-  <build_depend>cmake_modules</build_depend>
-  <build_depend>tf2</build_depend>
-  <build_depend>tf</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_export_depend>bebop_driver</build_export_depend>
+  <build_export_depend>bebop_msgs</build_export_depend>
+  <build_export_depend>geometry_msgs</build_export_depend>
+  <build_export_depend>nav_msgs</build_export_depend>
+  <build_export_depend>roscpp</build_export_depend>
+  <build_export_depend>std_msgs</build_export_depend>
+  <exec_depend>bebop_driver</exec_depend>
+  <exec_depend>bebop_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
 
-  <!-- Dependencies needed after this package is compiled. -->
-  <run_depend>gazebo_plugins</run_depend>
-  <run_depend>rotors_gazebo_plugins</run_depend>
-  <run_depend>gazebo_msgs</run_depend>
-  <run_depend>dynamic_reconfigure</run_depend>
-  <run_depend>geometry_msgs</run_depend>
-  <run_depend>mav_msgs</run_depend>
-  <run_depend>std_msgs</run_depend>
-  <run_depend>nav_msgs</run_depend>
-  <run_depend>bebop_driver</run_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>sensor_msgs</run_depend>
-  <run_depend>tf2</run_depend>
-  <run_depend>tf</run_depend>
 
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+
+  </export>
 </package>
