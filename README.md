@@ -69,6 +69,8 @@ To use the code developed and stored in this repository some preliminary actions
    $ echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
    $ source ~/.bashrc
    ```
+Installation Instructions - Ubuntu 16.04 with ROS Kinetic and Sphinx
+--------------------------------------------------------------------
 
 Basic Usage
 ---------------------------------------------------------
