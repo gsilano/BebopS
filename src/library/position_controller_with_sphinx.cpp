@@ -469,28 +469,90 @@ void PositionControllerWithSphinx::GetOdometry(nav_msgs::Odometry* odometry_filt
 
 }
 
-void PositionControllerWithSphinx::SetOdometryEstimated() {
+// Just to analyze the components that get uTerr variable
+void PositionControllerWithSphinx::GetUTerrComponents(nav_msgs::Odometry* uTerrComponents){
 
-    extended_kalman_filter_bebop_.SetThrustCommand(u_T_);
-    extended_kalman_filter_bebop_.EstimatorWithoutNoise(&state_, &odometry_, &odometry_filtered_private_);
+  uTerrComponents->pose.pose.position.x = ( (alpha_z_/mu_z_) * dot_e_z_);
+  uTerrComponents->pose.pose.position.y = - ( (beta_z_/pow(mu_z_,2)) * e_z_);
+  uTerrComponents->pose.pose.position.z = ( g_ + ( (alpha_z_/mu_z_) * dot_e_z_) - ( (beta_z_/pow(mu_z_,2)) * e_z_) );
 
 }
 
+// Just to analyze the position and velocity errors
+void PositionControllerWithSphinx::GetPositionAndVelocityErrors(nav_msgs::Odometry* positionAndVelocityErrors){
+
+  positionAndVelocityErrors->pose.pose.position.x = e_x_;
+  positionAndVelocityErrors->pose.pose.position.y = e_y_;
+  positionAndVelocityErrors->pose.pose.position.z = e_z_;
+
+  positionAndVelocityErrors->twist.twist.linear.x = dot_e_x_;
+  positionAndVelocityErrors->twist.twist.linear.y = dot_e_y_;
+  positionAndVelocityErrors->twist.twist.linear.z = dot_e_z_;
+
+}
+
+// Just to analyze the attitude and angular velocity errors
+void PositionControllerWithSphinx::GetAngularAndAngularVelocityErrors(nav_msgs::Odometry* angularAndAngularVelocityErrors){
+
+  angularAndAngularVelocityErrors->pose.pose.position.x = e_phi_;
+  angularAndAngularVelocityErrors->pose.pose.position.y = e_theta_;
+  angularAndAngularVelocityErrors->pose.pose.position.z = e_psi_;
+
+  angularAndAngularVelocityErrors->twist.twist.linear.x = dot_e_phi_;
+  angularAndAngularVelocityErrors->twist.twist.linear.y = dot_e_theta_;
+  angularAndAngularVelocityErrors->twist.twist.linear.z = dot_e_psi_;
+
+}
+
+// Just to plot the data during the simulation
 void PositionControllerWithSphinx::GetReferenceAngles(nav_msgs::Odometry* reference_angles){
-    assert(reference_angles);
+   assert(reference_angles);
+
+   double u_x, u_y, u_z, u_Terr;
+   PosController(&control_.uT, &control_.phiR, &control_.thetaR, &u_x, &u_y, &u_z, &u_Terr);
 
    reference_angles->pose.pose.position.x = control_.phiR*180/M_PI;
    reference_angles->pose.pose.position.y = control_.thetaR*180/M_PI;
-
-   double u_x, u_y, u_T, u_Terr;
-   PosController(&u_x, &u_y, &u_T, &u_Terr);
+   reference_angles->pose.pose.position.z = control_.uT;
 
    reference_angles->twist.twist.linear.x = u_x;
    reference_angles->twist.twist.linear.y = u_y;
-   reference_angles->twist.twist.linear.z = u_Terr;  
+   reference_angles->twist.twist.linear.z = u_Terr;
 
 }
 
+// Just to plot the components make able to compute dot_e_z
+void PositionControllerWithSphinx::GetVelocityAlongZComponents(nav_msgs::Odometry* zVelocity_components){
+  assert(zVelocity_components);
+
+  zVelocity_components->pose.pose.position.x = state_.linearVelocity.x;
+  zVelocity_components->pose.pose.position.y = state_.linearVelocity.y;
+  zVelocity_components->pose.pose.position.z = state_.linearVelocity.z;
+
+  double phi, theta, psi;
+  Quaternion2Euler(&phi, &theta, &psi);
+
+  zVelocity_components->twist.twist.linear.x = (-sin(theta) * state_.linearVelocity.x);
+  zVelocity_components->twist.twist.linear.y = ( sin(phi) * cos(theta) * state_.linearVelocity.y);
+  zVelocity_components->twist.twist.linear.z = (cos(phi) * cos(theta) * state_.linearVelocity.z);
+
+}
+
+// The functions is used to get information about the estimated state when bias and noise affect both the accelerometer and angular rate measurements
+void PositionControllerWithSphinx::SetOdometryEstimated() {
+
+    extended_kalman_filter_bebop_.SetThrustCommand(control_.uT);
+
+    //The EKF works or not in according to the value of the EKF_active_ variables
+    if(EKF_active_)
+    	extended_kalman_filter_bebop_.EstimatorWithNoise(&state_, &odometry_, &odometry_filtered_private_);
+    else
+    	extended_kalman_filter_bebop_.Estimator(&state_, &odometry_);
+
+}
+
+
+// The function computes the command signals
 void PositionControllerWithSphinx::CalculateCommandSignals(geometry_msgs::Twist* ref_command_signals) {
     assert(ref_command_signals);
     
