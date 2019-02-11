@@ -16,12 +16,12 @@
  * limitations under the License.
  */
 
-#include "teamsannio_med_control/extendedKalmanFilter.h"
-#include "teamsannio_med_control/transform_datatypes.h"
-#include "teamsannio_med_control/Matrix3x3.h"
-#include "teamsannio_med_control/Quaternion.h" 
-#include "teamsannio_med_control/stabilizer_types.h"
-#include "teamsannio_med_control/common.h"
+#include "bebopS/extendedKalmanFilter.h"
+#include "bebopS/transform_datatypes.h"
+#include "bebopS/Matrix3x3.h"
+#include "bebopS/Quaternion.h" 
+#include "bebopS/stabilizer_types.h"
+#include "bebopS/common.h"
 
 #include <math.h> 
 #include <ros/ros.h>
@@ -35,7 +35,7 @@
 
 #define TsP                       10e-3  /* Position control sampling time */
 
-namespace teamsannio_med_control {
+namespace bebopS {
 
 ExtendedKalmanFilter::ExtendedKalmanFilter()
        :Xp_(Eigen::VectorXf::Zero(6)), 
@@ -61,8 +61,8 @@ ExtendedKalmanFilter::ExtendedKalmanFilter()
 		                            0, 0, 0,     0,    1,    0,
 		                            0, 0, 0,     0,    0,    1;
 
-                double mean = 0, std = 0.005;
-                std::normal_distribution<double>  distribution_(mean, std);
+                            double mean = 0, std = 0.005;
+                            std::normal_distribution<double>  distribution_(mean, std);
 
 }
 
@@ -73,8 +73,10 @@ void ExtendedKalmanFilter::SetOdometry(const EigenOdometry& odometry) {
    odometry_private_ = odometry;    
 }
 
+// Set the filter parameters
 void ExtendedKalmanFilter::SetFilterParameters(FilterParameters *filter_parameters_){
 
+   // Kalman's matrices
    Rp_private_ = filter_parameters_->Rp_; 
    Qp_private_ = filter_parameters_->Qp_;
 
@@ -85,7 +87,7 @@ void ExtendedKalmanFilter::SetFilterParameters(FilterParameters *filter_paramete
 }
 
 
-//Such function is used to disable the EKF
+// The function disables the Extended Kalman Filter
 void ExtendedKalmanFilter::Estimator(state_t *state_, EigenOdometry* odometry_){
    assert(state_);
    assert(odometry_);
@@ -113,6 +115,7 @@ void ExtendedKalmanFilter::Estimator(state_t *state_, EigenOdometry* odometry_){
  
 }
 
+// The function uses the Kalman filter output when noise is in the loop
 void ExtendedKalmanFilter::EstimatorWithNoise(state_t *state_, EigenOdometry* odometry_, nav_msgs::Odometry* odometry_filtered){
    assert(state_);
    assert(odometry_);
@@ -142,6 +145,7 @@ void ExtendedKalmanFilter::EstimatorWithNoise(state_t *state_, EigenOdometry* od
 
 }
 
+// When there is noise in the loop
 void ExtendedKalmanFilter::EstimatorWithoutNoise(state_t *state_, EigenOdometry* odometry_, nav_msgs::Odometry* odometry_filtered){
    assert(state_);
    assert(odometry_);
@@ -224,7 +228,7 @@ void ExtendedKalmanFilter::PredictWithoutNoise(){
     dy = dy + TsP * ( (u_T_private_/m_private_) * (sin(psi) * sin(theta) * cos(phi) - cos(psi) * sin(phi)));
     dz = dz + TsP * (-g_private_ + ( (u_T_private_/m_private_) * cos(theta) * cos(phi)));
 			 
-    // Prediction error Matrix
+    // Prediction error matrix
     P_ = A_private_*(P_)*A_private_.transpose() + Qp_std_;
  		
     //The predicted state
@@ -317,10 +321,10 @@ void ExtendedKalmanFilter::CorrectWithoutNoise(){
 
     Meas<< x,
            y,
-	   z,
-	   dx_ENU,
-	   dy_ENU,
-	   dz_ENU;
+	         z,
+	         dx_ENU,
+	         dy_ENU,
+	         dz_ENU;
 	
     Eigen::MatrixXf K(6,6);
     K = P_ * Hp_ * (Hp_.transpose() * P_ * Hp_ + Rp_std_).inverse();
@@ -366,10 +370,10 @@ void ExtendedKalmanFilter::CorrectWithNoise(){
 
     Meas<< x,
            y,
-	   z,
-	   dx_ENU,
-	   dy_ENU,
-	   dz_ENU;
+	         z,
+	         dx_ENU,
+	         dy_ENU,
+	         dz_ENU;
 	
     Eigen::MatrixXf K(6,6);
     K = P_ * Hp_ * (Hp_.transpose() * P_ * Hp_ + Rp_std_).inverse();

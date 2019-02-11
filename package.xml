@@ -1,8 +1,8 @@
 <package>
 
-  <name>teamsannio_med_control</name>
-  <version>0.1.6</version>
-  <description>This package provides the Bebop control algorithm.</description>
+  <name>bebopS</name>
+  <version>0.2.1</version>
+  <description>This package aims to simulate the behavior of the Parrot Bebop by using SIL methodologies.</description>
 
   <maintainer email="giuseppe.silano@unisannio.it">Giuseppe Silano</maintainer>
   <maintainer email="pasquale.oppido@unisannio.it">Pasquale Oppido</maintainer>
@@ -11,11 +11,13 @@
   <author>Giuseppe Silano</author>
   <author>Pasquale Oppido</author>
   <author>Luigi Iannelli</author>
+  <author>Antun Ivanovic</author>
+  <author>Peter Griggs</author>
 
   <license>Apache</license>
 
-  <url type="website">https://github.com/gsilano/teamsannio_med_control</url>
-  <url type="bugtracker">https://github.com/gsilano/teamsannio_med_control/issues</url>
+  <url type="website">https://github.com/gsilano/BebopS</url>
+  <url type="bugtracker">https://github.com/gsilano/BebopS/issues</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 

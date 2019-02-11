@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+
+<launch>
+  <arg name="name" default="wind_turbine"/>
+  <arg name="tf_prefix" default="$(optenv ROS_NAMESPACE)"/>
+  <arg name="x" default="2.0"/>
+  <arg name="y" default="0.0"/>
+  <arg name="z" default="0"/>
+  <arg name="yaw" default="3.14"/>
+  <arg name="enable_logging" default="false"/>
+  <arg name="enable_ground_truth" default="true"/>
+  <arg name="log_file" default="force_sensor_log"/>
+  <arg name="exclude_floor_link_from_collision_check" default="ground_plane::link"/>
+  <arg name="model" value="$(find bebopS)/urdf/wind_turbine.gazebo.xacro" />
+
+  <!-- send the robot XML to param server -->
+  <param name="/$(arg name)/robot_description" command="
+    $(find xacro)/xacro --inorder '$(arg model)'
+    enable_logging:=$(arg enable_logging)
+    enable_ground_truth:=$(arg enable_ground_truth)
+    exclude_floor_link_from_collision_check:=$(arg exclude_floor_link_from_collision_check)
+    log_file:=$(arg log_file)
+    name:=$(arg name)"
+  />
+    
+  <param name="tf_prefix" type="string" value="$(arg tf_prefix)" />
+
+  <!-- push robot_description to factory and spawn robot in gazebo -->
+  <node name="spawn_force_sensor" pkg="gazebo_ros" type="spawn_model"
+   args="-param /$(arg name)/robot_description
+         -urdf
+         -x $(arg x)
+         -y $(arg y)
+         -z $(arg z)
+         -Y $(arg yaw)
+         -model $(arg name)"
+   respawn="false" output="screen" >
+  </node>
+
+</launch>

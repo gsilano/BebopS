@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-#include "teamsannio_med_control/waypoint_filter.h"
+#include "bebopS/waypoint_filter.h"
 
 #include <Eigen/Eigen>
 #include <chrono>
@@ -27,7 +27,7 @@
 
 using namespace std;
 
-namespace teamsannio_med_control {
+namespace bebopS {
 
 WaypointFilter::WaypointFilter()
          :filter_initialized_(false){
@@ -51,6 +51,7 @@ WaypointFilter::WaypointFilter()
 
 WaypointFilter::~WaypointFilter() {}
 
+// Set the filter parameters
 void WaypointFilter::SetParameters(WaypointFilterParameters *waypointFilter_parameters_){
 
 
@@ -59,18 +60,21 @@ void WaypointFilter::SetParameters(WaypointFilterParameters *waypointFilter_para
 
 }
 
+// Set the trajectory point
 void WaypointFilter::SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory_positionControllerNode){
 
     command_trajectory_private_ = command_trajectory_positionControllerNode;
 
 }
 
+// Get the trajectory point from the control library
 void WaypointFilter::GetTrajectoryPoint(mav_msgs::EigenTrajectoryPoint* command_trajectory_positionController){
 
     *command_trajectory_positionController = command_trajectory_toSend_;
 
 }
 
+// Filter initialization
 void WaypointFilter::Initialize(state_t state_){
 
    if(!filter_initialized_){
@@ -84,6 +88,7 @@ void WaypointFilter::Initialize(state_t state_){
    }
 }
 
+// Trajectory generation
 void WaypointFilter::TrajectoryGeneration(){
 
     command_trajectory_toSend_.position_W[0] = (Tsf_/(Tsf_+H_)) * command_trajectory_toSend_.position_W[0] + (H_/(Tsf_+H_)) * command_trajectory_private_.position_W[0];
