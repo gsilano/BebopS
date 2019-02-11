@@ -1,7 +1,7 @@
 <package>
 
   <name>bebopS</name>
-  <version>0.1.7</version>
+  <version>0.2.0</version>
   <description>This package aims to simulate the behavior of the Parrot Bebop by using SIL methodologies.</description>
 
   <maintainer email="giuseppe.silano@unisannio.it">Giuseppe Silano</maintainer>
