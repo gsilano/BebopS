@@ -72,37 +72,66 @@ To use the code developed and stored in this repository some preliminary actions
 Installation Instructions - Ubuntu 16.04 with ROS Kinetic and Sphinx
 --------------------------------------------------------------------
 
-## Running code in Sphinx
-1. Start firmware
-```bash
-$ sudo systemctl start firmwared.service
-$ sudo firmwared
+To use the code developed with the Parrot-Sphinx simulator some preliminary actions are needed. First of all, what is Sphinx? Sphinx is a simulation tool initially thought to cover the needs of Parrot engineers developing drone software. The main concept is to run a Parrot drone firmware on a PC, in an isolated environment well separated from the host system, while Gazebo is in charge of simulating the physical and visual surroundings of the drone. For further information on Sphinx, please take a look at the [Parrot for Developers website](https://developer.parrot.com/docs/sphinx/index.html).
+
+Sphinx can run only on Linux 64 bits, and a minimum of 1 GByte of storage is necessary to its exection.
+
+1. Add a new apt repository to the systema dn install the packages
+
 ```
-* Check if firmware is running properly
-```bash
+$ echo "deb http://plf.parrot.com/sphinx/binary `lsb_release -cs`/" | sudo tee /etc/apt/sources.list.d/sphinx.list > /dev/null
+$ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 508B1AE5
+$ sudo apt-get update
+$ sudo apt-get install parrot-sphinx
+```
+>Note: At the end of installation, a system log out is needed and then relog is needed to complete the installation.
+
+2. Let's start the simulator.
+
+For Linux distributions coming with [systemd](https://en.wikipedia.org/wiki/Systemd), Firmwared is installed as a systemd service. Therefore you just need to launch the service by entering the command:
+
+```
+$ sudo systemctl start firmwared.service
+```
+
+>Note: A system restart is required to able to run the firmware. For old Linux distribution, firmwared needs to be launched manually from a shell ` $ sudo firmwared `.
+
+The execution of firmwared is blocking so do not close the shell. To check if all went well, enter the following command:
+
+```
 $ fdc ping
 PONG
 ```
+You should get a _PONG_ in response. Otherwise, check the [Troubleshooting page](https://developer.parrot.com/docs/sphinx/troubleshooting.html).
 
-2. Start Sphinx
-```bash
-$ sphinx --datalog /opt/parrot-sphinx/usr/share/sphinx/drones/bebop2.drone::with_front_cam=false
+3. Check the wifi interface name
+
+At this time, it is importanto to check whe wifi interface name by using the following command:
+
+```
+$ iwconfig
 ```
 
-3. Cd into the packages launch files folder
-```bash
-$ cd launch/
+and remember the host wifi interface name (usualy "wlan0" or "wlx"). It will be necessary in the next step.
+
+Simulated drones may use the host system wifi interface to communicate with the drone controller (e.g., FreeFlight). For his own purpose, a simulated drone "steals" the host wifi interface. While the simulation is running, the wifi interface is only accessible from within the simulated firmware. If an interface for Internet access is already on use, it would be disconnected.
+
+4. Launch the first simulation by choosing a `.drone` file and start Sphinx with it. Several `.drone` files are provided along with Sphinx installation. [Here](https://developer.parrot.com/docs/sphinx/dronefile.html) there is a full list of supported devices.
+
+```
+$ sphinx --datalog /opt/parrot-sphinx/usr/share/sphinx/drones/bebop2.drone::stolen_interface=<your_interface_name>
 ```
 
-4. Run the launch file with ROS, will start the Bebop Autonomy package as well as this package
-```bash
-$ roslaunch sphinx_controller_test.launch
+where the stolen interface name "wlan0" may be the name of the wifi interface. 
+
+> Note: As it is the first time Sphinx is started with this `.drone` file, it may take several seconds to download the drone firmware from the external server. Once the firmware is loaded, the simulation starts.
+
+5. At this time, the launch files implementing the hovering and trajectory following examples, respectively, can be executed by using the command reported below
+
 ```
-
-*Note*: make sure that the Bebop Autonomy launch file at bebop_node.launch has the ip address 10.202.0.1
-
-## Changes made to original package
-Since the Bebop already implements the inner loop controller, we have stripped out the logic for the functions related to the inner loop, like the AttitudeController. Instead we just get the waypoints and trajectory, and use the Position Controller to generate the control signals and use the Odometry data as feedback. In the OdometryCallback function in position_controller_node.cpp, we check if the drone has not taken off, since this must happen for the drone to fly in Sphinx. All of the flight is controlled by two functions: SendTakeoffMsg() and SendPilotMsg(). In SendPilotMsg(), we use the roll angle, pitch angle, and vertical velocity to compute a linear vector of control signals.
+$ roslaunch bebops task1_world_with_sphinx.launch
+$ roslaunch bebops task2_world_with_sphinx.launch
+```
 
 Basic Usage
 ---------------------------------------------------------
