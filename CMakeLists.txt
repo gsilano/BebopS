@@ -68,15 +68,23 @@ target_link_libraries(position_controller_node
 add_executable(position_controller_with_sphinx_node src/nodes/position_controller_with_sphinx_node.cpp)
 add_dependencies(position_controller_with_sphinx_node ${catkin_EXPORTED_TARGETS})
 target_link_libraries(position_controller_with_sphinx_node
-  position_controller_with_sphinx extendedKalmanFilter waypoint_filter  ${catkin_LIBRARIES})
+  position_controller_with_sphinx extendedKalmanFilter waypoint_filter ${catkin_LIBRARIES})
 
 add_executable(hovering_example src/nodes/hovering_example.cpp)
 target_link_libraries(hovering_example ${catkin_LIBRARIES})
 add_dependencies(hovering_example ${catkin_EXPORTED_TARGETS})
 
+add_executable(hovering_example_with_sphinx src/nodes/hovering_example_with_sphinx.cpp)
+target_link_libraries(hovering_example_with_sphinx ${catkin_LIBRARIES})
+add_dependencies(hovering_example_with_sphinx ${catkin_EXPORTED_TARGETS})
+
 add_executable(waypoint_example src/nodes/waypoint_example.cpp)
 target_link_libraries(waypoint_example ${catkin_LIBRARIES})
 add_dependencies(waypoint_example ${catkin_EXPORTED_TARGETS})
+
+add_executable(waypoint_example_with_sphinx src/nodes/waypoint_example_with_sphinx.cpp)
+target_link_libraries(waypoint_example_with_sphinx ${catkin_LIBRARIES})
+add_dependencies(waypoint_example_with_sphinx ${catkin_EXPORTED_TARGETS})
 
 add_executable(quaternion_to_rpy src/nodes/quaternion_to_rpy.cpp)
 target_link_libraries(quaternion_to_rpy ${catkin_LIBRARIES})
@@ -86,7 +94,7 @@ install(TARGETS position_controller extendedKalmanFilter position_controller_wit
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
-install(TARGETS position_controller position_controller_with_sphinx_node hovering_example waypoint_example quaternion_to_rpy
+install(TARGETS position_controller position_controller_with_sphinx hovering_example hovering_example_with_sphinx waypoint_example waypoint_example_with_sphinx quaternion_to_rpy
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

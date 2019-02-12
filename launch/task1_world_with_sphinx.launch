@@ -1,0 +1,98 @@
+<?xml version="1.0"?>
+
+<launch>
+  <arg name="name" default="bebop"/>
+  <arg name="ip" default="10.202.0.1" />            <!-- IPv4 address for Sphinx -->
+  <arg name="drone_type" default="bebop2" />          <!-- available drone types: bebop1, bebop2 -->
+  <arg name="config_file" default="$(find bebopS)/config/defaults.yaml" />
+  <arg name="camera_info_url" default="package://bebopS/data/$(arg drone_type)_camera_calib.yaml" />
+  <arg name="csvFilesStoring" default="false"/>
+  <arg name="csvFilesStoringTime" default="15.0"/> <!-- seconds -->
+  <arg name="user_account" default="giuseppe"/>
+  <arg name="waypoint_filter" default="true"/>
+  <arg name="EKFActive" default="false"/>
+  <arg name="enable_plots" default="false"/>
+  <arg name="plotName" default="bebopPlots"/>
+  
+   <!-- Launch the controller  -->
+   <node name="position_controller_with_sphinx_node" pkg="bebopS" type="position_controller_with_sphinx_node" output="screen"> 
+     <rosparam command="load" file="$(find bebopS)/resource/controller_bebop.yaml" />
+     <rosparam command="load" file="$(find bebopS)/resource/bebop.yaml" />
+     <rosparam command="load" file="$(find bebopS)/resource/EKF_matrix.yaml" />
+     <rosparam command="load" file="$(find bebopS)/resource/waypoint_filter.yaml" />
+     <param name="csvFilesStoring" value="$(arg csvFilesStoring)"/>
+     <param name="csvFilesStoringTime" value="$(arg csvFilesStoringTime)"/>
+     <param name="user_account" value="$(arg user_account)"/>
+     <param name="waypoint_filter" value="$(arg waypoint_filter)"/>
+     <param name="EKFActive" value="$(arg EKFActive)"/>
+     <remap from="/odom" to="/bebop/odom" />
+     <remap from="/takeoff" to="/bebop/takeoff" />
+     <remap from="/cmd_vel" to="/bebop/cmd_vel" />
+     <remap from="/land" to="/bebop/land" />
+     <remap from="/command/trajectory" to="/bebop/command/trajectory" />
+     <remap from="/referenceAngles" to="/bebop/referenceAngles" />
+     <remap from="/filteredOutput" to="/bebop/filteredOutput" />
+     <remap from="/smoothedTrajectory" to="/bebop/smoothedTrajectory" />
+     <remap from="/stateErrors" to="/bebop/stateErrors" />
+     <remap from="/command/trajectory" to="/bebop/command/trajectory" />
+   </node>
+
+   <group ns="$(arg name)">
+
+   <!-- Launch the trajectory generator -->
+     <node name="hovering_example_with_sphinx" pkg="bebopS" type="hovering_example_with_sphinx" output="screen"/> 
+
+     <node pkg="bebop_driver" name="bebop_driver" type="bebop_driver_node" output="screen">
+        <param name="camera_info_url" value="$(arg camera_info_url)" />
+        <param name="bebop_ip" value="$(arg ip)" />
+        <rosparam command="load" file="$(arg config_file)" />
+     </node>
+
+     <param name="robot_description" command="$(find xacro)/xacro $(find bebop_description)/urdf/bebop_base.urdf.xacro"/>
+     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+
+   </group>
+
+    <!-- Launch the trajectory plot -->
+    <group ns="$(arg plotName)" if="$(arg enable_plots)">
+       <node name="position_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/odometry/pose/pose/position" output="screen" />
+        <node name="quaternion_to_rpy" pkg="bebopS" type="quaternion_to_rpy" output="screen" >
+          <remap from="/odometry" to="/bebop/odometry" />
+          <remap from="/orientation_rpy" to="/bebop/orientation_rpy" />
+        </node>
+        <node name="orientation_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/orientation_rpy" output="screen" />
+
+         <!-- Launch the reference angles plot -->
+         <node name="reference_angles_uT_PhiR_ThetaR" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/referenceAngles/pose/pose/position" output="screen" />
+         <node name="reference_angles_Ux_Uy_Uterr" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/referenceAngles/twist/twist/linear" output="screen" />
+
+         <!-- Launch the smoothed trajectory plot -->
+         <node name="smoothed_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/smoothedTrajectory/pose/pose/position" output="screen" />
+
+         <!-- Launch the uTerr components plot -->
+         <node name="uTerr_components_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/uTerrComponents/pose/pose/position" output="screen" />
+
+         <!-- Launch the zVelocity components plot -->
+         <node name="zVelocity_components_plot_1" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/zVelocityComponents/pose/pose/position" output="screen" />
+         <node name="zVelocity_components_plot_2" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/zVelocityComponents/twist/twist/linear" output="screen" />
+
+          <!-- Launch the filtered output plot -->
+          <node name="position_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/filteredOutput/pose/pose/position" output="screen" />
+          <node name="velocity_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/filteredOutput/twist/twist/linear" output="screen" />
+
+          <!-- Launch the state errors plot -->
+          <node name="state_errors_position_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/stateErrors/pose/pose/position" output="screen" />
+          <node name="state_errors_velocity_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/stateErrors/twist/twist/linear" output="screen" />
+
+          <!-- Launch the position and velocity errors plot -->
+          <node name="position_errors_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/positionAndVelocityErrors/pose/pose/position" output="screen" />
+          <node name="velocity_errors_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/positionAndVelocityErrors/twist/twist/linear" output="screen" />
+
+           <!-- Launch the angular and angular velocities errors plot -->
+           <node name="angular_errors_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/angularAndAngularVelocityErrors/pose/pose/position" output="screen" />
+           <node name="angular_velocity_errors_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/angularAndAngularVelocityErrors/twist/twist/linear" output="screen" />
+
+     </group>
+
+</launch>
+

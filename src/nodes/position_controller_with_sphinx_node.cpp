@@ -23,7 +23,7 @@
 
 #include <std_msgs/Empty.h>
 
-#include "position_controller_with_bebop_node.h"
+#include "position_controller_with_sphinx_node.h"
 
 #include "bebopS/parameters_ros.h"
 
@@ -331,38 +331,26 @@ void PositionControllerWithSphinxNode::OdomCallback(const nav_msgs::OdometryCons
 	    // Just for data plotting
 	    nav_msgs::Odometry uTerr_components;
 	    position_controller_.GetUTerrComponents(&uTerr_components);
-	    uTerr_components.header.stamp = odometry_msg->header.stamp;
+	    uTerr_components.header.stamp = odom_msg->header.stamp;
 	    uTerr_components_pub_.publish(uTerr_components);
 
 	    // Just for data plotting
 	    nav_msgs::Odometry zVelocity_components;
 	    position_controller_.GetVelocityAlongZComponents(&zVelocity_components);
-	    zVelocity_components.header.stamp = odometry_msg->header.stamp;
+	    zVelocity_components.header.stamp = odom_msg->header.stamp;
 	    zVelocity_components_pub_.publish(zVelocity_components);
 
             // Just for data plotting
 	    nav_msgs::Odometry positionAndVelocityErrors;
 	    position_controller_.GetPositionAndVelocityErrors(&positionAndVelocityErrors);
-	    positionAndVelocityErrors.header.stamp = odometry_msg->header.stamp;
+	    positionAndVelocityErrors.header.stamp = odom_msg->header.stamp;
 	    positionAndVelocityErrors_pub_.publish(positionAndVelocityErrors);
 
 	    // Just for data plotting
 	    nav_msgs::Odometry angularAndAngularVelocityErrors;
 	    position_controller_.GetAngularAndAngularVelocityErrors(&angularAndAngularVelocityErrors);
-	    angularAndAngularVelocityErrors.header.stamp = odometry_msg->header.stamp;
+	    angularAndAngularVelocityErrors.header.stamp = odom_msg->header.stamp;
 	    angularAndAngularVelocityErrors_pub_.publish(angularAndAngularVelocityErrors);
-
-	    // Just for data plotting
-	    nav_msgs::Odometry filtered_errors;
-	    filtered_errors.pose.pose.position.x = odometry_filtered.pose.pose.position.x - odometry_gt_.pose.pose.position.x;
-	    filtered_errors.pose.pose.position.y = odometry_filtered.pose.pose.position.y - odometry_gt_.pose.pose.position.y;
-	    filtered_errors.pose.pose.position.z = odometry_filtered.pose.pose.position.z - odometry_gt_.pose.pose.position.z;
-	    filtered_errors.twist.twist.linear.x = odometry_filtered.twist.twist.linear.x - odometry_gt_.twist.twist.linear.x;
-	    filtered_errors.twist.twist.linear.y = odometry_filtered.twist.twist.linear.y - odometry_gt_.twist.twist.linear.y;
-	    filtered_errors.twist.twist.linear.z = odometry_filtered.twist.twist.linear.z - odometry_gt_.twist.twist.linear.z;
-
-	    filtered_errors.header.stamp = odometry_msg->header.stamp;
-	    filtered_errors_pub_.publish(filtered_errors);
 
     }	 
 }

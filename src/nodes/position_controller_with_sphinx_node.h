@@ -33,7 +33,7 @@
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
 
 #include "bebopS/common.h"
-#include "bebopS/position_controller_with_bebop.h"
+#include "bebopS/position_controller_with_sphinx.h"
 #include "bebopS/parameters_ros.h"
 #include "bebopS/parameters.h"
 
@@ -73,7 +73,7 @@ namespace bebopS {
             std::deque<ros::Duration> command_waiting_times_;
             ros::Timer command_timer_;
 
-            void MultiDofJointTrajectoryCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& trajectory_reference_msg);
+            void MultiDofJointTrajectoryCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& msg);
             void TakeOff();
             void OdomCallback(const nav_msgs::OdometryConstPtr& odom_msg);
 
