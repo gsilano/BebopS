@@ -2,11 +2,12 @@
 Changelog for package BebopS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-0.2.1 (2019-02-12)
+0.2.1 (2019-02-13)
 ------------------
 * The interface between the position_controller and the Parrot Sphinx simulator has been made
-* Added the hovering example file to publish the waypoint when Sphinx is in the loop
-* Added the waypoint example file to publish waypoints when Sphinx is in the loop
+* Added the hovering example file to publish the waypoint when the Parrot-Sphinx simulator is in the loop
+* Added the waypoint example file to publish waypoints when the Parrot-Sphinx simulator is in the loop
+* The task1_world_with_Sphinx and task2_world_with_Sphinx launch files allow to achieve hovering and trajectory tracking by using the Parrot-Sphinx simulator.
 * Contributors: Giuseppe Silano, Peter Griggs
 
 0.2.0 (2019-01-31)
