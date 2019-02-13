@@ -72,7 +72,7 @@ To use the code developed and stored in this repository some preliminary actions
 Installation Instructions - Ubuntu 16.04 with ROS Kinetic and Sphinx
 --------------------------------------------------------------------
 
-To use the code developed with the Parrot-Sphinx simulator some preliminary actions are needed. First of all, what is Sphinx? Sphinx is a simulation tool initially thought to cover the needs of Parrot engineers developing drone software. The main concept is to run a Parrot drone firmware on a PC, in an isolated environment well separated from the host system, while Gazebo is in charge of simulating the physical and visual surroundings of the drone. For further information on Sphinx, please take a look at the [Parrot for Developers website](https://developer.parrot.com/docs/sphinx/index.html).
+Preliminary actions are required to use the code developed with the Parrot-Sphinx simulator. First of all, **what is Sphinx?** Sphinx is a simulation tool initially thought to cover the needs of Parrot engineers developing drone software. The main concept is to run a Parrot drone firmware on a PC, in an isolated environment well separated from the host system, while Gazebo is in charge of simulating the physical and visual surroundings of the drone. For further information on Sphinx, please take a look at the [Parrot for Developers website](https://developer.parrot.com/docs/sphinx/index.html).
 
 Sphinx can run only on Linux 64 bits, and a minimum of 1 GByte of storage is necessary to its exection.
 
@@ -126,10 +126,27 @@ before simulating, the stolen interface needs to be configured. For further deta
 
 > Note: As it is the first time Sphinx is started with this `.drone` file, it may take several seconds to download the drone firmware from the external server. Once the firmware is loaded, the simulation starts.
 
-5. At this time, the launch files implementing the hovering and trajectory following examples, respectively, can be executed by using the command reported below
+5. At this time, the launch files implementing the hovering and trajectory tracking examples, respectively, can be executed by using the [**bebop_autonomy**](https://bebop-autonomy.readthedocs.io/en/latest/) ROS package 
 
 ```
+$ sudo apt-get install build-essential python-rosdep python-catkin-tools
+# Create and initialize the workspace
+$ mkdir -p ~/bebop_ws/src && cd ~/bebop_ws
+$ catkin init
+$ git clone https://github.com/AutonomyLab/bebop_autonomy.git src/bebop_autonomy
+# Update rosdep database and install dependencies (including parrot_arsdk)
+$ rosdep update
+$ rosdep install --from-paths src -i
+# Build the workspace
+$ catkin build
+```
+
+and the commands listed below
+
+```
+# Hovering example
 $ roslaunch bebopS task1_world_with_sphinx.launch
+# Trajectory tracking example
 $ roslaunch bebops task2_world_with_sphinx.launch
 ```
 
