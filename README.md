@@ -119,17 +119,17 @@ Simulated drones may use the host system wifi interface to communicate with the 
 4. Launch the first simulation by choosing a `.drone` file and start Sphinx with it. Several `.drone` files are provided along with Sphinx installation. [Here](https://developer.parrot.com/docs/sphinx/dronefile.html) there is a full list of supported devices.
 
 ```
-$ sphinx --datalog /opt/parrot-sphinx/usr/share/sphinx/drones/bebop2.drone::stolen_interface=<your_interface_name>
+$ sphinx --datalog /opt/parrot-sphinx/usr/share/sphinx/drones/bebop2.drone
 ```
 
-where the stolen interface name "wlan0" may be the name of the wifi interface. 
+before simulating, the stolen interface needs to be configured. For further details, take a look at the [Parrot-Sphinx documentation](https://developer.parrot.com/docs/sphinx/firststep.html). 
 
 > Note: As it is the first time Sphinx is started with this `.drone` file, it may take several seconds to download the drone firmware from the external server. Once the firmware is loaded, the simulation starts.
 
 5. At this time, the launch files implementing the hovering and trajectory following examples, respectively, can be executed by using the command reported below
 
 ```
-$ roslaunch bebops task1_world_with_sphinx.launch
+$ roslaunch bebopS task1_world_with_sphinx.launch
 $ roslaunch bebops task2_world_with_sphinx.launch
 ```
 
@@ -157,7 +157,7 @@ To speed up the simulation, a certain set of sensors can be included when simula
 These value can be modified before simulating the drone behavior acting on the launch file or at runtime by running on the terminal:
 
    ```
-   $ roslaunch bebops bebop_without_controller.launch enable_odometry_sensor_with_noise:=true
+   $ roslaunch bebopS bebop_without_controller.launch enable_odometry_sensor_with_noise:=true
    ```
    
 Finally, the waypoint and Kalman filters, as well as the data storage, can be enabled/disabled by using the variables: `csvFilesStoring`, `csvFilesStoringTime` (simulation time after which the data will be saved), `user_account` (required to define the storage path), `waypoint_filter` and `EKFActive`.   
@@ -165,13 +165,13 @@ Finally, the waypoint and Kalman filters, as well as the data storage, can be en
 While, running in a terminal the command
 
    ```
-   $ roslaunch bebops task1_world.launch
+   $ roslaunch bebopS task1_world.launch
    ```
    
 the Parrot Bebop takes off from the ground and keeps indefinitely the hovering position subjected to wind gusts (up to 0.5 N) for a minute. Conversely, 
 
    ```
-   $ roslaunch bebops task2_world.launch
+   $ roslaunch bebopS task2_world.launch
    ```
    
 the drone starts to follow the trajectory expressed as a sequence of waypoints (x_r, y_r, z_r and \psi_r) published at a settled time (t_0, t_1, t_3, etc.), as described in `waypoint.txt` file. To avoid system instabilities, a waypoint filter is employed to smooth the trajectory.
