@@ -12,19 +12,32 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   cmake_modules
+  message_generation
 )
 
 find_package(
   Eigen REQUIRED
 )
 
+#To add custom messages to the repository
+add_message_files(
+  FILES
+  Sphinx.msg
+)
+
+#For messages generation
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  geometry_msgs
+)
+
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
   LIBRARIES position_controller extendedKalmanFilter position_controller_with_sphinx waypoint_filter
-  CATKIN_DEPENDS geometry_msgs mav_msgs nav_msgs roscpp sensor_msgs std_msgs
+  CATKIN_DEPENDS geometry_msgs mav_msgs nav_msgs roscpp sensor_msgs std_msgs message_runtime
   DEPENDS Eigen 
 )
-
 
 include_directories(
   include

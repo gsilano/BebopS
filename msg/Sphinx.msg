@@ -1,0 +1,23 @@
+#This is custom message developed to bring data coming from the Sphinx data logger
+#Header header
+float32 velXABC
+float32 velYABC
+float32 velZABC
+float32 angVelXABC
+float32 angVelYABC
+float32 angVelZABC
+float32 velXENU
+float32 velYENU
+float32 velZENU
+float32 posX
+float32 posY
+float32 posZ
+float32 attitudeX
+float32 attitudeY
+float32 attitudeZ
+float32 accXABC
+float32 accYABC
+float32 accZABC
+float32 angAccXABC
+float32 angAccYABC
+float32 angAccZABC
