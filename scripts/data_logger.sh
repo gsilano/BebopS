@@ -15,4 +15,5 @@
 # limitations under the License.
 #
 #
+cd ~/catkin_ws/src/bebopS/scripts/
 sh data_logger_publishing.awk

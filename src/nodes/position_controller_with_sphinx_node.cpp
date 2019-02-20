@@ -48,6 +48,9 @@ PositionControllerWithSphinxNode::PositionControllerWithSphinxNode() {
     //To get the trajectory to follow
     cmd_multi_dof_joint_trajectory_sub_ = nh.subscribe(mav_msgs::default_topics::COMMAND_TRAJECTORY, 1,  &PositionControllerWithSphinxNode::MultiDofJointTrajectoryCallback, this);
 
+    //To get data coming from the Parrot-Sphinx data logger
+    logger_sub_ = nh.subscribe(bebopS_msgs::default_topics::PARROT_SPHINX_LOGGER, 30, &PositionControllerWithSphinxNode::LoggerCallback, this);
+
     //To get data coming from the bebop_autonomy package odometry topic
     odom_sub_ = nh.subscribe(bebop_msgs::default_topics::ODOM, 30, &PositionControllerWithSphinxNode::OdomCallback, this);
 
@@ -287,6 +290,12 @@ void PositionControllerWithSphinxNode::InitializeParams() {
 }
 
 void PositionControllerWithSphinxNode::Publish(){
+}
+
+void PositionControllerWithSphinxNode::LoggerCallback(const bebopS::Sphinx::ConstPrt& logger_msg) {
+
+   ROS_INFO("SONO ENTRATO");
+
 }
 
 void PositionControllerWithSphinxNode::OdomCallback(const nav_msgs::OdometryConstPtr& odom_msg) {

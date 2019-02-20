@@ -2,7 +2,7 @@
 Changelog for package BebopS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-0.2.1 (2019-02-13)
+0.2.1 (2019-02-20)
 ------------------
 * The interface between the position_controller and the Parrot Sphinx simulator has been made
 * Added the hovering example file to publish the waypoint when the Parrot-Sphinx simulator is in the loop

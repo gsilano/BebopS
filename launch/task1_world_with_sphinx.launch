@@ -14,11 +14,6 @@
   <arg name="enable_plots" default="false"/>
   <arg name="plotName" default="bebopPlots"/>
 
-  <!-- Awk file for data logging  -->
-  <node name="sphinx_data_logging_script" pkg="bebopS" >
-    <param name="cmd" value="$(find bebopS)/data_logger.sh"/>
-  </node>
-
   <!-- Launch the controller  -->
   <node name="position_controller_with_sphinx_node" pkg="bebopS" type="position_controller_with_sphinx_node" output="screen"> 
     <rosparam command="load" file="$(find bebopS)/resource/controller_bebop.yaml" />
@@ -40,6 +35,7 @@
     <remap from="/smoothedTrajectory" to="/bebop/smoothedTrajectory" />
     <remap from="/stateErrors" to="/bebop/stateErrors" />
     <remap from="/command/trajectory" to="/bebop/command/trajectory" />
+    <remap from="/parrotSphinx" to="/bebop/parrotSphinx" />
   </node>
 
   <group ns="$(arg name)">

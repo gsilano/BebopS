@@ -21,6 +21,8 @@
 namespace bebopS_msgs {
 	namespace default_topics {
 
+	static constexpr char PARROT_SPHINX_LOGGER[] = "parrotSphinx";
+
         static constexpr char FILTERED_OUTPUT[] = "filteredOutput";
         static constexpr char STATE_ERRORS[] = "stateErrors";
 

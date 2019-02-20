@@ -37,6 +37,9 @@
 #include "bebopS/parameters_ros.h"
 #include "bebopS/parameters.h"
 
+#include "bebopS/Sphinx.h"
+#include "bebopS/conversion.h
+
 namespace bebopS {
 
     class PositionControllerWithSphinxNode{
@@ -57,6 +60,7 @@ namespace bebopS {
             //subscribers
             ros::Subscriber cmd_multi_dof_joint_trajectory_sub_;
             ros::Subscriber odom_sub_;
+            ros::Subscriber logger_sub_;
 
             //publisher
             ros::Publisher motor_velocity_reference_pub_;
@@ -76,6 +80,7 @@ namespace bebopS {
             void MultiDofJointTrajectoryCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& msg);
             void TakeOff();
             void OdomCallback(const nav_msgs::OdometryConstPtr& odom_msg);
+            void LoggerCallback(const bebopS::Sphinx::ConstPrt& logger_msg);
 
 
     };

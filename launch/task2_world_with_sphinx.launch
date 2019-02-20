@@ -39,6 +39,7 @@
     <remap from="/zVelocityComponents" to="/bebop/zVelocityComponents" />
     <remap from="/positionAndVelocityErrors" to="/bebop/positionAndVelocityErrors" />
     <remap from="/angularAndAngularVelocityErrors" to="/bebop/angularAndAngularVelocityErrors" />
+    <remap from="/parrotSphinx" to="/bebop/parrotSphinx" />
   </node>
 
    <group ns="$(arg name)">

@@ -169,7 +169,7 @@ before simulating, the stolen interface needs to be configured. For further deta
 
 > Note: As it is the first time Sphinx is started with this `.drone` file, it may take several seconds to download the drone firmware from the external server. Once the firmware is loaded, the simulation starts.
 
-5. At this time, the launch files implementing the hovering and trajectory tracking examples, respectively, can be executed by using the [**bebop_autonomy**](https://bebop-autonomy.readthedocs.io/en/latest/) ROS package 
+5. At this time, the launch files implementing the hovering and trajectory tracking examples, respectively, can be executed by using the [**bebop_autonomy**](https://bebop-autonomy.readthedocs.io/en/latest/) ROS package. Below are the installation instructions for the ROS package:
 
 ```
 $ sudo apt-get install build-essential python-rosdep python-catkin-tools
@@ -184,7 +184,7 @@ $ rosdep install --from-paths src -i
 $ catkin build
 ```
 
-change the access permissions for the files listed in the script folder 
+Then, the access permissions for the files listed in the scripts folder have to be changed. It can be done, using the commands 
 
 ```
 $ cd ~/catkin_ws/src/bebopS/scripts/
@@ -194,7 +194,12 @@ $ sudo chmod 777 data_logger.sh
 $ sudo chmod 777 data_logger_publising.awk
 ```
 
-and the commands listed below
+Finally, the simulation can be performed through the commands listed below (they have to be runned in two different terminals)
+
+```
+# Sh script to enable the publication of the data logger
+$ sh data_logger.sh
+```
 
 ```
 # Hovering example
