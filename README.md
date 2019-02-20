@@ -69,6 +69,49 @@ To use the code developed and stored in this repository some preliminary actions
    $ echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
    $ source ~/.bashrc
    ```
+   Basic Usage
+---------------------------------------------------------
+
+Launching the simulation is quite simple, so as customizing it: it is enough to run in a terminal the command
+
+   ```
+   $ roslaunch bebops bebop_without_controller.launch
+   ```
+   
+> **Note** The first run of gazebo might take considerably long, as it will download some models from an online database. To avoid any problems when starting the simulation for the first time, you may run the `gazebo` command in the terminal line.
+
+The `bebop_without_controller.launch` file lets simulate the Parrot Bebop dynamics when no controllers are in the loop. Therefore, the drone pose can be modified by publishing the propellers angular velocity on the `/gazebo/command/motor_speed` topic. Moreover, external disturbances can also be simulated by varying the contents of the variables: `wind_force` (it represents the wind force expressed in Newton), `wind_start` (it indicates the time in seconds after which external forces will begin to act), `wind_duration` (the inveral time), `wind_direction` (the wind direction along the x, y and z-axis, its values are bounded between [-1, 1]). 
+
+To let the multicopter fly you need to generate thrust with the rotors, this is achieved by sending commands to the multicopter, which make the rotors spin. 
+
+   ```
+   $ rostopic pub /gazebo/command/motor_speed mav_msgs/Actuators '{angular_velocities: [1000, 1000, 1000, 1000]}'
+   ```
+
+To speed up the simulation, a certain set of sensors can be included when simulating the drone dynamics by varying the flags: `enable_odometry_sensor_with_noise`/`disable_odometry_sensor_with_noise` (it includes the odometry sensor with bias and noise terms), `enable_ground_truth_sensor` (it enables the ground truth sensor), `enable_wind_plugin` (even external disturbances will be simulated) and `enable_laser1D` (it enables the 1-D laser scanner).
+
+These value can be modified before simulating the drone behavior acting on the launch file or at runtime by running on the terminal:
+
+   ```
+   $ roslaunch bebopS bebop_without_controller.launch enable_odometry_sensor_with_noise:=true
+   ```
+   
+Finally, the waypoint and Kalman filters, as well as the data storage, can be enabled/disabled by using the variables: `csvFilesStoring`, `csvFilesStoringTime` (simulation time after which the data will be saved), `user_account` (required to define the storage path), `waypoint_filter` and `EKFActive`.   
+
+While, running in a terminal the command
+
+   ```
+   $ roslaunch bebopS task1_world.launch
+   ```
+   
+the Parrot Bebop takes off from the ground and keeps indefinitely the hovering position subjected to wind gusts (up to 0.5 N) for a minute. Conversely, 
+
+   ```
+   $ roslaunch bebopS task2_world.launch
+   ```
+   
+the drone starts to follow the trajectory expressed as a sequence of waypoints (x_r, y_r, z_r and \psi_r) published at a settled time (t_0, t_1, t_3, etc.), as described in `waypoint.txt` file. To avoid system instabilities, a waypoint filter is employed to smooth the trajectory.
+
 Installation Instructions - Ubuntu 16.04 with ROS Kinetic and Sphinx
 --------------------------------------------------------------------
 
@@ -141,6 +184,16 @@ $ rosdep install --from-paths src -i
 $ catkin build
 ```
 
+change the access permissions for the files listed in the script folder 
+
+```
+$ cd ~/catkin_ws/src/bebopS/scripts/
+# Sh script to start recording data from the Parrot-Sphinx simulator
+$ sudo chmod 777 data_logger.sh
+# Awk script in charge of publishing the Parrot-Sphinx simulator data
+$ sudo chmod 777 data_logger_publising.awk
+```
+
 and the commands listed below
 
 ```
@@ -149,49 +202,6 @@ $ roslaunch bebopS task1_world_with_sphinx.launch
 # Trajectory tracking example
 $ roslaunch bebops task2_world_with_sphinx.launch
 ```
-
-Basic Usage
----------------------------------------------------------
-
-Launching the simulation is quite simple, so as customizing it: it is enough to run in a terminal the command
-
-   ```
-   $ roslaunch bebops bebop_without_controller.launch
-   ```
-   
-> **Note** The first run of gazebo might take considerably long, as it will download some models from an online database. To avoid any problems when starting the simulation for the first time, you may run the `gazebo` command in the terminal line.
-
-The `bebop_without_controller.launch` file lets simulate the Parrot Bebop dynamics when no controllers are in the loop. Therefore, the drone pose can be modified by publishing the propellers angular velocity on the `/gazebo/command/motor_speed` topic. Moreover, external disturbances can also be simulated by varying the contents of the variables: `wind_force` (it represents the wind force expressed in Newton), `wind_start` (it indicates the time in seconds after which external forces will begin to act), `wind_duration` (the inveral time), `wind_direction` (the wind direction along the x, y and z-axis, its values are bounded between [-1, 1]). 
-
-To let the multicopter fly you need to generate thrust with the rotors, this is achieved by sending commands to the multicopter, which make the rotors spin. 
-
-   ```
-   $ rostopic pub /gazebo/command/motor_speed mav_msgs/Actuators '{angular_velocities: [1000, 1000, 1000, 1000]}'
-   ```
-
-To speed up the simulation, a certain set of sensors can be included when simulating the drone dynamics by varying the flags: `enable_odometry_sensor_with_noise`/`disable_odometry_sensor_with_noise` (it includes the odometry sensor with bias and noise terms), `enable_ground_truth_sensor` (it enables the ground truth sensor), `enable_wind_plugin` (even external disturbances will be simulated) and `enable_laser1D` (it enables the 1-D laser scanner).
-
-These value can be modified before simulating the drone behavior acting on the launch file or at runtime by running on the terminal:
-
-   ```
-   $ roslaunch bebopS bebop_without_controller.launch enable_odometry_sensor_with_noise:=true
-   ```
-   
-Finally, the waypoint and Kalman filters, as well as the data storage, can be enabled/disabled by using the variables: `csvFilesStoring`, `csvFilesStoringTime` (simulation time after which the data will be saved), `user_account` (required to define the storage path), `waypoint_filter` and `EKFActive`.   
-
-While, running in a terminal the command
-
-   ```
-   $ roslaunch bebopS task1_world.launch
-   ```
-   
-the Parrot Bebop takes off from the ground and keeps indefinitely the hovering position subjected to wind gusts (up to 0.5 N) for a minute. Conversely, 
-
-   ```
-   $ roslaunch bebopS task2_world.launch
-   ```
-   
-the drone starts to follow the trajectory expressed as a sequence of waypoints (x_r, y_r, z_r and \psi_r) published at a settled time (t_0, t_1, t_3, etc.), as described in `waypoint.txt` file. To avoid system instabilities, a waypoint filter is employed to smooth the trajectory.
 
 Bugs & Feature Requests
 --------------------------
