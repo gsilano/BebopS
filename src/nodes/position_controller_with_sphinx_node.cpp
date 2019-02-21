@@ -51,6 +51,9 @@ PositionControllerWithSphinxNode::PositionControllerWithSphinxNode() {
     //To get data coming from the Parrot-Sphinx data logger
     logger_sub_ = nh.subscribe(bebopS_msgs::default_topics::PARROT_SPHINX_LOGGER, 30, &PositionControllerWithSphinxNode::LoggerCallback, this);
 
+    // The client needed to get information about the Gazebo simulation environment every time a new odometry message come from the logger
+    clientOdometryFromLogger_ = clientHandleOdometryFromLogger_.serviceClient<gazebo_msgs::GetWorldProperties>("/gazebo/get_world_properties");
+
     //To get data coming from the bebop_autonomy package odometry topic
     odom_sub_ = nh.subscribe(bebop_msgs::default_topics::ODOM, 30, &PositionControllerWithSphinxNode::OdomCallback, this);
 
@@ -292,9 +295,91 @@ void PositionControllerWithSphinxNode::InitializeParams() {
 void PositionControllerWithSphinxNode::Publish(){
 }
 
-void PositionControllerWithSphinxNode::LoggerCallback(const bebopS::Sphinx::ConstPrt& logger_msg) {
+void PositionControllerWithSphinxNode::LoggerCallback(const bebopS::Sphinx logger_msg) {
 
-   ROS_INFO("SONO ENTRATO");
+    ROS_INFO_ONCE("PositionController with Bebop got first logger odometry message.");
+
+    if (waypointHasBeenPublished_){
+
+	    // The data come from the Parrot-Sphinx logger are used to build a new odometry message, later used
+	    // by the position controller libray
+	    EigenOdometry odometry_logger;
+            EigenOdometry attitude_logger;
+
+	    // Drone position in inertial reference system
+	    odometry_logger.position[0] = logger_msg.posX;
+	    odometry_logger.position[1] = logger_msg.posX;
+	    odometry_logger.position[2] = logger_msg.posX;
+
+	    // Drone orientation in radians (Euler angles)
+	    attitude_logger.position[0] = logger_msg.attitudeX;
+	    attitude_logger.position[1] = logger_msg.attitudeY;
+	    attitude_logger.position[2] = logger_msg.attitudeZ;
+
+	    // Drone linear velocity in the inertial reference system
+	    odometry_logger.velocity[0] = logger_msg.velXENU;
+	    odometry_logger.velocity[1] = logger_msg.velYENU;
+	    odometry_logger.velocity[2] = logger_msg.velZENU;
+
+	    // Drone angular velocity in the aircraft body center reference system
+	    odometry_logger.angular_velocity[0] = logger_msg.angVelXABC;
+	    odometry_logger.angular_velocity[1] = logger_msg.angVelYABC;
+	    odometry_logger.angular_velocity[2] = logger_msg.angVelZABC;
+
+            position_controller_.SetOdomFromLogger(odometry_logger, attitude_logger);
+
+            //For taking off the drone if it is not
+            if (!takeOffMsgHasBeenSent_)            
+                TakeOff();
+
+            //creating a new twist message. twist_msg is used to send the command signals
+	    geometry_msgs::Twist ref_command_signals;
+	    position_controller_.CalculateCommandSignals(&ref_command_signals);
+	    motor_velocity_reference_pub_.publish(ref_command_signals);          
+
+            //The code reported below is used to plot the data when the simulation is running
+            nav_msgs::Odometry odometry_filtered;
+            position_controller_.GetOdometry(&odometry_filtered);
+            odometry_filtered.header.stamp = ros::Time::now();
+            odometry_filtered_pub_.publish(odometry_filtered);
+
+            // Just for data plotting
+            nav_msgs::Odometry reference_angles;
+            position_controller_.GetReferenceAngles(&reference_angles);
+            reference_angles.header.stamp = ros::Time::now();
+            reference_angles_pub_.publish(reference_angles);
+
+            // Just for data plotting
+            nav_msgs::Odometry smoothed_reference;
+            position_controller_.GetTrajectory(&smoothed_reference);
+            smoothed_reference.header.stamp = ros::Time::now();
+            smoothed_reference_pub_.publish(smoothed_reference);
+
+	    // Just for data plotting
+	    nav_msgs::Odometry uTerr_components;
+	    position_controller_.GetUTerrComponents(&uTerr_components);
+	    uTerr_components.header.stamp = ros::Time::now();
+	    uTerr_components_pub_.publish(uTerr_components);
+
+	    // Just for data plotting
+	    nav_msgs::Odometry zVelocity_components;
+	    position_controller_.GetVelocityAlongZComponents(&zVelocity_components);
+	    zVelocity_components.header.stamp = ros::Time::now();
+	    zVelocity_components_pub_.publish(zVelocity_components);
+
+            // Just for data plotting
+	    nav_msgs::Odometry positionAndVelocityErrors;
+	    position_controller_.GetPositionAndVelocityErrors(&positionAndVelocityErrors);
+	    positionAndVelocityErrors.header.stamp = ros::Time::now();
+	    positionAndVelocityErrors_pub_.publish(positionAndVelocityErrors);
+
+	    // Just for data plotting
+	    nav_msgs::Odometry angularAndAngularVelocityErrors;
+	    position_controller_.GetAngularAndAngularVelocityErrors(&angularAndAngularVelocityErrors);
+	    angularAndAngularVelocityErrors.header.stamp = ros::Time::now();
+	    angularAndAngularVelocityErrors_pub_.publish(angularAndAngularVelocityErrors);
+
+    }
 
 }
 
@@ -309,57 +394,6 @@ void PositionControllerWithSphinxNode::OdomCallback(const nav_msgs::OdometryCons
 	    EigenOdometry odom;
 	    eigenOdometryFromMsg(odom_msg, &odom);
 	    position_controller_.SetOdom(odom);
-
-            //For taking off the drone if it is not
-            if (!takeOffMsgHasBeenSent_)            
-                TakeOff();
-
-            //creating a new twist message. twist_msg is used to send the command signals
-	    geometry_msgs::Twist ref_command_signals;
-	    position_controller_.CalculateCommandSignals(&ref_command_signals);
-	    motor_velocity_reference_pub_.publish(ref_command_signals);
-
-            //The code reported below is used to plot the data when the simulation is running
-            nav_msgs::Odometry odometry_filtered;
-            position_controller_.GetOdometry(&odometry_filtered);
-            odometry_filtered.header.stamp = odom_msg->header.stamp;
-            odometry_filtered_pub_.publish(odometry_filtered);
-
-            // Just for data plotting
-            nav_msgs::Odometry reference_angles;
-            position_controller_.GetReferenceAngles(&reference_angles);
-            reference_angles.header.stamp = odom_msg->header.stamp;
-            reference_angles_pub_.publish(reference_angles);
-
-            // Just for data plotting
-            nav_msgs::Odometry smoothed_reference;
-            position_controller_.GetTrajectory(&smoothed_reference);
-            smoothed_reference.header.stamp = odom_msg->header.stamp;
-            smoothed_reference_pub_.publish(smoothed_reference);
-
-	    // Just for data plotting
-	    nav_msgs::Odometry uTerr_components;
-	    position_controller_.GetUTerrComponents(&uTerr_components);
-	    uTerr_components.header.stamp = odom_msg->header.stamp;
-	    uTerr_components_pub_.publish(uTerr_components);
-
-	    // Just for data plotting
-	    nav_msgs::Odometry zVelocity_components;
-	    position_controller_.GetVelocityAlongZComponents(&zVelocity_components);
-	    zVelocity_components.header.stamp = odom_msg->header.stamp;
-	    zVelocity_components_pub_.publish(zVelocity_components);
-
-            // Just for data plotting
-	    nav_msgs::Odometry positionAndVelocityErrors;
-	    position_controller_.GetPositionAndVelocityErrors(&positionAndVelocityErrors);
-	    positionAndVelocityErrors.header.stamp = odom_msg->header.stamp;
-	    positionAndVelocityErrors_pub_.publish(positionAndVelocityErrors);
-
-	    // Just for data plotting
-	    nav_msgs::Odometry angularAndAngularVelocityErrors;
-	    position_controller_.GetAngularAndAngularVelocityErrors(&angularAndAngularVelocityErrors);
-	    angularAndAngularVelocityErrors.header.stamp = odom_msg->header.stamp;
-	    angularAndAngularVelocityErrors_pub_.publish(angularAndAngularVelocityErrors);
 
     }	 
 }

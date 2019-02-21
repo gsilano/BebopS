@@ -52,10 +52,13 @@ class ExtendedKalmanFilter {
 
      //The function is used to disable the Extended Kalman Filter
      void Estimator(state_t *state_, EigenOdometry* odometry_);
+     void EstimatorSphinxLogger(state_t *state_, EigenOdometry* odometry_from_logger_, EigenOdometry* attitude_from_logger_);
 
   private:
 
      EigenOdometry odometry_private_;
+     EigenOdometry odometryFromLogger_private_;
+     EigenOdometry attitudeFromLogger_private_;
 
      //Filter Vectors
      Eigen::VectorXf Xp_, Xe_, Hatx_;
@@ -73,6 +76,7 @@ class ExtendedKalmanFilter {
      void Quaternion2Euler(double* roll, double* pitch, double* yaw) const;
      void AttitudeAddingNoise(double *phin, double *thetan, double* psin, double phi, double theta, double psi);
      void SetOdometry(const EigenOdometry& odometry);
+     void SetOdometryFromLogger(const EigenOdometry& odometryFromLogger, const EigenOdometry& attitudeFromLogger);
      void CorrectWithoutNoise();
      void CorrectWithNoise();
      void PredictWithoutNoise();

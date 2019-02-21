@@ -38,7 +38,8 @@
 #include "bebopS/parameters.h"
 
 #include "bebopS/Sphinx.h"
-#include "bebopS/conversion.h
+
+#include <gazebo_msgs/GetWorldProperties.h>
 
 namespace bebopS {
 
@@ -56,6 +57,11 @@ namespace bebopS {
             bool takeOffMsgHasBeenSent_ = false;
 
             PositionControllerWithSphinx position_controller_;
+
+            //Gazebo services for timing messages come from the logger
+            ros::NodeHandle clientHandleOdometryFromLogger_;
+            ros::ServiceClient clientOdometryFromLogger_;
+            gazebo_msgs::GetWorldProperties my_messageOdometryFromLogger_;
 
             //subscribers
             ros::Subscriber cmd_multi_dof_joint_trajectory_sub_;
@@ -80,7 +86,7 @@ namespace bebopS {
             void MultiDofJointTrajectoryCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& msg);
             void TakeOff();
             void OdomCallback(const nav_msgs::OdometryConstPtr& odom_msg);
-            void LoggerCallback(const bebopS::Sphinx::ConstPrt& logger_msg);
+            void LoggerCallback(const bebopS::Sphinx logger_msg);
 
 
     };

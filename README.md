@@ -198,7 +198,7 @@ Finally, the simulation can be performed through the commands listed below (they
 
 ```
 # Sh script to enable the publication of the data logger
-$ sh data_logger.sh
+$ rosrun bebopS data_logger.sh
 ```
 
 ```

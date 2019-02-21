@@ -101,6 +101,7 @@ class PositionControllerParameters {
             void CalculateCommandSignals(geometry_msgs::Twist* ref_command_signals);
 
             void SetOdom(const EigenOdometry& odometry);
+            void SetOdomFromLogger(const EigenOdometry& odometry_from_logger, const EigenOdometry& attitude_from_logger);
             void SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory_positionControllerNode);
             void SetControllerGains();
             void SetVehicleParameters();
@@ -153,6 +154,7 @@ class PositionControllerParameters {
 	    std::vector<string> listDronePosition_;
             std::vector<string> listCommandSinglasBefore_;
             std::vector<string> listCommandSinglasAfter_;
+            std::vector<string> listOdometryFromBebopAutonomyPackage_;
           
             //Controller gains
             double beta_x_, beta_y_, beta_z_;
@@ -214,6 +216,8 @@ class PositionControllerParameters {
             control_t control_;
             mav_msgs::EigenTrajectoryPoint command_trajectory_;
             EigenOdometry odometry_;
+            EigenOdometry odometry_from_logger_;
+            EigenOdometry attitude_from_logger_;
 
             void Emergency();
             void LandEmergency();

@@ -170,138 +170,146 @@ PositionControllerWithSphinx::~PositionControllerWithSphinx() {}
 //The callback saves data come from simulation into csv files
 void PositionControllerWithSphinx::CallbackSaveData(const ros::TimerEvent& event){
 
-      if(!dataStoring_active_){
-         return;
-      }
+   if(!dataStoring_active_){
+      return;
+   }
 
-      ofstream fileControllerGains;
-      ofstream fileVehicleParameters;
-      ofstream fileControlSignals;
-      ofstream fileReferenceAngles;
-      ofstream fileVelocityErrors;
-      ofstream fileDroneAttiude;
-      ofstream fileTrajectoryErrors;
-      ofstream fileAttitudeErrors;
-      ofstream fileDerivativeAttitudeErrors;
-      ofstream fileDroneAngularVelocitiesABC;
-      ofstream fileDroneTrajectoryReference;
-      ofstream fileDroneLinearVelocities;
-      ofstream fileDronePosition;
-      ofstream fileCommandSignalsBefore;
-      ofstream fileCommandSignalsAfter;
+   ofstream fileControllerGains;
+   ofstream fileVehicleParameters;
+   ofstream fileControlSignals;
+   ofstream fileReferenceAngles;
+   ofstream fileVelocityErrors;
+   ofstream fileDroneAttiude;
+   ofstream fileTrajectoryErrors;
+   ofstream fileAttitudeErrors;
+   ofstream fileDerivativeAttitudeErrors;
+   ofstream fileDroneAngularVelocitiesABC;
+   ofstream fileDroneTrajectoryReference;
+   ofstream fileDroneLinearVelocities;
+   ofstream fileDronePosition;
+   ofstream fileCommandSignalsBefore;
+   ofstream fileCommandSignalsAfter;
+   ofstream fileOdometryBebopAutonomyPackage;
 
-      ROS_INFO("CallbackSavaData function is working. Time: %f seconds, %f nanoseconds", odometry_.timeStampSec, odometry_.timeStampNsec);
+   ROS_INFO("CallbackSavaData function is working. Time: %f seconds, %f nanoseconds", odometry_.timeStampSec, odometry_.timeStampNsec);
     
-      fileControllerGains.open("/home/" + user_ + "/controllerGains.csv", std::ios_base::app);
-      fileVehicleParameters.open("/home/" + user_ + "/vehicleParameters.csv", std::ios_base::app);
-      fileControlSignals.open("/home/" + user_ + "/controlSignals.csv", std::ios_base::app);
-      fileReferenceAngles.open("/home/" + user_ + "/referenceAngles.csv", std::ios_base::app);
-      fileVelocityErrors.open("/home/" + user_ + "/velocityErrors.csv", std::ios_base::app);
-      fileDroneAttiude.open("/home/" + user_ + "/droneAttitude.csv", std::ios_base::app);
-      fileTrajectoryErrors.open("/home/" + user_ + "/trajectoryErrors.csv", std::ios_base::app);
-      fileAttitudeErrors.open("/home/" + user_ + "/attitudeErrors.csv", std::ios_base::app);
-      fileDerivativeAttitudeErrors.open("/home/" + user_ + "/derivativeAttitudeErrors.csv", std::ios_base::app);
-      fileDroneAngularVelocitiesABC.open("/home/" + user_ + "/droneAngularVelocitiesABC.csv", std::ios_base::app);
-      fileDroneTrajectoryReference.open("/home/" + user_ + "/droneTrajectoryReferences.csv", std::ios_base::app);
-      fileDroneLinearVelocities.open("/home/" + user_ + "/droneLinearVelocities.csv", std::ios_base::app);
-      fileDronePosition.open("/home/" + user_ + "/dronePosition.csv", std::ios_base::app);
-      fileCommandSignalsBefore.open("/home/" + user_ + "/commandSignalsBefore.csv", std::ios_base::app);
-      fileCommandSignalsAfter.open("/home/" + user_ + "/commandSignalsAfter.csv", std::ios_base::app);
+   fileControllerGains.open("/home/" + user_ + "/controllerGains.csv", std::ios_base::app);
+   fileVehicleParameters.open("/home/" + user_ + "/vehicleParameters.csv", std::ios_base::app);
+   fileControlSignals.open("/home/" + user_ + "/controlSignals.csv", std::ios_base::app);
+   fileReferenceAngles.open("/home/" + user_ + "/referenceAngles.csv", std::ios_base::app);
+   fileVelocityErrors.open("/home/" + user_ + "/velocityErrors.csv", std::ios_base::app);
+   fileDroneAttiude.open("/home/" + user_ + "/droneAttitude.csv", std::ios_base::app);
+   fileTrajectoryErrors.open("/home/" + user_ + "/trajectoryErrors.csv", std::ios_base::app);
+   fileAttitudeErrors.open("/home/" + user_ + "/attitudeErrors.csv", std::ios_base::app);
+   fileDerivativeAttitudeErrors.open("/home/" + user_ + "/derivativeAttitudeErrors.csv", std::ios_base::app);
+   fileDroneAngularVelocitiesABC.open("/home/" + user_ + "/droneAngularVelocitiesABC.csv", std::ios_base::app);
+   fileDroneTrajectoryReference.open("/home/" + user_ + "/droneTrajectoryReferences.csv", std::ios_base::app);
+   fileDroneLinearVelocities.open("/home/" + user_ + "/droneLinearVelocities.csv", std::ios_base::app);
+   fileDronePosition.open("/home/" + user_ + "/dronePosition.csv", std::ios_base::app);
+   fileCommandSignalsBefore.open("/home/" + user_ + "/commandSignalsBefore.csv", std::ios_base::app);
+   fileCommandSignalsAfter.open("/home/" + user_ + "/commandSignalsAfter.csv", std::ios_base::app);
+   fileOdometryBebopAutonomyPackage.open("/home/" + user_ + "/odometryFromBebopAutonomyPackage.csv", std::ios_base::app);
 
       // Saving vehicle parameters in a file
-      fileControllerGains << beta_x_ << "," << beta_y_ << "," << beta_z_ << "," << alpha_x_ << "," << alpha_y_ << "," << alpha_z_ << "," << beta_phi_ << ","
+   fileControllerGains << beta_x_ << "," << beta_y_ << "," << beta_z_ << "," << alpha_x_ << "," << alpha_y_ << "," << alpha_z_ << "," << beta_phi_ << ","
     		  << beta_theta_ << "," << beta_psi_ << "," << alpha_phi_ << "," << alpha_theta_ << "," << alpha_psi_ << "," << mu_x_ << "," << mu_y_ << ","
 			  << mu_z_ << "," << mu_phi_ << "," << mu_theta_ << "," << mu_psi_ << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
-      // Saving vehicle parameters in a file
-      fileVehicleParameters << bf_ << "," << l_ << "," << bm_ << "," << m_ << "," << g_ << "," << Ix_ << "," << Iy_ << "," << Iz_ << ","
+   // Saving vehicle parameters in a file
+   fileVehicleParameters << bf_ << "," << l_ << "," << bm_ << "," << m_ << "," << g_ << "," << Ix_ << "," << Iy_ << "," << Iz_ << ","
     		  << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
-      // Saving control signals in a file
-      for (unsigned n=0; n < listControlSignals_.size(); ++n) {
-          fileControlSignals << listControlSignals_.at( n );
-      }
+   // Saving control signals in a file
+   for (unsigned n=0; n < listControlSignals_.size(); ++n) {
+       fileControlSignals << listControlSignals_.at( n );
+   }
 
-      // Saving the reference angles in a file
-      for (unsigned n=0; n < listReferenceAngles_.size(); ++n) {
-          fileReferenceAngles << listReferenceAngles_.at( n );
-      }
+   // Saving the reference angles in a file
+   for (unsigned n=0; n < listReferenceAngles_.size(); ++n) {
+       fileReferenceAngles << listReferenceAngles_.at( n );
+   }
 
-      // Saving the velocity errors in a file
-      for (unsigned n=0; n < listVelocityErrors_.size(); ++n) {
-          fileVelocityErrors << listVelocityErrors_.at( n );
-      }
+   // Saving the velocity errors in a file
+   for (unsigned n=0; n < listVelocityErrors_.size(); ++n) {
+       fileVelocityErrors << listVelocityErrors_.at( n );
+   }
 
-      // Saving the drone attitude in a file
-      for (unsigned n=0; n < listDroneAttitude_.size(); ++n) {
-          fileDroneAttiude << listDroneAttitude_.at( n );
-      }
+   // Saving the drone attitude in a file
+   for (unsigned n=0; n < listDroneAttitude_.size(); ++n) {
+       fileDroneAttiude << listDroneAttitude_.at( n );
+   }
  
-      // Saving the trajectory errors in a file
-      for (unsigned n=0; n < listTrajectoryErrors_.size(); ++n) {
-          fileTrajectoryErrors << listTrajectoryErrors_.at( n );
-      }
+   // Saving the trajectory errors in a file
+   for (unsigned n=0; n < listTrajectoryErrors_.size(); ++n) {
+       fileTrajectoryErrors << listTrajectoryErrors_.at( n );
+   }
 
-      // Saving the attitude errors in a file
-      for (unsigned n=0; n < listAttitudeErrors_.size(); ++n) {
-          fileAttitudeErrors << listAttitudeErrors_.at( n );
-      }
+   // Saving the attitude errors in a file
+   for (unsigned n=0; n < listAttitudeErrors_.size(); ++n) {
+       fileAttitudeErrors << listAttitudeErrors_.at( n );
+   }
 
-      // Saving the derivative attitude errors in a file
-      for (unsigned n=0; n < listDerivativeAttitudeErrors_.size(); ++n) {
-          fileDerivativeAttitudeErrors << listDerivativeAttitudeErrors_.at( n );
-      }
+   // Saving the derivative attitude errors in a file
+   for (unsigned n=0; n < listDerivativeAttitudeErrors_.size(); ++n) {
+       fileDerivativeAttitudeErrors << listDerivativeAttitudeErrors_.at( n );
+   }
 
-      // Saving the drone angular velocity in the aircraft body reference system
-      for (unsigned n=0; n < listDroneAngularVelocitiesABC_.size(); ++n) {
-    	  fileDroneAngularVelocitiesABC << listDroneAngularVelocitiesABC_.at( n );
-      }
+   // Saving the drone angular velocity in the aircraft body reference system
+   for (unsigned n=0; n < listDroneAngularVelocitiesABC_.size(); ++n) {
+       fileDroneAngularVelocitiesABC << listDroneAngularVelocitiesABC_.at( n );
+   }
 
-      // Saving the drone trajectory references (them coming from the waypoint filter)
-      for (unsigned n=0; n < listDroneTrajectoryReference_.size(); ++n) {
-    	  fileDroneTrajectoryReference << listDroneTrajectoryReference_.at( n );
-      }
+   // Saving the drone trajectory references (them coming from the waypoint filter)
+   for (unsigned n=0; n < listDroneTrajectoryReference_.size(); ++n) {
+       fileDroneTrajectoryReference << listDroneTrajectoryReference_.at( n );
+   }
 
-      // Saving drone linear velocity in the aircraft body center reference system
-      for (unsigned n=0; n < listDroneLinearVelocities_.size(); ++n) {
-    	  fileDroneLinearVelocities << listDroneLinearVelocities_.at( n );
-      }
+   // Saving drone linear velocity in the aircraft body center reference system
+   for (unsigned n=0; n < listDroneLinearVelocities_.size(); ++n) {
+       fileDroneLinearVelocities << listDroneLinearVelocities_.at( n );
+   }
 
-      // Saving the drone position along axes
-      for (unsigned n=0; n < listDronePosition_.size(); ++n) {
-        fileDronePosition << listDronePosition_.at( n );
-      }
+   // Saving the drone position along axes
+   for (unsigned n=0; n < listDronePosition_.size(); ++n) {
+       fileDronePosition << listDronePosition_.at( n );
+   }
 
-      // Saving command signals before
-      for (unsigned n=0; n < listCommandSinglasBefore_.size(); ++n) {
-        fileCommandSignalsBefore << listCommandSinglasBefore_.at( n );
-      }
+   // Saving command signals before
+   for (unsigned n=0; n < listCommandSinglasBefore_.size(); ++n) {
+       fileCommandSignalsBefore << listCommandSinglasBefore_.at( n );
+   }
 
-      // Saving command signals after
-      for (unsigned n=0; n < listCommandSinglasAfter_.size(); ++n) {
-        fileCommandSignalsAfter << listCommandSinglasAfter_.at( n );
-      }
+   // Saving command signals after
+   for (unsigned n=0; n < listCommandSinglasAfter_.size(); ++n) {
+       fileCommandSignalsAfter << listCommandSinglasAfter_.at( n );
+   }
+
+   // Saving control signals in a file
+   for (unsigned n=0; n < listOdometryFromBebopAutonomyPackage_.size(); ++n) {
+       fileOdometryBebopAutonomyPackage << listOdometryFromBebopAutonomyPackage_.at( n );
+   }
 
 
-      // Closing all opened files
-      fileControllerGains.close ();
-      fileVehicleParameters.close ();
-      fileControlSignals.close ();
-      fileReferenceAngles.close();
-      fileVelocityErrors.close();
-      fileDroneAttiude.close();
-      fileTrajectoryErrors.close();
-      fileAttitudeErrors.close();
-      fileDerivativeAttitudeErrors.close();
-      fileDroneAngularVelocitiesABC.close();
-      fileDroneTrajectoryReference.close();
-      fileDroneLinearVelocities.close();
-      fileDronePosition.close();
-      fileCommandSignalsBefore.close();
-      fileCommandSignalsAfter.close();
+   // Closing all opened files
+   fileControllerGains.close ();
+   fileVehicleParameters.close ();
+   fileControlSignals.close ();
+   fileReferenceAngles.close();
+   fileVelocityErrors.close();
+   fileDroneAttiude.close();
+   fileTrajectoryErrors.close();
+   fileAttitudeErrors.close();
+   fileDerivativeAttitudeErrors.close();
+   fileDroneAngularVelocitiesABC.close();
+   fileDroneTrajectoryReference.close();
+   fileDroneLinearVelocities.close();
+   fileDronePosition.close();
+   fileCommandSignalsBefore.close();
+   fileCommandSignalsAfter.close();
+   fileOdometryBebopAutonomyPackage.close();
 
-      // To have a one shot storing
-      dataStoring_active_ = false;
+   // To have a one shot storing
+   dataStoring_active_ = false;
 
 }
 
@@ -309,95 +317,95 @@ void PositionControllerWithSphinx::CallbackSaveData(const ros::TimerEvent& event
 // These variables will be employed during the simulation
 void PositionControllerWithSphinx::SetControllerGains(){
 
-      beta_x_ = controller_parameters_.beta_xy_.x();
-      beta_y_ = controller_parameters_.beta_xy_.y();
-      beta_z_ = controller_parameters_.beta_z_;
+   beta_x_ = controller_parameters_.beta_xy_.x();
+   beta_y_ = controller_parameters_.beta_xy_.y();
+   beta_z_ = controller_parameters_.beta_z_;
 
-      beta_phi_ = controller_parameters_.beta_phi_;
-      beta_theta_ = controller_parameters_.beta_theta_;
-      beta_psi_ = controller_parameters_.beta_psi_;
+   beta_phi_ = controller_parameters_.beta_phi_;
+   beta_theta_ = controller_parameters_.beta_theta_;
+   beta_psi_ = controller_parameters_.beta_psi_;
 
-      alpha_x_ = 1 - beta_x_;
-      alpha_y_ = 1 - beta_y_;
-      alpha_z_ = 1 - beta_z_;
+   alpha_x_ = 1 - beta_x_;
+   alpha_y_ = 1 - beta_y_;
+   alpha_z_ = 1 - beta_z_;
 
-      alpha_phi_ = 1 - beta_phi_;
-      alpha_theta_ = 1 - beta_theta_;
-      alpha_psi_ = 1 - beta_psi_;
+   alpha_phi_ = 1 - beta_phi_;
+   alpha_theta_ = 1 - beta_theta_;
+   alpha_psi_ = 1 - beta_psi_;
 
-      mu_x_ = controller_parameters_.mu_xy_.x();
-      mu_y_ = controller_parameters_.mu_xy_.y();
-      mu_z_ = controller_parameters_.mu_z_;
+   mu_x_ = controller_parameters_.mu_xy_.x();
+   mu_y_ = controller_parameters_.mu_xy_.y();
+   mu_z_ = controller_parameters_.mu_z_;
 
-      mu_phi_ = controller_parameters_.mu_phi_;
-      mu_theta_ = controller_parameters_.mu_theta_;
-      mu_psi_ = controller_parameters_.mu_psi_;  
+   mu_phi_ = controller_parameters_.mu_phi_;
+   mu_theta_ = controller_parameters_.mu_theta_;
+   mu_psi_ = controller_parameters_.mu_psi_;  
 
-      lambda_x_ = controller_parameters_.U_q_.x();
-      lambda_y_ = controller_parameters_.U_q_.y();
-      lambda_z_ = controller_parameters_.U_q_.z();
+   lambda_x_ = controller_parameters_.U_q_.x();
+   lambda_y_ = controller_parameters_.U_q_.y();
+   lambda_z_ = controller_parameters_.U_q_.z();
 	  
-      K_x_1_ = 1/mu_x_;
-      K_x_2_ = -2 * (beta_x_/mu_x_);
+   K_x_1_ = 1/mu_x_;
+   K_x_2_ = -2 * (beta_x_/mu_x_);
 	  
-      K_y_1_ = 1/mu_y_;
-      K_y_2_ = -2 * (beta_y_/mu_y_);
+   K_y_1_ = 1/mu_y_;
+   K_y_2_ = -2 * (beta_y_/mu_y_);
 	  
-      K_z_1_ = 1/mu_z_;
-      K_z_2_ = -2 * (beta_z_/mu_z_);
+   K_z_1_ = 1/mu_z_;
+   K_z_2_ = -2 * (beta_z_/mu_z_);
 
 }
 
 // As SetControllerGains, the function is used to set the vehicle parameters into private variables of the class
 void PositionControllerWithSphinx::SetVehicleParameters(){
 
-      bf_ = vehicle_parameters_.bf_;
-      l_ = vehicle_parameters_.armLength_;
-      bm_ = vehicle_parameters_.bm_;
-      m_ = vehicle_parameters_.mass_;
-      g_ = vehicle_parameters_.gravity_;
-      Ix_ = vehicle_parameters_.inertia_(0,0);
-      Iy_ = vehicle_parameters_.inertia_(1,1);
-      Iz_ = vehicle_parameters_.inertia_(2,2);
+   bf_ = vehicle_parameters_.bf_;
+   l_ = vehicle_parameters_.armLength_;
+   bm_ = vehicle_parameters_.bm_;
+   m_ = vehicle_parameters_.mass_;
+   g_ = vehicle_parameters_.gravity_;
+   Ix_ = vehicle_parameters_.inertia_(0,0);
+   Iy_ = vehicle_parameters_.inertia_(1,1);
+   Iz_ = vehicle_parameters_.inertia_(2,2);
 
-      // On the EKF object is invoked the method SeVehicleParameters. Such function allows to send the vehicle parameters to the EKF class.
-      // Then, they are employed to set the filter matrices
-      extended_kalman_filter_bebop_.SetVehicleParameters(m_, g_);
+   // On the EKF object is invoked the method SeVehicleParameters. Such function allows to send the vehicle parameters to the EKF class. Then, they are employed to set the filter matrices
+   extended_kalman_filter_bebop_.SetVehicleParameters(m_, g_);
 
 }
 
 // Reading parameters come frame launch file
 void PositionControllerWithSphinx::SetLaunchFileParameters(){
 
-	// The boolean variable is used to inactive the logging if it is not useful
-	if(dataStoring_active_){
+   // The boolean variable is used to inactive the logging if it is not useful
+   if(dataStoring_active_){
 
-           // Time after which the data storing function is turned on
-	   timer3_ = n3_.createTimer(ros::Duration(dataStoringTime_), &PositionControllerWithSphinx::CallbackSaveData, this, false, true);
+      // Time after which the data storing function is turned on
+      timer3_ = n3_.createTimer(ros::Duration(dataStoringTime_), &PositionControllerWithSphinx::CallbackSaveData, this, false, true);
 
-	   // Cleaning the string vector contents
-	   listControlSignals_.clear();
-	   listReferenceAngles_.clear();
-	   listVelocityErrors_.clear();
-	   listDroneAttitude_.clear();
-	   listTrajectoryErrors_.clear();
-	   listAttitudeErrors_.clear();
-	   listDerivativeAttitudeErrors_.clear();
-	   listDroneAngularVelocitiesABC_.clear();
-	   listDroneTrajectoryReference_.clear();
-           listDroneLinearVelocities_.clear();
-	   listDronePosition_.clear();
-           listCommandSinglasBefore_.clear();
-           listCommandSinglasAfter_.clear();
+      // Cleaning the string vector contents
+      listControlSignals_.clear();
+      listReferenceAngles_.clear();
+      listVelocityErrors_.clear();
+      listDroneAttitude_.clear();
+      listTrajectoryErrors_.clear();
+      listAttitudeErrors_.clear();
+      listDerivativeAttitudeErrors_.clear();
+      listDroneAngularVelocitiesABC_.clear();
+      listDroneTrajectoryReference_.clear();
+      listDroneLinearVelocities_.clear();
+      listDronePosition_.clear();
+      listCommandSinglasBefore_.clear();
+      listCommandSinglasAfter_.clear();
+      listOdometryFromBebopAutonomyPackage_.clear();
 	  
-	}
+   }
 
 }
 
 void PositionControllerWithSphinx::SetFilterParameters(){
 
-      // The function is used to move the filter parameters from the YAML file to the filter class
-      extended_kalman_filter_bebop_.SetFilterParameters(&filter_parameters_);
+   // The function is used to move the filter parameters from the YAML file to the filter class
+   extended_kalman_filter_bebop_.SetFilterParameters(&filter_parameters_);
 
 }
 
@@ -424,14 +432,35 @@ void PositionControllerWithSphinx::Quaternion2Euler(double* roll, double* pitch,
 void PositionControllerWithSphinx::SetOdom(const EigenOdometry& odometry) {
 
    //+x forward, +y left, +z up, +yaw CCW
-    odometry_ = odometry; 
+   odometry_ = odometry; 
+
+   double roll, pitch, yaw;
+   Quaternion2Euler(&roll, &pitch, &yaw);
+
+   // Saving drone attitude in a file
+   std::stringstream tempOdometryFromBebopAutonomyPackage;
+   tempOdometryFromBebopAutonomyPackage << odometry_.position[0] << "," << odometry_.position[1] << "," << odometry_.position[2] << "," << roll << "," << pitch << "," << yaw << "," << odometry_.velocity[0] << "," << odometry_.velocity[1] << "," << odometry_.velocity[2] << "," << odometry_.angular_velocity[0] << "," << odometry_.angular_velocity[1] << "," << odometry_.angular_velocity[2] << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+
+   listOdometryFromBebopAutonomyPackage_.push_back(tempOdometryFromBebopAutonomyPackage.str());
+
+}
+
+// The function pass the odometry message built from the logger data
+void PositionControllerWithSphinx::SetOdomFromLogger(const EigenOdometry& odometry_from_logger, const EigenOdometry& attitude_from_logger) {
+
+    //+x forward, +y left, +z up, +yaw CCW
+    odometry_from_logger_ = odometry_from_logger; 
+    attitude_from_logger_ = attitude_from_logger; 
     controller_active_= true;
 
-    Quaternion2Euler(&state_.attitude.roll, &state_.attitude.pitch, &state_.attitude.yaw);
+    state_.attitude.roll = attitude_from_logger_.position[0]; 
+    state_.attitude.pitch = attitude_from_logger_.position[1]; 
+    state_.attitude.yaw = attitude_from_logger_.position[2];
 
-    state_.angularVelocity.x = odometry_.angular_velocity[0];
-    state_.angularVelocity.y = odometry_.angular_velocity[1];
-    state_.angularVelocity.z = odometry_.angular_velocity[2];
+    // Angular velocities are expressed in aircraft body frame reference system
+    state_.angularVelocity.x = odometry_from_logger_.angular_velocity[0];
+    state_.angularVelocity.y = odometry_from_logger_.angular_velocity[1];
+    state_.angularVelocity.z = odometry_from_logger_.angular_velocity[2];
 
 }
 
@@ -483,26 +512,26 @@ void PositionControllerWithSphinx::GetUTerrComponents(nav_msgs::Odometry* uTerrC
 // Just to analyze the position and velocity errors
 void PositionControllerWithSphinx::GetPositionAndVelocityErrors(nav_msgs::Odometry* positionAndVelocityErrors){
 
-  positionAndVelocityErrors->pose.pose.position.x = e_x_;
-  positionAndVelocityErrors->pose.pose.position.y = e_y_;
-  positionAndVelocityErrors->pose.pose.position.z = e_z_;
+   positionAndVelocityErrors->pose.pose.position.x = e_x_;
+   positionAndVelocityErrors->pose.pose.position.y = e_y_;
+   positionAndVelocityErrors->pose.pose.position.z = e_z_;
 
-  positionAndVelocityErrors->twist.twist.linear.x = dot_e_x_;
-  positionAndVelocityErrors->twist.twist.linear.y = dot_e_y_;
-  positionAndVelocityErrors->twist.twist.linear.z = dot_e_z_;
+   positionAndVelocityErrors->twist.twist.linear.x = dot_e_x_;
+   positionAndVelocityErrors->twist.twist.linear.y = dot_e_y_;
+   positionAndVelocityErrors->twist.twist.linear.z = dot_e_z_;
 
 }
 
 // Just to analyze the attitude and angular velocity errors
 void PositionControllerWithSphinx::GetAngularAndAngularVelocityErrors(nav_msgs::Odometry* angularAndAngularVelocityErrors){
 
-  angularAndAngularVelocityErrors->pose.pose.position.x = e_phi_;
-  angularAndAngularVelocityErrors->pose.pose.position.y = e_theta_;
-  angularAndAngularVelocityErrors->pose.pose.position.z = e_psi_;
+   angularAndAngularVelocityErrors->pose.pose.position.x = e_phi_;
+   angularAndAngularVelocityErrors->pose.pose.position.y = e_theta_;
+   angularAndAngularVelocityErrors->pose.pose.position.z = e_psi_;
 
-  angularAndAngularVelocityErrors->twist.twist.linear.x = dot_e_phi_;
-  angularAndAngularVelocityErrors->twist.twist.linear.y = dot_e_theta_;
-  angularAndAngularVelocityErrors->twist.twist.linear.z = dot_e_psi_;
+   angularAndAngularVelocityErrors->twist.twist.linear.x = dot_e_phi_;
+   angularAndAngularVelocityErrors->twist.twist.linear.y = dot_e_theta_;
+   angularAndAngularVelocityErrors->twist.twist.linear.z = dot_e_psi_;
 
 }
 
@@ -527,16 +556,16 @@ void PositionControllerWithSphinx::GetReferenceAngles(nav_msgs::Odometry* refere
 void PositionControllerWithSphinx::GetVelocityAlongZComponents(nav_msgs::Odometry* zVelocity_components){
   assert(zVelocity_components);
 
-  zVelocity_components->pose.pose.position.x = state_.linearVelocity.x;
-  zVelocity_components->pose.pose.position.y = state_.linearVelocity.y;
-  zVelocity_components->pose.pose.position.z = state_.linearVelocity.z;
+   zVelocity_components->pose.pose.position.x = state_.linearVelocity.x;
+   zVelocity_components->pose.pose.position.y = state_.linearVelocity.y;
+   zVelocity_components->pose.pose.position.z = state_.linearVelocity.z;
 
-  double phi, theta, psi;
-  Quaternion2Euler(&phi, &theta, &psi);
+   double phi, theta, psi;
+   Quaternion2Euler(&phi, &theta, &psi);
 
-  zVelocity_components->twist.twist.linear.x = (-sin(theta) * state_.linearVelocity.x);
-  zVelocity_components->twist.twist.linear.y = ( sin(phi) * cos(theta) * state_.linearVelocity.y);
-  zVelocity_components->twist.twist.linear.z = (cos(phi) * cos(theta) * state_.linearVelocity.z);
+   zVelocity_components->twist.twist.linear.x = (-sin(theta) * state_.linearVelocity.x);
+   zVelocity_components->twist.twist.linear.y = ( sin(phi) * cos(theta) * state_.linearVelocity.y);
+   zVelocity_components->twist.twist.linear.z = (cos(phi) * cos(theta) * state_.linearVelocity.z);
 
 }
 
@@ -545,11 +574,8 @@ void PositionControllerWithSphinx::SetOdometryEstimated() {
 
     extended_kalman_filter_bebop_.SetThrustCommand(control_.uT);
 
-    //The EKF works or not in according to the value of the EKF_active_ variables
-    if(EKF_active_)
-    	extended_kalman_filter_bebop_.EstimatorWithNoise(&state_, &odometry_, &odometry_filtered_private_);
-    else
-    	extended_kalman_filter_bebop_.Estimator(&state_, &odometry_);
+    //TODO: The EKF on data come from the Parrot-Sphinx data logger to be implemented
+    extended_kalman_filter_bebop_.EstimatorSphinxLogger(&state_, &odometry_from_logger_, &attitude_from_logger_);
 
 }
 
@@ -578,14 +604,14 @@ void PositionControllerWithSphinx::CalculateCommandSignals(geometry_msgs::Twist*
       // Saving drone attitude in a file
       std::stringstream tempDroneAttitude;
       tempDroneAttitude << state_.attitude.roll << "," << state_.attitude.pitch << "," << state_.attitude.yaw << ","
-          <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+          <<odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "\n";
 
       listDroneAttitude_.push_back(tempDroneAttitude.str());
 
       // Saving the drone angular velocity in the aircraft body reference system
       std:stringstream tempDroneAngularVelocitiesABC;
       tempDroneAngularVelocitiesABC << state_.angularVelocity.x << "," << state_.angularVelocity.y << "," << state_.angularVelocity.z
-        << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+        << "," << odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "\n";
 
       listDroneAngularVelocitiesABC_.push_back(tempDroneAngularVelocitiesABC.str());
     }
@@ -607,7 +633,7 @@ void PositionControllerWithSphinx::CalculateCommandSignals(geometry_msgs::Twist*
       
       // Saving command signals before saturating in a file
       std::stringstream tempCommandSignalsBefore;
-      tempCommandSignalsBefore << linearX << "," << linearY << "," << linearZ << "," << angularZ << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+      tempCommandSignalsBefore << linearX << "," << linearY << "," << linearZ << "," << angularZ << "," << odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "\n";
 
       listCommandSinglasBefore_.push_back(tempCommandSignalsBefore.str());
 
@@ -643,7 +669,7 @@ void PositionControllerWithSphinx::CalculateCommandSignals(geometry_msgs::Twist*
       
       // Saving command signals in a file
       std::stringstream tempCommandSignalsAfter;
-      tempCommandSignalsAfter << linearX << "," << linearY << "," << linearZ << "," << angularZ << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+      tempCommandSignalsAfter << linearX << "," << linearY << "," << linearZ << "," << angularZ << "," << odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "\n";
 
       listCommandSinglasAfter_.push_back(tempCommandSignalsAfter.str());
 
@@ -718,7 +744,7 @@ void PositionControllerWithSphinx::VelocityErrors(double* dot_e_x, double* dot_e
      // Saving drone linear velocity in the aircraft body center reference system
      std::stringstream tempDroneLinearVelocities;
      tempDroneLinearVelocities << state_.linearVelocity.x << "," << state_.linearVelocity.y << "," << state_.linearVelocity.z << ","
-         << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+         << odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "\n";
 
      listDroneLinearVelocities_.push_back(tempDroneLinearVelocities.str());
    }
@@ -825,7 +851,7 @@ void PositionControllerWithSphinx::PosController(double* u_T, double* phi_r, dou
    if(dataStoring_active_){
       //Saving reference angles in a file
       std::stringstream tempReferenceAngles;
-      tempReferenceAngles << *theta_r << "," << *phi_r << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+      tempReferenceAngles << *theta_r << "," << *phi_r << "," << odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "\n";
 
       listReferenceAngles_.push_back(tempReferenceAngles.str());
 	  
@@ -835,7 +861,7 @@ void PositionControllerWithSphinx::PosController(double* u_T, double* phi_r, dou
       //Saving control signals in a file
       std::stringstream tempControlSignals;
       tempControlSignals << *u_T << "," << u_phi << "," << u_theta << "," << u_psi << "," << *u_x << "," << *u_y << ","
-          << *u_Terr << "," << *u_z << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+          << *u_Terr << "," << *u_z << "," <<odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "\n";
 
       listControlSignals_.push_back(tempControlSignals.str());
 
@@ -913,20 +939,20 @@ void PositionControllerWithSphinx::CallbackAttitude(const ros::TimerEvent& event
 
         //Saving attitude derivate errors in a file
         std::stringstream tempDerivativeAttitudeErrors;
-        tempDerivativeAttitudeErrors << dot_e_phi_ << "," << dot_e_theta_ << "," << dot_e_psi_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << secs << "\n";
+        tempDerivativeAttitudeErrors << dot_e_phi_ << "," << dot_e_theta_ << "," << dot_e_psi_ << "," <<odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "," << secs << "\n";
 
         listDerivativeAttitudeErrors_.push_back(tempDerivativeAttitudeErrors.str());
 
         //Saving attitude errors in a file
         std::stringstream tempAttitudeErrors;
-        tempAttitudeErrors << e_phi_ << "," << e_theta_ << "," << e_psi_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << secs << "\n";
+        tempAttitudeErrors << e_phi_ << "," << e_theta_ << "," << e_psi_ << "," <<odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << secs << "\n";
 
         listAttitudeErrors_.push_back(tempAttitudeErrors.str());
 
         //Saving the drone position along axes
         std::stringstream tempDronePosition;
         tempDronePosition << state_.position.x << "," << state_.position.y << "," << state_.position.z << ","
-            << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << secs << "\n";
+            << odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "," << secs << "\n";
 
         listDronePosition_.push_back(tempDronePosition.str());
 
@@ -934,8 +960,8 @@ void PositionControllerWithSphinx::CallbackAttitude(const ros::TimerEvent& event
 }
 
 //The function every TsP:
-//	* the next point to follow has generated (the output of the waypoint filter)
-//	* the output of the waypoint filter is put into the command_trajectory_ data structure
+//  * the next point to follow has generated (the output of the waypoint filter)
+//  * the output of the waypoint filter is put into the command_trajectory_ data structure
 //  * the EKF is used to estimate the drone attitude and linear velocity
 //  * the position and velocity errors are computed
 //  * the last part is used to store the data into csv files if the data storing is active
@@ -966,20 +992,20 @@ void PositionControllerWithSphinx::CallbackPosition(const ros::TimerEvent& event
 
         //Saving velocity errors in a file
         std::stringstream tempVelocityErrors;
-        tempVelocityErrors << dot_e_x_ << "," << dot_e_y_ << "," << dot_e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << secs << "\n";
+        tempVelocityErrors << dot_e_x_ << "," << dot_e_y_ << "," << dot_e_z_ << "," <<odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "," << secs << "\n";
 
         listVelocityErrors_.push_back(tempVelocityErrors.str());
 
         //Saving trajectory errors in a file
         std::stringstream tempTrajectoryErrors;
-        tempTrajectoryErrors << e_x_ << "," << e_y_ << "," << e_z_ << "," <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << secs << "\n";
+        tempTrajectoryErrors << e_x_ << "," << e_y_ << "," << e_z_ << "," <<odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "," << secs << "\n";
 
         listTrajectoryErrors_.push_back(tempTrajectoryErrors.str());
 
         //Saving the drone trajectory references (them coming from the waypoint filter)
         std::stringstream tempTrajectoryReferences;
         tempTrajectoryReferences << command_trajectory_.position_W[0] << "," << command_trajectory_.position_W[1] << "," << command_trajectory_.position_W[2] << ","
-            <<odometry_.timeStampSec << "," << odometry_.timeStampNsec << "," << secs << "\n";
+            <<odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "," << secs << "\n";
 
         listDroneTrajectoryReference_.push_back(tempTrajectoryReferences.str());
 

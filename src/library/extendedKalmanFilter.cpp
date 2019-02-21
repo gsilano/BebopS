@@ -73,6 +73,12 @@ void ExtendedKalmanFilter::SetOdometry(const EigenOdometry& odometry) {
    odometry_private_ = odometry;    
 }
 
+void ExtendedKalmanFilter::SetOdometryFromLogger(const EigenOdometry& odometryFromLogger, const EigenOdometry& attitudeFromLogger) {
+    
+   odometryFromLogger_private_ = odometryFromLogger;    
+   attitudeFromLogger_private_ = attitudeFromLogger;
+}
+
 // Set the filter parameters
 void ExtendedKalmanFilter::SetFilterParameters(FilterParameters *filter_parameters_){
 
@@ -112,6 +118,32 @@ void ExtendedKalmanFilter::Estimator(state_t *state_, EigenOdometry* odometry_){
    state_->angularVelocity.x = odometry_private_.angular_velocity[0];
    state_->angularVelocity.y = odometry_private_.angular_velocity[1];
    state_->angularVelocity.z = odometry_private_.angular_velocity[2];
+ 
+}
+
+// The function disables the Extended Kalman Filter
+void ExtendedKalmanFilter::EstimatorSphinxLogger(state_t *state_, EigenOdometry* odometry_from_logger_, EigenOdometry* attitude_from_logger_){
+   assert(state_);
+   assert(odometry_from_logger_);
+   assert(attitude_from_logger_);
+
+   SetOdometryFromLogger(*odometry_from_logger_, *attitude_from_logger_);
+
+   state_->position.x = odometryFromLogger_private_.position[0];
+   state_->position.y = odometryFromLogger_private_.position[1];
+   state_->position.z = odometryFromLogger_private_.position[2];
+  
+   state_->linearVelocity.x = odometryFromLogger_private_.velocity[0];
+   state_->linearVelocity.y = odometryFromLogger_private_.velocity[1];
+   state_->linearVelocity.z = odometryFromLogger_private_.velocity[2];
+
+   state_->attitude.roll = attitudeFromLogger_private_.position[0];
+   state_->attitude.pitch = attitudeFromLogger_private_.position[1];
+   state_->attitude.yaw = attitudeFromLogger_private_.position[2];
+ 
+   state_->angularVelocity.x = odometryFromLogger_private_.angular_velocity[0];
+   state_->angularVelocity.y = odometryFromLogger_private_.angular_velocity[1];
+   state_->angularVelocity.z = odometryFromLogger_private_.angular_velocity[2];
  
 }
 
