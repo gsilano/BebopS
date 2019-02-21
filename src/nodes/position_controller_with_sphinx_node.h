@@ -39,8 +39,6 @@
 
 #include "bebopS/Sphinx.h"
 
-#include <gazebo_msgs/GetWorldProperties.h>
-
 namespace bebopS {
 
     class PositionControllerWithSphinxNode{
@@ -57,11 +55,6 @@ namespace bebopS {
             bool takeOffMsgHasBeenSent_ = false;
 
             PositionControllerWithSphinx position_controller_;
-
-            //Gazebo services for timing messages come from the logger
-            ros::NodeHandle clientHandleOdometryFromLogger_;
-            ros::ServiceClient clientOdometryFromLogger_;
-            gazebo_msgs::GetWorldProperties my_messageOdometryFromLogger_;
 
             //subscribers
             ros::Subscriber cmd_multi_dof_joint_trajectory_sub_;

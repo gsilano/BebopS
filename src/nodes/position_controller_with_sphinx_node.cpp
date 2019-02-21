@@ -51,9 +51,6 @@ PositionControllerWithSphinxNode::PositionControllerWithSphinxNode() {
     //To get data coming from the Parrot-Sphinx data logger
     logger_sub_ = nh.subscribe(bebopS_msgs::default_topics::PARROT_SPHINX_LOGGER, 30, &PositionControllerWithSphinxNode::LoggerCallback, this);
 
-    // The client needed to get information about the Gazebo simulation environment every time a new odometry message come from the logger
-    clientOdometryFromLogger_ = clientHandleOdometryFromLogger_.serviceClient<gazebo_msgs::GetWorldProperties>("/gazebo/get_world_properties");
-
     //To get data coming from the bebop_autonomy package odometry topic
     odom_sub_ = nh.subscribe(bebop_msgs::default_topics::ODOM, 30, &PositionControllerWithSphinxNode::OdomCallback, this);
 
@@ -329,7 +326,7 @@ void PositionControllerWithSphinxNode::LoggerCallback(const bebopS::Sphinx logge
             position_controller_.SetOdomFromLogger(odometry_logger, attitude_logger);
 
             //For taking off the drone if it is not
-            if (!takeOffMsgHasBeenSent_)            
+            if (!takeOffMsgHasBeenSent_)        
                 TakeOff();
 
             //creating a new twist message. twist_msg is used to send the command signals
