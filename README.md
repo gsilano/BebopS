@@ -38,7 +38,7 @@ To use the code developed and stored in this repository some preliminary actions
  $ rosdep update
  $ echo "source /opt/ros/kinetic/setup.bash" >> ~/.bashrc
  $ source ~/.bashrc
- $ sudo apt-get install python-rosinstall pythonrosinstall-generator python-wstool build-essential
+ $ sudo apt-get install python-rosinstall python-rosinstall-generator python-wstool build-essential
  ```
  2. If you don't have ROS workspace yet you can do so by
 
@@ -194,7 +194,12 @@ $ sudo chmod 777 data_logger.sh
 $ sudo chmod 777 data_logger_publising.awk
 ```
 
-Finally, the simulation can be performed through the commands listed below (they have to be runned in two different terminals)
+Finally, the simulation can be performed through the commands listed below (they have to be runned in three different terminals)
+
+```
+# A collection of nodes and programs that are pre-requisites of a ROS-based system
+$ roscore
+```
 
 ```
 # Sh script to enable the publication of the data logger
