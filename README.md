@@ -210,7 +210,7 @@ $ rosrun bebopS data_logger.sh
 # Hovering example
 $ roslaunch bebopS task1_world_with_sphinx.launch
 # Trajectory tracking example
-$ roslaunch bebops task2_world_with_sphinx.launch
+$ roslaunch bebopS task2_world_with_sphinx.launch
 ```
 
 Bugs & Feature Requests
