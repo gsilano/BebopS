@@ -187,6 +187,8 @@ $ catkin build
 Then, the access permissions for the files listed in the scripts folder have to be changed. It can be done, using the commands 
 
 ```
+# To install the unbuffer command required for the script
+$ sudo apt install expect
 $ cd ~/catkin_ws/src/bebopS/scripts/
 # Sh script to start recording data from the Parrot-Sphinx simulator
 $ sudo chmod 777 data_logger.sh
