@@ -191,7 +191,7 @@ $ cd ~/catkin_ws/src/bebopS/scripts/
 # Sh script to start recording data from the Parrot-Sphinx simulator
 $ sudo chmod 777 data_logger.sh
 # Awk script in charge of publishing the Parrot-Sphinx simulator data
-$ sudo chmod 777 data_logger_publising.awk
+$ sudo chmod 777 data_logger_publishing.awk
 ```
 
 Finally, the simulation can be performed through the commands listed below (they have to be runned in three different terminals)
