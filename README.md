@@ -75,7 +75,7 @@ To use the code developed and stored in this repository some preliminary actions
 Launching the simulation is quite simple, so as customizing it: it is enough to run in a terminal the command
 
    ```
-   $ roslaunch bebops bebop_without_controller.launch
+   $ roslaunch bebopS bebop_without_controller.launch
    ```
    
 > **Note** The first run of gazebo might take considerably long, as it will download some models from an online database. To avoid any problems when starting the simulation for the first time, you may run the `gazebo` command in the terminal line.
@@ -174,7 +174,7 @@ before simulating, the stolen interface needs to be configured. For further deta
 ```
 $ sudo apt-get install build-essential python-rosdep python-catkin-tools
 # Create and initialize the workspace
-$ mkdir -p ~/bebop_ws/src && cd ~/bebop_ws
+$ mkdir -p ~/catkin_ws/src && cd ~/catkin_ws
 $ catkin init
 $ git clone https://github.com/AutonomyLab/bebop_autonomy.git src/bebop_autonomy
 # Update rosdep database and install dependencies (including parrot_arsdk)
