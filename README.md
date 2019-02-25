@@ -46,6 +46,7 @@ To use the code developed and stored in this repository some preliminary actions
  $ mkdir -p ~/catkin_ws/src
  $ cd ~/catkin_ws/src
  $ catkin_init_workspace  # initialize your catkin workspace
+ $ cd ~/catkin_ws
  $ catkin init
  $ git clone git@github.com:larics/rotors_simulator.git
  $ git clone git@github.com:larics/mav_comm.git
