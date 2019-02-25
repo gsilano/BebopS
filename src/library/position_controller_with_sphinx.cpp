@@ -179,7 +179,7 @@ void PositionControllerWithSphinx::CallbackSaveData(const ros::TimerEvent& event
    ofstream fileControlSignals;
    ofstream fileReferenceAngles;
    ofstream fileVelocityErrors;
-   ofstream fileDroneAttiude;
+   ofstream fileDroneAttitude;
    ofstream fileTrajectoryErrors;
    ofstream fileAttitudeErrors;
    ofstream fileDerivativeAttitudeErrors;
@@ -191,14 +191,14 @@ void PositionControllerWithSphinx::CallbackSaveData(const ros::TimerEvent& event
    ofstream fileCommandSignalsAfter;
    ofstream fileOdometryBebopAutonomyPackage;
 
-   ROS_INFO("CallbackSavaData function is working. Time: %f seconds, %f nanoseconds", odometry_.timeStampSec, odometry_.timeStampNsec);
+   ROS_INFO("CallbackSaveData function is working. Time: %f seconds, %f nanoseconds", odometry_.timeStampSec, odometry_.timeStampNsec);
     
    fileControllerGains.open("/home/" + user_ + "/controllerGains.csv", std::ios_base::app);
    fileVehicleParameters.open("/home/" + user_ + "/vehicleParameters.csv", std::ios_base::app);
    fileControlSignals.open("/home/" + user_ + "/controlSignals.csv", std::ios_base::app);
    fileReferenceAngles.open("/home/" + user_ + "/referenceAngles.csv", std::ios_base::app);
    fileVelocityErrors.open("/home/" + user_ + "/velocityErrors.csv", std::ios_base::app);
-   fileDroneAttiude.open("/home/" + user_ + "/droneAttitude.csv", std::ios_base::app);
+   fileDroneAttitude.open("/home/" + user_ + "/droneAttitude.csv", std::ios_base::app);
    fileTrajectoryErrors.open("/home/" + user_ + "/trajectoryErrors.csv", std::ios_base::app);
    fileAttitudeErrors.open("/home/" + user_ + "/attitudeErrors.csv", std::ios_base::app);
    fileDerivativeAttitudeErrors.open("/home/" + user_ + "/derivativeAttitudeErrors.csv", std::ios_base::app);
@@ -206,8 +206,8 @@ void PositionControllerWithSphinx::CallbackSaveData(const ros::TimerEvent& event
    fileDroneTrajectoryReference.open("/home/" + user_ + "/droneTrajectoryReferences.csv", std::ios_base::app);
    fileDroneLinearVelocities.open("/home/" + user_ + "/droneLinearVelocities.csv", std::ios_base::app);
    fileDronePosition.open("/home/" + user_ + "/dronePosition.csv", std::ios_base::app);
-   fileCommandSignalsBefore.open("/home/" + user_ + "/commandSignalsBefore.csv", std::ios_base::app);
-   fileCommandSignalsAfter.open("/home/" + user_ + "/commandSignalsAfter.csv", std::ios_base::app);
+   fileCommandSignalsBefore.open("/home/" + user_ + "/commandSignalsBeforeSaturation.csv", std::ios_base::app);
+   fileCommandSignalsAfter.open("/home/" + user_ + "/commandSignalsAfterSaturation.csv", std::ios_base::app);
    fileOdometryBebopAutonomyPackage.open("/home/" + user_ + "/odometryFromBebopAutonomyPackage.csv", std::ios_base::app);
 
       // Saving vehicle parameters in a file
@@ -236,7 +236,7 @@ void PositionControllerWithSphinx::CallbackSaveData(const ros::TimerEvent& event
 
    // Saving the drone attitude in a file
    for (unsigned n=0; n < listDroneAttitude_.size(); ++n) {
-       fileDroneAttiude << listDroneAttitude_.at( n );
+       fileDroneAttitude << listDroneAttitude_.at( n );
    }
  
    // Saving the trajectory errors in a file
@@ -296,7 +296,7 @@ void PositionControllerWithSphinx::CallbackSaveData(const ros::TimerEvent& event
    fileControlSignals.close ();
    fileReferenceAngles.close();
    fileVelocityErrors.close();
-   fileDroneAttiude.close();
+   fileDroneAttitude.close();
    fileTrajectoryErrors.close();
    fileAttitudeErrors.close();
    fileDerivativeAttitudeErrors.close();
@@ -598,7 +598,7 @@ void PositionControllerWithSphinx::CalculateCommandSignals(geometry_msgs::Twist*
     AttitudeController(&u_phi, &u_theta, &u_psi);
     PosController(&control_.uT, &control_.phiR, &control_.thetaR, &u_x, &u_y, &u_z, &u_Terr);
  
-    // Data storing section. It is actived if necessary
+    // Data storing section. It is activated if necessary
     if(dataStoring_active_){
       
       // Saving drone attitude in a file
@@ -628,7 +628,7 @@ void PositionControllerWithSphinx::CalculateCommandSignals(geometry_msgs::Twist*
     CommandVelocity(&linearZ);
     CommandYawRate(&angularZ);
 
-    // Data storing section. It is actived if necessary
+    // Data storing section. It is activated if necessary
     if(dataStoring_active_){
       
       // Saving command signals before saturating in a file
@@ -709,7 +709,7 @@ void PositionControllerWithSphinx::LandEmergency(){
     }
 }
 
-//The function handles the emergy
+//The function handles the emergency
 void PositionControllerWithSphinx::Emergency(){
 
     stateEmergency_ = true;

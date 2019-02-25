@@ -74,7 +74,7 @@ class PositionControllerParameters {
         mu_theta_(MuDefaultPitchController),
         mu_phi_(MuDefaultRollController),
         mu_psi_(MuDefaultYawRateController),
-	U_q_(UqDefaultXYZ){
+	    U_q_(UqDefaultXYZ){
   }
 
   Eigen::Vector2d beta_xy_;
@@ -132,7 +132,7 @@ class PositionControllerParameters {
 
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         private:
-            //Boolean variables to active/unactive the controller and the data storage
+            //Boolean variables to active/inactive the controller and the data storage
             bool controller_active_;
             bool stateEmergency_;
 
@@ -150,8 +150,8 @@ class PositionControllerParameters {
             std::vector<string> listDerivativeAttitudeErrors_;
             std::vector<string> listDroneAngularVelocitiesABC_;
             std::vector<string> listDroneTrajectoryReference_;
-	    std::vector<string> listDroneLinearVelocities_;
-	    std::vector<string> listDronePosition_;
+	        std::vector<string> listDroneLinearVelocities_;
+	        std::vector<string> listDronePosition_;
             std::vector<string> listCommandSinglasBefore_;
             std::vector<string> listCommandSinglasAfter_;
             std::vector<string> listOdometryFromBebopAutonomyPackage_;
@@ -166,10 +166,10 @@ class PositionControllerParameters {
             double mu_x_, mu_y_, mu_z_;
             double mu_phi_, mu_theta_, mu_psi_;
 			
-	    double lambda_x_, lambda_y_, lambda_z_;
-	    double K_x_1_, K_x_2_;
-	    double K_y_1_, K_y_2_;
-	    double K_z_1_, K_z_2_;
+	        double lambda_x_, lambda_y_, lambda_z_;
+	        double K_x_1_, K_x_2_;
+	        double K_y_1_, K_y_2_;
+	        double K_z_1_, K_z_2_;
 
             //Position and linear velocity errors
             double e_x_;
