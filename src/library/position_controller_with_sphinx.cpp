@@ -47,7 +47,7 @@
 #define TsA                       5e-3 /* Attitude control sampling time */
 #define TsE                       5 /* Refresh landing time*/
 
-#define MAX_TILT_ANGLE            20  /* Current tilt max in degree */
+#define MAX_TILT_ANGLE            30  /* Current tilt max in degree */
 #define MAX_VERT_SPEED            1  /* Current max vertical speed in m/s */
 #define MAX_ROT_SPEED             100 /* Current max rotation speed in degree/s */
 
@@ -618,7 +618,7 @@ void PositionControllerWithSphinx::CalculateCommandSignals(geometry_msgs::Twist*
     
     //The commands are normalized to take into account the real commands that can be send to the drone
     //Them range is between -1 and 1.
-    double theta_ref_degree, phi_ref_degree, yawRate_ref_degree;
+    double theta_ref_degree, phi_ref_degree;
     theta_ref_degree = control_.thetaR * (180/M_PI);
     phi_ref_degree = control_.phiR * (180/M_PI);
     
@@ -696,7 +696,7 @@ void PositionControllerWithSphinx::CommandYawRate(double* yawRate_command){
 
     e_psi_sum_ = e_psi_sum_ + e_psi_ * TsA;
 
-    *yawRate_command = (( (alpha_psi_/mu_psi_) * e_psi_) - ( (beta_psi_/pow(mu_psi_,2)) * e_psi_sum_))/MAX_ROT_SPEED;
+    *yawRate_command = (( (alpha_psi_/mu_psi_) * e_psi_) - ( (beta_psi_/pow(mu_psi_,2)) * e_psi_sum_))/(MAX_ROT_SPEED * M_PI/180);
 
 }
 
