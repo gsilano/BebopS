@@ -189,7 +189,7 @@ Then, the access permissions for the files listed in the scripts folder have to 
 ```
 # To install the unbuffer command required for the script
 $ sudo apt install expect
-$ cd ~/catkin_ws/src/bebopS/scripts/
+$ cd ~/catkin_ws/src/BebopS/scripts/
 # Sh script to start recording data from the Parrot-Sphinx simulator
 $ sudo chmod 777 data_logger.sh
 # Awk script in charge of publishing the Parrot-Sphinx simulator data
