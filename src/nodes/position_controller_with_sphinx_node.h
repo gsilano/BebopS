@@ -53,6 +53,7 @@ namespace bebopS {
 
             bool waypointHasBeenPublished_ = false;
             bool takeOffMsgHasBeenSent_ = false;
+            bool bebop_autonomy_package_activated_ = false;
 
             PositionControllerWithSphinx position_controller_;
 

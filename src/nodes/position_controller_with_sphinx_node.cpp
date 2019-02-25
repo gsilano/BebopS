@@ -301,7 +301,7 @@ void PositionControllerWithSphinxNode::LoggerCallback(const bebopS::Sphinx logge
 	    // The data come from the Parrot-Sphinx logger are used to build a new odometry message, later used
 	    // by the position controller libray
 	    EigenOdometry odometry_logger;
-            EigenOdometry attitude_logger;
+      EigenOdometry attitude_logger;
 
 	    // Drone position in inertial reference system
 	    odometry_logger.position[0] = logger_msg.posX;
@@ -323,35 +323,35 @@ void PositionControllerWithSphinxNode::LoggerCallback(const bebopS::Sphinx logge
 	    odometry_logger.angular_velocity[1] = logger_msg.angVelYABC;
 	    odometry_logger.angular_velocity[2] = logger_msg.angVelZABC;
 
-            position_controller_.SetOdomFromLogger(odometry_logger, attitude_logger);
+      position_controller_.SetOdomFromLogger(odometry_logger, attitude_logger);
 
-            //For taking off the drone if it is not
-            if (!takeOffMsgHasBeenSent_)        
-                TakeOff();
+      //For taking off the drone if it is not
+      if (!takeOffMsgHasBeenSent_ && bebop_autonomy_package_activated_)        
+          TakeOff();
 
-            //creating a new twist message. twist_msg is used to send the command signals
+      //creating a new twist message. twist_msg is used to send the command signals
 	    geometry_msgs::Twist ref_command_signals;
 	    position_controller_.CalculateCommandSignals(&ref_command_signals);
 	    motor_velocity_reference_pub_.publish(ref_command_signals);          
 
-            //The code reported below is used to plot the data when the simulation is running
-            nav_msgs::Odometry odometry_filtered;
-            ros::Time headerStamp = ros::Time::now();
-            position_controller_.GetOdometry(&odometry_filtered);
-            odometry_filtered.header.stamp = headerStamp;
-            odometry_filtered_pub_.publish(odometry_filtered);
+      //The code reported below is used to plot the data when the simulation is running
+      nav_msgs::Odometry odometry_filtered;
+      ros::Time headerStamp = ros::Time::now();
+      position_controller_.GetOdometry(&odometry_filtered);
+      odometry_filtered.header.stamp = headerStamp;
+      odometry_filtered_pub_.publish(odometry_filtered);
 
-            // Just for data plotting
-            nav_msgs::Odometry reference_angles;
-            position_controller_.GetReferenceAngles(&reference_angles);
-            reference_angles.header.stamp = headerStamp;
-            reference_angles_pub_.publish(reference_angles);
+      // Just for data plotting
+      nav_msgs::Odometry reference_angles;
+      position_controller_.GetReferenceAngles(&reference_angles);
+      reference_angles.header.stamp = headerStamp;
+      reference_angles_pub_.publish(reference_angles);
 
-            // Just for data plotting
-            nav_msgs::Odometry smoothed_reference;
-            position_controller_.GetTrajectory(&smoothed_reference);
-            smoothed_reference.header.stamp = headerStamp;
-            smoothed_reference_pub_.publish(smoothed_reference);
+      // Just for data plotting
+      nav_msgs::Odometry smoothed_reference;
+      position_controller_.GetTrajectory(&smoothed_reference);
+      smoothed_reference.header.stamp = headerStamp;
+      smoothed_reference_pub_.publish(smoothed_reference);
 
 	    // Just for data plotting
 	    nav_msgs::Odometry uTerr_components;
@@ -365,7 +365,7 @@ void PositionControllerWithSphinxNode::LoggerCallback(const bebopS::Sphinx logge
 	    zVelocity_components.header.stamp = headerStamp;
 	    zVelocity_components_pub_.publish(zVelocity_components);
 
-            // Just for data plotting
+      // Just for data plotting
 	    nav_msgs::Odometry positionAndVelocityErrors;
 	    position_controller_.GetPositionAndVelocityErrors(&positionAndVelocityErrors);
 	    positionAndVelocityErrors.header.stamp = headerStamp;
@@ -385,13 +385,17 @@ void PositionControllerWithSphinxNode::OdomCallback(const nav_msgs::OdometryCons
 
     ROS_INFO_ONCE("PositionController with Bebop got first odometry message.");
 
+    //The boolean variable allows to send the TakeOff message until the connection with the bebop autonomy package is fine 
+    if(!bebop_autonomy_package_activated_)
+       bebop_autonomy_package_activated_ = true;
+
     if (waypointHasBeenPublished_){
 
-            //These functions allow to put the odometry message into the odometry variable --> _position, _orientation,_velocity_body,
-            //_angular_velocity
-	    EigenOdometry odom;
-	    eigenOdometryFromMsg(odom_msg, &odom);
-	    position_controller_.SetOdom(odom);
+        //These functions allow to put the odometry message into the odometry variable --> _position, _orientation,_velocity_body,
+        //_angular_velocity
+	      EigenOdometry odom;
+	      eigenOdometryFromMsg(odom_msg, &odom);
+	      position_controller_.SetOdom(odom);
 
     }	 
 }
