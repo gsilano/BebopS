@@ -686,8 +686,8 @@ void PositionControllerWithSphinx::CalculateCommandSignals(geometry_msgs::Twist*
 void PositionControllerWithSphinx::CommandVelocity(double* vel_command){
 
     e_z_sum_ = e_z_sum_ + e_z_ * TsP;
-
-    *vel_command = (( (alpha_z_/mu_z_) * e_z_) - ( (beta_z_/pow(mu_z_,2)) * e_z_sum_))/MAX_VERT_SPEED;
+	
+    *vel_command = ( ( (e_z_sum_ * K_z_1_ * K_z_2_)/lambda_z_ ) + ( (e_z_ * K_z_2_)/lambda_z_ ) )/MAX_VERT_SPEED;
 
 }
 
