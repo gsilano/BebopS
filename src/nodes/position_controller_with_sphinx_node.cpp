@@ -305,8 +305,8 @@ void PositionControllerWithSphinxNode::LoggerCallback(const bebopS::Sphinx logge
 
 	    // Drone position in inertial reference system
 	    odometry_logger.position[0] = logger_msg.posX;
-	    odometry_logger.position[1] = logger_msg.posX;
-	    odometry_logger.position[2] = logger_msg.posX;
+	    odometry_logger.position[1] = logger_msg.posY;
+	    odometry_logger.position[2] = logger_msg.posZ;
 
 	    // Drone orientation in radians (Euler angles)
 	    attitude_logger.position[0] = logger_msg.attitudeX;
