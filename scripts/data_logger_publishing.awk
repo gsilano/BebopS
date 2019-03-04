@@ -60,7 +60,7 @@ stdbuf -o L tlm-data-logger -r 5 inet:127.0.0.1:9060 |
 
 	END {};' |
 
-        rostopic pub bebop/parrotSphinx bebopS/Sphinx
+       rostopic pub -r 200 bebop/parrotSphinx bebopS/Sphinx
 
 
 
