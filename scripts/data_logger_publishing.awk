@@ -17,7 +17,7 @@
 # The script allows to catch data from the Sphinx logger publishing it on a suitable topic.
 #
 #
-stdbuf -o L tlm-data-logger inet:127.0.0.1:9060 | 
+stdbuf -o L tlm-data-logger -r 5 inet:127.0.0.1:9060 | 
 
 	unbuffer -p awk -F "[ ',]+" ' 
 
