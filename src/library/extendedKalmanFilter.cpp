@@ -144,7 +144,7 @@ void ExtendedKalmanFilter::EstimatorSphinxLogger(state_t *state_, EigenOdometry*
    state_->angularVelocity.x = odometryFromLogger_private_.angular_velocity[0];
    state_->angularVelocity.y = odometryFromLogger_private_.angular_velocity[1];
    state_->angularVelocity.z = odometryFromLogger_private_.angular_velocity[2];
- 
+
 }
 
 // The function uses the Kalman filter output when noise is in the loop

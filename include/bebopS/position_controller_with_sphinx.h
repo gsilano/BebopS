@@ -193,7 +193,7 @@ class PositionControllerParameters {
             double Ix_, Iy_, Iz_;
 
             //Controller interface with Bebop paramters
-            double e_z_sum_, vel_command_;
+            double u_z_sum_, vel_command_;
             double e_psi_sum_, yawRate_command_;            
 
             ros::NodeHandle n1_;
@@ -222,7 +222,7 @@ class PositionControllerParameters {
             void Emergency();
             void LandEmergency();
             void SetOdometryEstimated();
-            void CommandVelocity(double* vel_command);
+            void CommandVelocity(double u_z, double* vel_command);
             void CommandYawRate(double* yawRate_command);
             void Quaternion2Euler(double* roll, double* pitch, double* yaw) const;
             void AttitudeController(double* u_phi, double* u_theta, double* u_psi);

@@ -37,7 +37,7 @@
 #include "bebopS/parameters_ros.h"
 #include "bebopS/parameters.h"
 
-#include "bebopS/Sphinx.h"
+#include "bebopS/Sphinx_msgs.h"
 
 namespace bebopS {
 
@@ -80,7 +80,7 @@ namespace bebopS {
             void MultiDofJointTrajectoryCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& msg);
             void TakeOff();
             void OdomCallback(const nav_msgs::OdometryConstPtr& odom_msg);
-            void LoggerCallback(const bebopS::Sphinx logger_msg);
+            void LoggerCallback(const bebopS::Sphinx_msgs& logger_msg);
 
 
     };

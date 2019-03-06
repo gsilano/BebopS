@@ -68,7 +68,7 @@ PositionControllerWithSphinx::PositionControllerWithSphinx()
       e_x_(0),
       e_y_(0),
       e_z_(0),
-      e_z_sum_(0),
+      u_z_sum_(0),
       vel_command_(0),
       e_psi_sum_(0),
       yawRate_command_(0),
@@ -462,6 +462,7 @@ void PositionControllerWithSphinx::SetOdomFromLogger(const EigenOdometry& odomet
     state_.angularVelocity.y = odometry_from_logger_.angular_velocity[1];
     state_.angularVelocity.z = odometry_from_logger_.angular_velocity[2];
 
+
 }
 
 // The function allows to set the waypoint filter parameters
@@ -486,6 +487,7 @@ void PositionControllerWithSphinx::SetTrajectoryPoint(const mav_msgs::EigenTraje
 
 // Just to plot the data during the simulation
 void PositionControllerWithSphinx::GetTrajectory(nav_msgs::Odometry* smoothed_trajectory){
+   assert(smoothed_trajectory);
 
    smoothed_trajectory->pose.pose.position.x = command_trajectory_.position_W[0];
    smoothed_trajectory->pose.pose.position.y = command_trajectory_.position_W[1];
@@ -495,6 +497,7 @@ void PositionControllerWithSphinx::GetTrajectory(nav_msgs::Odometry* smoothed_tr
 
 // Just to plot the data during the simulation
 void PositionControllerWithSphinx::GetOdometry(nav_msgs::Odometry* odometry_filtered){
+   assert(odometry_filtered);
 
    *odometry_filtered = odometry_filtered_private_;
 
@@ -502,6 +505,7 @@ void PositionControllerWithSphinx::GetOdometry(nav_msgs::Odometry* odometry_filt
 
 // Just to analyze the components that get uTerr variable
 void PositionControllerWithSphinx::GetUTerrComponents(nav_msgs::Odometry* uTerrComponents){
+  assert(uTerrComponents);
 
   uTerrComponents->pose.pose.position.x = ( (alpha_z_/mu_z_) * dot_e_z_);
   uTerrComponents->pose.pose.position.y = - ( (beta_z_/pow(mu_z_,2)) * e_z_);
@@ -511,6 +515,7 @@ void PositionControllerWithSphinx::GetUTerrComponents(nav_msgs::Odometry* uTerrC
 
 // Just to analyze the position and velocity errors
 void PositionControllerWithSphinx::GetPositionAndVelocityErrors(nav_msgs::Odometry* positionAndVelocityErrors){
+   assert(positionAndVelocityErrors);
 
    positionAndVelocityErrors->pose.pose.position.x = e_x_;
    positionAndVelocityErrors->pose.pose.position.y = e_y_;
@@ -524,6 +529,7 @@ void PositionControllerWithSphinx::GetPositionAndVelocityErrors(nav_msgs::Odomet
 
 // Just to analyze the attitude and angular velocity errors
 void PositionControllerWithSphinx::GetAngularAndAngularVelocityErrors(nav_msgs::Odometry* angularAndAngularVelocityErrors){
+   assert(angularAndAngularVelocityErrors);
 
    angularAndAngularVelocityErrors->pose.pose.position.x = e_phi_;
    angularAndAngularVelocityErrors->pose.pose.position.y = e_theta_;
@@ -625,9 +631,9 @@ void PositionControllerWithSphinx::CalculateCommandSignals(geometry_msgs::Twist*
     double linearX, linearY, linearZ, angularZ;
     linearX = theta_ref_degree/MAX_TILT_ANGLE;
     linearY = phi_ref_degree/MAX_TILT_ANGLE;
-    CommandVelocity(&linearZ);
+    CommandVelocity(u_z, &linearZ);
     CommandYawRate(&angularZ);
-
+    
     // Data storing section. It is activated if necessary
     if(dataStoring_active_){
       
@@ -683,16 +689,20 @@ void PositionControllerWithSphinx::CalculateCommandSignals(geometry_msgs::Twist*
 }
 
 //The function integrates thrust to obtain the velocity command signal
-void PositionControllerWithSphinx::CommandVelocity(double* vel_command){
+void PositionControllerWithSphinx::CommandVelocity(double u_z, double* vel_command){
+    assert(vel_command);
 
-    e_z_sum_ = e_z_sum_ + e_z_ * TsP;
+    u_z_sum_ = u_z_sum_ + u_z * TsP;
 	
-    *vel_command = ( ( (e_z_sum_ * K_z_1_ * K_z_2_)/lambda_z_ ) + ( (e_z_ * K_z_2_)/lambda_z_ ) )/MAX_VERT_SPEED;
+    *vel_command = u_z_sum_/MAX_VERT_SPEED;
+
+    ROS_INFO("Uz: %f Vel_command: %f", u_z, *vel_command);
 
 }
 
 //The function integrates the angular acceleration along the z-axis to obtain the angular velocity 
 void PositionControllerWithSphinx::CommandYawRate(double* yawRate_command){
+    assert(yawRate_command);
 
     e_psi_sum_ = e_psi_sum_ + e_psi_ * TsA;
 

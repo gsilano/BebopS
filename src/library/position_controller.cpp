@@ -491,6 +491,7 @@ void PositionController::SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint
 
 // Just to plot the data during the simulation
 void PositionController::GetTrajectory(nav_msgs::Odometry* smoothed_trajectory){
+  assert(smoothed_trajectory);
 
    smoothed_trajectory->pose.pose.position.x = command_trajectory_.position_W[0];
    smoothed_trajectory->pose.pose.position.y = command_trajectory_.position_W[1];
@@ -500,6 +501,7 @@ void PositionController::GetTrajectory(nav_msgs::Odometry* smoothed_trajectory){
 
 // Just to plot the data during the simulation
 void PositionController::GetOdometry(nav_msgs::Odometry* odometry_filtered){
+   assert(odometry_filtered);
 
    *odometry_filtered = odometry_filtered_private_;
 
@@ -507,6 +509,7 @@ void PositionController::GetOdometry(nav_msgs::Odometry* odometry_filtered){
 
 // Just to analyze the components that get uTerr variable
 void PositionController::GetUTerrComponents(nav_msgs::Odometry* uTerrComponents){
+  assert(uTerrComponents);
 
   uTerrComponents->pose.pose.position.x = ( (alpha_z_/mu_z_) * dot_e_z_);
   uTerrComponents->pose.pose.position.y = - ( (beta_z_/pow(mu_z_,2)) * e_z_);
@@ -516,6 +519,7 @@ void PositionController::GetUTerrComponents(nav_msgs::Odometry* uTerrComponents)
 
 // Just to analyze the position and velocity errors
 void PositionController::GetPositionAndVelocityErrors(nav_msgs::Odometry* positionAndVelocityErrors){
+  assert(positionAndVelocityErrors);
 
   positionAndVelocityErrors->pose.pose.position.x = e_x_;
   positionAndVelocityErrors->pose.pose.position.y = e_y_;
@@ -529,7 +533,8 @@ void PositionController::GetPositionAndVelocityErrors(nav_msgs::Odometry* positi
 
 // Just to analyze the attitude and angular velocity errors
 void PositionController::GetAngularAndAngularVelocityErrors(nav_msgs::Odometry* angularAndAngularVelocityErrors){
-
+  assert(angularAndAngularVelocityErrors);
+  
   angularAndAngularVelocityErrors->pose.pose.position.x = e_phi_;
   angularAndAngularVelocityErrors->pose.pose.position.y = e_theta_;
   angularAndAngularVelocityErrors->pose.pose.position.z = e_psi_;

@@ -26,8 +26,9 @@
 #include "position_controller_with_sphinx_node.h"
 
 #include "bebopS/parameters_ros.h"
-
 #include "bebopS_msgs/default_topics.h"
+#include "bebopS/Sphinx_msgs.h"
+
 #include "bebop_msgs/default_topics.h"
 
 #include "geometry_msgs/Twist.h"
@@ -292,11 +293,11 @@ void PositionControllerWithSphinxNode::InitializeParams() {
 void PositionControllerWithSphinxNode::Publish(){
 }
 
-void PositionControllerWithSphinxNode::LoggerCallback(const bebopS::Sphinx logger_msg) {
+void PositionControllerWithSphinxNode::LoggerCallback(const bebopS::Sphinx_msgs& logger_msg) {
 
     ROS_INFO_ONCE("PositionController with Bebop got first logger odometry message.");
 
-    if (waypointHasBeenPublished_){
+    if (waypointHasBeenPublished_ && bebop_autonomy_package_activated_){
 
 	    // The data come from the Parrot-Sphinx logger are used to build a new odometry message, later used
 	    // by the position controller libray
@@ -323,16 +324,24 @@ void PositionControllerWithSphinxNode::LoggerCallback(const bebopS::Sphinx logge
 	    odometry_logger.angular_velocity[1] = logger_msg.angVelYABC;
 	    odometry_logger.angular_velocity[2] = logger_msg.angVelZABC;
 
+      ROS_DEBUG("Roll: %f Pitch: %f Yaw: %f", attitude_logger.position[1], attitude_logger.position[2], attitude_logger.position[3]);
+      ROS_DEBUG("AngX: %f AngY: %f AngZ: %f", odometry_logger.angular_velocity[0], odometry_logger.angular_velocity[1], odometry_logger.angular_velocity[2]);
+      ROS_DEBUG("PosX: %f PosY: %f PosZ: %f", odometry_logger.position[0], odometry_logger.position[1], odometry_logger.position[2]);
+      ROS_DEBUG("LinX: %f LinY: %f LinZ: %f", odometry_logger.velocity[0], odometry_logger.velocity[1], odometry_logger.velocity[2]);
+
       position_controller_.SetOdomFromLogger(odometry_logger, attitude_logger);
 
       //For taking off the drone if it is not
-      if (!takeOffMsgHasBeenSent_ && bebop_autonomy_package_activated_)        
+      if (!takeOffMsgHasBeenSent_)        
           TakeOff();
 
-      //creating a new twist message. twist_msg is used to send the command signals
-	    geometry_msgs::Twist ref_command_signals;
-	    position_controller_.CalculateCommandSignals(&ref_command_signals);
-	    motor_velocity_reference_pub_.publish(ref_command_signals);          
+      //creating a new twist message. twist_msg is used to send the command signals. The Bebop command signals
+      //are computed later the drone took off.
+	    if (takeOffMsgHasBeenSent_){
+          geometry_msgs::Twist ref_command_signals;
+	        position_controller_.CalculateCommandSignals(&ref_command_signals);
+	        motor_velocity_reference_pub_.publish(ref_command_signals);          
+      }
 
       //The code reported below is used to plot the data when the simulation is running
       nav_msgs::Odometry odometry_filtered;

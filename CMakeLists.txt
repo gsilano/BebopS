@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   nav_msgs
   std_msgs
   roscpp
+  rospy
   sensor_msgs
   cmake_modules
   message_generation
@@ -22,7 +23,7 @@ find_package(
 #To add custom messages to the repository
 add_message_files(
   FILES
-  Sphinx.msg
+  Sphinx_msgs.msg
 )
 
 #For messages generation
