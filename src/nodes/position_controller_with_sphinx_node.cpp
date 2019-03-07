@@ -35,6 +35,10 @@
 #include "geometry_msgs/Vector3.h"
 #include "std_msgs/Empty.h"
 
+#define MIN_RANGE_HOVER   0.90 //Minimum hovering interval before starting the timer
+#define MAX_RANGE_HOVER   1.10 //Maximum hovering interval before starting the timer
+#define WAITING_RANGE        3    //Waiting range before starting the controller
+
 namespace bebopS {
 
 PositionControllerWithSphinxNode::PositionControllerWithSphinxNode() {
@@ -329,15 +333,29 @@ void PositionControllerWithSphinxNode::LoggerCallback(const bebopS::Sphinx_msgs&
       ROS_DEBUG("PosX: %f PosY: %f PosZ: %f", odometry_logger.position[0], odometry_logger.position[1], odometry_logger.position[2]);
       ROS_DEBUG("LinX: %f LinY: %f LinZ: %f", odometry_logger.velocity[0], odometry_logger.velocity[1], odometry_logger.velocity[2]);
 
-      position_controller_.SetOdomFromLogger(odometry_logger, attitude_logger);
-
       //For taking off the drone if it is not
       if (!takeOffMsgHasBeenSent_)        
           TakeOff();
 
+      //Check drone hovers one meter from the ground
+      if(odometry_logger.position[2] > MIN_RANGE_HOVER && odometry_logger.position[2] < MAX_RANGE_HOVER){
+
+         if(first_time_ == 0)
+          first_time_ = ros::Time::now().toSec();
+
+         if((ros::Time::now().toSec() - first_time_) > WAITING_RANGE )
+          isHovering_ = true;
+      }
+      else{
+        first_time_ = 0;
+      }
+      
       //creating a new twist message. twist_msg is used to send the command signals. The Bebop command signals
       //are computed later the drone took off.
-	    if (takeOffMsgHasBeenSent_){
+	    if (takeOffMsgHasBeenSent_ && isHovering_){
+         
+          position_controller_.SetOdomFromLogger(odometry_logger, attitude_logger);
+
           geometry_msgs::Twist ref_command_signals;
 	        position_controller_.CalculateCommandSignals(&ref_command_signals);
 	        motor_velocity_reference_pub_.publish(ref_command_signals);          
@@ -410,6 +428,8 @@ void PositionControllerWithSphinxNode::OdomCallback(const nav_msgs::OdometryCons
 }
 
 void PositionControllerWithSphinxNode::TakeOff(){
+
+    ROS_INFO_ONCE("PositionController with Bebop sent take off message.");
 
     //The drone takes off from the ground only if the waypoint to reach has been published and the IMU
     //message has been received. In this way, we are sure the communication is done

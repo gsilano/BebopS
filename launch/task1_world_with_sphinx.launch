@@ -9,7 +9,7 @@
   <arg name="csvFilesStoring" default="false"/>
   <arg name="csvFilesStoringTime" default="10.0"/> <!-- seconds -->
   <arg name="user_account" default="giuseppe"/>
-  <arg name="waypoint_filter" default="false"/>
+  <arg name="waypoint_filter" default="true"/>
   <arg name="EKFActive" default="false"/>
   <arg name="enable_plots" default="false"/>
   <arg name="plotName" default="bebopPlots"/>

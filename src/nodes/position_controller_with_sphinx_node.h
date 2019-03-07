@@ -54,6 +54,10 @@ namespace bebopS {
             bool waypointHasBeenPublished_ = false;
             bool takeOffMsgHasBeenSent_ = false;
             bool bebop_autonomy_package_activated_ = false;
+            bool isHovering_ = false;
+
+            //To check if the drone hovers
+            double first_time_ = 0;
 
             PositionControllerWithSphinx position_controller_;
 

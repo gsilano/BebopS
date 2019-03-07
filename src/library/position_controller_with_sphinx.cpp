@@ -462,7 +462,6 @@ void PositionControllerWithSphinx::SetOdomFromLogger(const EigenOdometry& odomet
     state_.angularVelocity.y = odometry_from_logger_.angular_velocity[1];
     state_.angularVelocity.z = odometry_from_logger_.angular_velocity[2];
 
-
 }
 
 // The function allows to set the waypoint filter parameters
@@ -583,6 +582,8 @@ void PositionControllerWithSphinx::SetOdometryEstimated() {
     //TODO: The EKF on data come from the Parrot-Sphinx data logger to be implemented
     extended_kalman_filter_bebop_.EstimatorSphinxLogger(&state_, &odometry_from_logger_, &attitude_from_logger_);
 
+    ROS_DEBUG("PosX: %f PosY: %f PosZ: %f", state_.position.x, state_.position.y, state_.position.z);
+
 }
 
 
@@ -696,7 +697,7 @@ void PositionControllerWithSphinx::CommandVelocity(double u_z, double* vel_comma
 	
     *vel_command = u_z_sum_/MAX_VERT_SPEED;
 
-    ROS_INFO("Uz: %f Vel_command: %f", u_z, *vel_command);
+    ROS_DEBUG("Uz: %f Vel_command: %f e_z: %f", u_z, *vel_command, e_z_);
 
 }
 
@@ -775,6 +776,10 @@ void PositionControllerWithSphinx::PositionErrors(double* e_x, double* e_y, doub
    *e_x = x_r - state_.position.x;
    *e_y = y_r - state_.position.y;
    *e_z = z_r - state_.position.z;
+
+   ROS_INFO("x_r: %f, y_r: %f, z_r: %f", x_r, y_r, z_r);
+   ROS_DEBUG("PosX: %f PosY: %f PosZ: %f", state_.position.x, state_.position.y, state_.position.z);
+   ROS_DEBUG("e_x: %f, e_y: %f, e_z: %f", *e_x, *e_y, *e_z);
 
 }
 
