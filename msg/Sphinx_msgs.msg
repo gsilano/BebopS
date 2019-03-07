@@ -31,6 +31,7 @@ float64 posZ                         # Drone position along the z-axis
 float64 attitudeX                    # Drone attitude along the x-axis (roll angle)
 float64 attitudeY                    # Drone attitude along the y-axis (pitch angle)
 float64 attitudeZ                    # Drone attitude along the z-axis (yaw angle)
+float32 timeStamp                    # Drone time stamp (seconds)
 float64 accXABC                      # Acceleration along the x-axis in the aircraft body center reference system
 float64 accYABC                      # Acceleration along the y-axis in the aircraft body center reference system
 float64 accZABC                      # Acceleration along the z-axis in the aircraft body center reference system

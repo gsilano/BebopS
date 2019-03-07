@@ -40,8 +40,11 @@ stdbuf -o L tlm-data-logger -r 5 inet:127.0.0.1:9060 |
 
 	#Drone position	- Inertial frame reference system
 	/omniscient_bebop2.worldPosition.x:/{ print "posX: "$2 }; 
-    /omniscient_bebop2.worldPosition.y:/{ print "posY: "$2 }; 
-    /omniscient_bebop2.worldPosition.z:/{ print "posZ: "$2 };
+    	/omniscient_bebop2.worldPosition.y:/{ print "posY: "$2 }; 
+    	/omniscient_bebop2.worldPosition.z:/{ print "posZ: "$2 };
+
+        #Drone time stamp
+        /omniscient_bebop2.timestamp:/{ print "timeStamp: "$2 }; 
     
 	#Drone Attitude
 	/omniscient_bebop2.worldAttitude.x:/{ print "attitudeX: "$2 };
