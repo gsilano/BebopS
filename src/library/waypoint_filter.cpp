@@ -91,6 +91,8 @@ void WaypointFilter::Initialize(state_t state_){
 // Trajectory generation
 void WaypointFilter::TrajectoryGeneration(){
 
+    ROS_DEBUG("First part: %f, Second part: %f", (Tsf_/(Tsf_+H_)) * command_trajectory_toSend_.position_W[2], (H_/(Tsf_+H_)) * command_trajectory_private_.position_W[2]);
+
     command_trajectory_toSend_.position_W[0] = (Tsf_/(Tsf_+H_)) * command_trajectory_toSend_.position_W[0] + (H_/(Tsf_+H_)) * command_trajectory_private_.position_W[0];
     command_trajectory_toSend_.position_W[1] = (Tsf_/(Tsf_+H_)) * command_trajectory_toSend_.position_W[1] + (H_/(Tsf_+H_)) * command_trajectory_private_.position_W[1];
     command_trajectory_toSend_.position_W[2] = (Tsf_/(Tsf_+H_)) * command_trajectory_toSend_.position_W[2] + (H_/(Tsf_+H_)) * command_trajectory_private_.position_W[2];

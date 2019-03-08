@@ -721,7 +721,7 @@ void PositionControllerWithSphinx::CommandVelocity(double* linearZ){
 	
     *linearZ = u_z_sum_/MAX_VERT_SPEED;
 
-    ROS_INFO("z_r %f, e_z: %f, u_z: %f, linearZ: %f ", state_.position.z, e_z_, u_z_internal, *linearZ);
+    ROS_INFO("z_r %f, e_z: %f, u_z: %f, linearZ: %f ", command_trajectory_.position_W[2], e_z_, u_z_internal, *linearZ);
 
 }
 
