@@ -98,7 +98,7 @@ void WaypointFilter::TrajectoryGeneration(){
     double yaw = (Tsf_/(Tsf_+H_)) * command_trajectory_toSend_.getYaw() + (H_/(Tsf_+H_)) * command_trajectory_private_.getYaw();
     command_trajectory_toSend_.setFromYaw(yaw);
 
-    ROS_INFO("Filter Output - x: %f, y: %f, z: %f", command_trajectory_toSend_.position_W[0], command_trajectory_toSend_.position_W[1], command_trajectory_toSend_.position_W[2]);
+    ROS_DEBUG("Filter Output - x: %f, y: %f, z: %f", command_trajectory_toSend_.position_W[0], command_trajectory_toSend_.position_W[1], command_trajectory_toSend_.position_W[2]);
 
 }
 

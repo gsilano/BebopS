@@ -171,6 +171,10 @@ class PositionControllerParameters {
 	        double K_y_1_, K_y_2_;
 	        double K_z_1_, K_z_2_;
 
+            //Bebop's command signals
+            double linearZ_;
+            double u_z_;
+
             //Position and linear velocity errors
             double e_x_;
             double e_y_;
@@ -222,7 +226,7 @@ class PositionControllerParameters {
             void Emergency();
             void LandEmergency();
             void SetOdometryEstimated();
-            void CommandVelocity(double u_z, double* vel_command);
+            void CommandVelocity(double* linearZ);
             void CommandYawRate(double* yawRate_command);
             void Quaternion2Euler(double* roll, double* pitch, double* yaw) const;
             void AttitudeController(double* u_phi, double* u_theta, double* u_psi);

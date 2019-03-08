@@ -65,6 +65,8 @@ PositionControllerWithSphinx::PositionControllerWithSphinx()
       EKF_active_(false),
       dataStoringTime_(0),
       stateEmergency_(false),
+      linearZ_(0),
+      u_z_(0),
       e_x_(0),
       e_y_(0),
       e_z_(0),
@@ -621,9 +623,9 @@ void PositionControllerWithSphinx::CalculateCommandSignals(geometry_msgs::Twist*
     }
     
     double u_phi, u_theta, u_psi;
-    double u_x, u_y, u_z, u_Terr;
+    double u_x, u_y, u_Terr;
     AttitudeController(&u_phi, &u_theta, &u_psi);
-    PosController(&control_.uT, &control_.phiR, &control_.thetaR, &u_x, &u_y, &u_z, &u_Terr);
+    PosController(&control_.uT, &control_.phiR, &control_.thetaR, &u_x, &u_y, &u_z_, &u_Terr);
  
     // Data storing section. It is activated if necessary
     if(dataStoring_active_){
@@ -649,10 +651,9 @@ void PositionControllerWithSphinx::CalculateCommandSignals(geometry_msgs::Twist*
     theta_ref_degree = control_.thetaR * (180/M_PI);
     phi_ref_degree = control_.phiR * (180/M_PI);
     
-    double linearX, linearY, linearZ, angularZ;
+    double linearX, linearY, angularZ;
     linearX = theta_ref_degree/MAX_TILT_ANGLE;
     linearY = phi_ref_degree/MAX_TILT_ANGLE;
-    CommandVelocity(u_z, &linearZ);
     CommandYawRate(&angularZ);
     
     // Data storing section. It is activated if necessary
@@ -660,18 +661,18 @@ void PositionControllerWithSphinx::CalculateCommandSignals(geometry_msgs::Twist*
       
       // Saving command signals before saturating in a file
       std::stringstream tempCommandSignalsBefore;
-      tempCommandSignalsBefore << linearX << "," << linearY << "," << linearZ << "," << angularZ << "," << odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "\n";
+      tempCommandSignalsBefore << linearX << "," << linearY << "," << linearZ_ << "," << angularZ << "," << odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "\n";
 
       listCommandSinglasBefore_.push_back(tempCommandSignalsBefore.str());
 
     }
 
     //The command signals are saturated to take into the SDK constrains in sending commands
-    if(!(linearZ > -1 && linearZ < 1))
-        if(linearZ > 1)
-           linearZ = 1;
+    if(!(linearZ_ > -1 && linearZ_ < 1))
+        if(linearZ_ > 1)
+           linearZ_ = 1;
         else
-           linearZ = -1;
+           linearZ_ = -1;
 
     if(!(linearX > -1 && linearX < 1))
         if(linearX > 1)
@@ -691,12 +692,12 @@ void PositionControllerWithSphinx::CalculateCommandSignals(geometry_msgs::Twist*
         else
            angularZ = -1;
 
-    // Data storing section. It is actived if necessary
+    // Data storing section. It is activated if necessary
     if(dataStoring_active_){
       
       // Saving command signals in a file
       std::stringstream tempCommandSignalsAfter;
-      tempCommandSignalsAfter << linearX << "," << linearY << "," << linearZ << "," << angularZ << "," << odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "\n";
+      tempCommandSignalsAfter << linearX << "," << linearY << "," << linearZ_ << "," << angularZ << "," << odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "\n";
 
       listCommandSinglasAfter_.push_back(tempCommandSignalsAfter.str());
 
@@ -704,20 +705,23 @@ void PositionControllerWithSphinx::CalculateCommandSignals(geometry_msgs::Twist*
 
     ref_command_signals->linear.x = linearX;
     ref_command_signals->linear.y = linearY;
-    ref_command_signals->linear.z = linearZ;
+    ref_command_signals->linear.z = linearZ_;
     ref_command_signals->angular.z = angularZ; 
 
 }
 
 //The function integrates thrust to obtain the velocity command signal
-void PositionControllerWithSphinx::CommandVelocity(double u_z, double* vel_command){
-    assert(vel_command);
+void PositionControllerWithSphinx::CommandVelocity(double* linearZ){
+    assert(linearZ);
 
-    u_z_sum_ = u_z_sum_ + u_z * TsP;
+    //Since u_z is a force, it has to be divided by the mas to get the vertical acceleration
+    double u_z_internal = u_z_/m_;
+
+    u_z_sum_ = u_z_sum_ + u_z_internal * TsP;
 	
-    *vel_command = u_z_sum_/MAX_VERT_SPEED;
+    *linearZ = u_z_sum_/MAX_VERT_SPEED;
 
-    ROS_DEBUG("Uz: %f Vel_command: %f e_z: %f", u_z, *vel_command, e_z_);
+    ROS_INFO("z_r %f, e_z: %f, u_z: %f, linearZ: %f ", state_.position.z, e_z_, u_z_internal, *linearZ);
 
 }
 
@@ -800,8 +804,11 @@ void PositionControllerWithSphinx::PositionErrors(double* e_x, double* e_y, doub
    *e_y = y_r - state_.position.y;
    *e_z = z_r - state_.position.z;
 
+   //Every Tsp the Bebop vertical command is updated
+   CommandVelocity(&linearZ_);
+
    ROS_DEBUG("x_r: %f, y_r: %f, z_r: %f", x_r, y_r, z_r);
-   ROS_DEBUG("PosX: %f PosY: %f PosZ: %f", state_.position.x, state_.position.y, state_.position.z);
+   ROS_DEBUG("x_d: %f y_d: %f z_d: %f", state_.position.x, state_.position.y, state_.position.z);
    ROS_DEBUG("e_x: %f, e_y: %f, e_z: %f", *e_x, *e_y, *e_z);
 
 }
