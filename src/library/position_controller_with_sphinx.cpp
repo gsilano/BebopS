@@ -51,10 +51,10 @@
 #define MAX_VERT_SPEED            1  /* Current max vertical speed in m/s */
 #define MAX_ROT_SPEED             100 /* Current max rotation speed in degree/s */
 
-#define MAX_POS_X                 1 /* Max position before emergency state along x-axis */
-#define MAX_POS_Y                 1 /* Max position before emergency state along y-axis */
-#define MAX_POS_Z                 1 /* Max position before emergency state along z-axis */
-#define MAX_VEL_ERR               1 /* Max velocity error before emergency state */
+#define MAX_POS_X                 3 /* Max position before emergency state along x-axis */
+#define MAX_POS_Y                 3 /* Max position before emergency state along y-axis */
+#define MAX_POS_Z                 3 /* Max position before emergency state along z-axis */
+#define MAX_VEL_ERR               3 /* Max velocity error before emergency state */
 
 namespace bebopS {
 
@@ -137,6 +137,23 @@ PositionControllerWithSphinx::PositionControllerWithSphinx()
             command_trajectory_.position_W[0] = 0;
             command_trajectory_.position_W[1] = 0;
             command_trajectory_.position_W[2] = 0;
+
+            //Odometry logger initialization
+            odometry_from_logger_.position[0] = 0;
+            odometry_from_logger_.position[1] = 0;
+            odometry_from_logger_.position[2] = 0;
+
+            odometry_from_logger_.velocity[0] = 0;
+            odometry_from_logger_.velocity[1] = 0;
+            odometry_from_logger_.velocity[2] = 0;
+
+            odometry_from_logger_.angular_velocity[0] = 0;
+            odometry_from_logger_.angular_velocity[1] = 0;
+            odometry_from_logger_.angular_velocity[2] = 0;
+
+            attitude_from_logger_.position[0] = 0;
+            attitude_from_logger_.position[1] = 0;
+            attitude_from_logger_.position[2] = 0;
 
             // Kalman filter's parameters initialization
             filter_parameters_.dev_x_ = 0;
@@ -451,8 +468,8 @@ void PositionControllerWithSphinx::SetOdomFromLogger(const EigenOdometry& odomet
     //+x forward, +y left, +z up, +yaw CCW
     odometry_from_logger_ = odometry_from_logger; 
     attitude_from_logger_ = attitude_from_logger; 
-    controller_active_= true;
 
+    // Drone attitude
     state_.attitude.roll = attitude_from_logger_.position[0]; 
     state_.attitude.pitch = attitude_from_logger_.position[1]; 
     state_.attitude.yaw = attitude_from_logger_.position[2];
@@ -461,6 +478,9 @@ void PositionControllerWithSphinx::SetOdomFromLogger(const EigenOdometry& odomet
     state_.angularVelocity.x = odometry_from_logger_.angular_velocity[0];
     state_.angularVelocity.y = odometry_from_logger_.angular_velocity[1];
     state_.angularVelocity.z = odometry_from_logger_.angular_velocity[2];
+
+    //Enabling the controller and the waypoint filter initialization
+    controller_active_= true;
 
 }
 
@@ -715,6 +735,7 @@ void PositionControllerWithSphinx::CommandYawRate(double* yawRate_command){
 void PositionControllerWithSphinx::LandEmergency(){
 
     if(stateEmergency_){
+       ROS_INFO_ONCE("PositionController with Bebop starts landing.");
        std_msgs::Empty empty_msg;
        land_pub_.publish(empty_msg);
     }
@@ -722,6 +743,8 @@ void PositionControllerWithSphinx::LandEmergency(){
 
 //The function handles the emergency
 void PositionControllerWithSphinx::Emergency(){
+
+    ROS_INFO_ONCE("PositionController with Bebop goes in Emergency mode.");
 
     stateEmergency_ = true;
     timer3_ = n3_.createTimer(ros::Duration(TsE), &PositionControllerWithSphinx::CallbackLand, this, false, true); 
@@ -777,7 +800,7 @@ void PositionControllerWithSphinx::PositionErrors(double* e_x, double* e_y, doub
    *e_y = y_r - state_.position.y;
    *e_z = z_r - state_.position.z;
 
-   ROS_INFO("x_r: %f, y_r: %f, z_r: %f", x_r, y_r, z_r);
+   ROS_DEBUG("x_r: %f, y_r: %f, z_r: %f", x_r, y_r, z_r);
    ROS_DEBUG("PosX: %f PosY: %f PosZ: %f", state_.position.x, state_.position.y, state_.position.z);
    ROS_DEBUG("e_x: %f, e_y: %f, e_z: %f", *e_x, *e_y, *e_z);
 
@@ -982,17 +1005,18 @@ void PositionControllerWithSphinx::CallbackAttitude(const ros::TimerEvent& event
 //  * the last part is used to store the data into csv files if the data storing is active
 void PositionControllerWithSphinx::CallbackPosition(const ros::TimerEvent& event){
   
+     SetOdometryEstimated();
+
      // The function is used to invoke the waypoint filter employs to reduce the error dimension along the axes when the drone stars to follow the trajectory.
      // The waypoint filter works with an update time of Tsp
      if(controller_active_)
-       waypoint_filter_.Initialize(state_);
+        waypoint_filter_.Initialize(state_);
 
      if(waypointFilter_active_ && controller_active_){
         waypoint_filter_.TrajectoryGeneration();
         waypoint_filter_.GetTrajectoryPoint(&command_trajectory_);
      }
 
-     SetOdometryEstimated();
      PositionErrors(&e_x_, &e_y_, &e_z_);
      VelocityErrors(&dot_e_x_, &dot_e_y_, &dot_e_z_);
 
@@ -1031,7 +1055,9 @@ void PositionControllerWithSphinx::CallbackPosition(const ros::TimerEvent& event
 //Callback handling the emergency status
 void PositionControllerWithSphinx::CallbackLand(const ros::TimerEvent& event){
 
-     LandEmergency();
+    ROS_INFO_ONCE("PositionController with Bebop activated the call back for landing.");  
+    
+    LandEmergency();
    
 }
 

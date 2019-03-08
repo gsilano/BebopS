@@ -1011,6 +1011,8 @@ void PositionController::CallbackAttitude(const ros::TimerEvent& event){
 //  * the last part is used to store the data into csv files if the data storing is active
 void PositionController::CallbackPosition(const ros::TimerEvent& event){
   
+    SetOdometryEstimated();
+
      // The function is used to invoke the waypoint filter employs to reduce the error dimension along the axes when the drone stars to follow the trajectory.
      // The waypoint filter works with an update time of Tsp
      if(controller_active_)
@@ -1021,7 +1023,7 @@ void PositionController::CallbackPosition(const ros::TimerEvent& event){
         waypoint_filter_.GetTrajectoryPoint(&command_trajectory_);
      }
 
-     SetOdometryEstimated();
+
      PositionErrors(&e_x_, &e_y_, &e_z_);
      VelocityErrors(&dot_e_x_, &dot_e_y_, &dot_e_z_);
 

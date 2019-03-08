@@ -338,7 +338,7 @@ void PositionControllerWithSphinxNode::LoggerCallback(const bebopS::Sphinx_msgs&
           TakeOff();
 
       //Check drone hovers one meter from the ground
-      if(odometry_logger.position[2] > MIN_RANGE_HOVER && odometry_logger.position[2] < MAX_RANGE_HOVER){
+      if(odometry_logger.position[2] > MIN_RANGE_HOVER && odometry_logger.position[2] < MAX_RANGE_HOVER && takeOffMsgHasBeenSent_){
 
          if(first_time_ == 0)
           first_time_ = ros::Time::now().toSec();
