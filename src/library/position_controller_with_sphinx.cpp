@@ -66,14 +66,13 @@ PositionControllerWithSphinx::PositionControllerWithSphinx()
       dataStoringTime_(0),
       stateEmergency_(false),
       linearZ_(0),
+      u_z_sum_(0),
+      u_psi_sum_(0),
+      angularZ_(0),
       u_z_(0),
       e_x_(0),
       e_y_(0),
       e_z_(0),
-      u_z_sum_(0),
-      vel_command_(0),
-      e_psi_sum_(0),
-      yawRate_command_(0),
       dot_e_x_(0),
       dot_e_y_(0), 
       dot_e_z_(0),
@@ -209,6 +208,7 @@ void PositionControllerWithSphinx::CallbackSaveData(const ros::TimerEvent& event
    ofstream fileCommandSignalsBefore;
    ofstream fileCommandSignalsAfter;
    ofstream fileOdometryBebopAutonomyPackage;
+   ofstream fileWaypointFilterParameters;
 
    ROS_INFO("CallbackSaveData function is working. Time: %f seconds, %f nanoseconds", odometry_.timeStampSec, odometry_.timeStampNsec);
     
@@ -228,11 +228,14 @@ void PositionControllerWithSphinx::CallbackSaveData(const ros::TimerEvent& event
    fileCommandSignalsBefore.open("/home/" + user_ + "/commandSignalsBeforeSaturation.csv", std::ios_base::app);
    fileCommandSignalsAfter.open("/home/" + user_ + "/commandSignalsAfterSaturation.csv", std::ios_base::app);
    fileOdometryBebopAutonomyPackage.open("/home/" + user_ + "/odometryFromBebopAutonomyPackage.csv", std::ios_base::app);
+   fileWaypointFilterParameters.open("/home/" + user_ + "/filterParameters.csv", std::ios_base::app);
 
-      // Saving vehicle parameters in a file
+   // Saving vehicle parameters in a file
    fileControllerGains << beta_x_ << "," << beta_y_ << "," << beta_z_ << "," << alpha_x_ << "," << alpha_y_ << "," << alpha_z_ << "," << beta_phi_ << ","
     		  << beta_theta_ << "," << beta_psi_ << "," << alpha_phi_ << "," << alpha_theta_ << "," << alpha_psi_ << "," << mu_x_ << "," << mu_y_ << ","
-			  << mu_z_ << "," << mu_phi_ << "," << mu_theta_ << "," << mu_psi_ << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+			  << mu_z_ << "," << mu_phi_ << "," << mu_theta_ << "," << mu_psi_ << "," << "," << lambda_x_ << "," << lambda_y_ << "," << lambda_z_ << 
+              "," << K_x_1_ << "," << K_x_2_ << "," << K_y_1_ << "," << K_y_2_ << "," << K_z_1_ << "," << K_z_2_ << "," << odometry_.timeStampSec << "," 
+              << odometry_.timeStampNsec << "\n";
 
    // Saving vehicle parameters in a file
    fileVehicleParameters << bf_ << "," << l_ << "," << bm_ << "," << m_ << "," << g_ << "," << Ix_ << "," << Iy_ << "," << Iz_ << ","
@@ -308,6 +311,11 @@ void PositionControllerWithSphinx::CallbackSaveData(const ros::TimerEvent& event
        fileOdometryBebopAutonomyPackage << listOdometryFromBebopAutonomyPackage_.at( n );
    }
 
+   // Saving filter parameters in a file
+   for (unsigned n=0; n < listWaypointFilterParameters_.size(); ++n) {
+       fileWaypointFilterParameters << listWaypointFilterParameters_.at( n );
+   }
+
 
    // Closing all opened files
    fileControllerGains.close ();
@@ -326,6 +334,7 @@ void PositionControllerWithSphinx::CallbackSaveData(const ros::TimerEvent& event
    fileCommandSignalsBefore.close();
    fileCommandSignalsAfter.close();
    fileOdometryBebopAutonomyPackage.close();
+   fileWaypointFilterParameters.close();
 
    // To have a one shot storing
    dataStoring_active_ = false;
@@ -416,6 +425,7 @@ void PositionControllerWithSphinx::SetLaunchFileParameters(){
       listCommandSinglasBefore_.clear();
       listCommandSinglasAfter_.clear();
       listOdometryFromBebopAutonomyPackage_.clear();
+      listWaypointFilterParameters_.clear();
 	  
    }
 
@@ -489,8 +499,22 @@ void PositionControllerWithSphinx::SetOdomFromLogger(const EigenOdometry& odomet
 // The function allows to set the waypoint filter parameters
 void PositionControllerWithSphinx::SetWaypointFilterParameters(){
 
-  waypoint_filter_.SetParameters(&waypoint_filter_parameters_);
+    waypoint_filter_.SetParameters(&waypoint_filter_parameters_);
 
+    // Data storing section. It is activated if necessary
+    if(dataStoring_active_){
+
+        double Tsf, H;
+        Tsf = waypoint_filter_parameters_.tsf_;
+        H = waypoint_filter_parameters_.h_;
+
+        // Saving drone attitude in a file
+        std::stringstream tempWaypointFilterParameters;
+        tempWaypointFilterParameters << Tsf << "," << H << "," << odometry_from_logger_.timeStampSec << "," << 
+        odometry_from_logger_.timeStampNsec << "\n";
+
+        listWaypointFilterParameters_.push_back(tempWaypointFilterParameters.str());
+    }
 }
 
 // The function sets the filter trajectory points
@@ -521,16 +545,6 @@ void PositionControllerWithSphinx::GetOdometry(nav_msgs::Odometry* odometry_filt
    assert(odometry_filtered);
 
    *odometry_filtered = odometry_filtered_private_;
-
-}
-
-// Just to analyze the components that get uTerr variable
-void PositionControllerWithSphinx::GetUTerrComponents(nav_msgs::Odometry* uTerrComponents){
-  assert(uTerrComponents);
-
-  uTerrComponents->pose.pose.position.x = ( (alpha_z_/mu_z_) * dot_e_z_);
-  uTerrComponents->pose.pose.position.y = - ( (beta_z_/pow(mu_z_,2)) * e_z_);
-  uTerrComponents->pose.pose.position.z = ( g_ + ( (alpha_z_/mu_z_) * dot_e_z_) - ( (beta_z_/pow(mu_z_,2)) * e_z_) );
 
 }
 
@@ -586,13 +600,6 @@ void PositionControllerWithSphinx::GetVelocityAlongZComponents(nav_msgs::Odometr
    zVelocity_components->pose.pose.position.x = state_.linearVelocity.x;
    zVelocity_components->pose.pose.position.y = state_.linearVelocity.y;
    zVelocity_components->pose.pose.position.z = state_.linearVelocity.z;
-
-   double phi, theta, psi;
-   Quaternion2Euler(&phi, &theta, &psi);
-
-   zVelocity_components->twist.twist.linear.x = (-sin(theta) * state_.linearVelocity.x);
-   zVelocity_components->twist.twist.linear.y = ( sin(phi) * cos(theta) * state_.linearVelocity.y);
-   zVelocity_components->twist.twist.linear.z = (cos(phi) * cos(theta) * state_.linearVelocity.z);
 
 }
 
@@ -651,17 +658,16 @@ void PositionControllerWithSphinx::CalculateCommandSignals(geometry_msgs::Twist*
     theta_ref_degree = control_.thetaR * (180/M_PI);
     phi_ref_degree = control_.phiR * (180/M_PI);
     
-    double linearX, linearY, angularZ;
+    double linearX, linearY;
     linearX = theta_ref_degree/MAX_TILT_ANGLE;
     linearY = phi_ref_degree/MAX_TILT_ANGLE;
-    CommandYawRate(&angularZ);
     
     // Data storing section. It is activated if necessary
     if(dataStoring_active_){
       
       // Saving command signals before saturating in a file
       std::stringstream tempCommandSignalsBefore;
-      tempCommandSignalsBefore << linearX << "," << linearY << "," << linearZ_ << "," << angularZ << "," << odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "\n";
+      tempCommandSignalsBefore << linearX << "," << linearY << "," << linearZ_ << "," << angularZ_ << "," << odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "\n";
 
       listCommandSinglasBefore_.push_back(tempCommandSignalsBefore.str());
 
@@ -686,18 +692,18 @@ void PositionControllerWithSphinx::CalculateCommandSignals(geometry_msgs::Twist*
         else
            linearY = -1;
 
-    if(!(angularZ > -1 && angularZ < 1))
-        if(angularZ > 1)
-           angularZ = 1;
+    if(!(angularZ_ > -1 && angularZ_ < 1))
+        if(angularZ_ > 1)
+           angularZ_ = 1;
         else
-           angularZ = -1;
+           angularZ_ = -1;
 
     // Data storing section. It is activated if necessary
     if(dataStoring_active_){
       
       // Saving command signals in a file
       std::stringstream tempCommandSignalsAfter;
-      tempCommandSignalsAfter << linearX << "," << linearY << "," << linearZ_ << "," << angularZ << "," << odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "\n";
+      tempCommandSignalsAfter << linearX << "," << linearY << "," << linearZ_ << "," << angularZ_ << "," << odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "\n";
 
       listCommandSinglasAfter_.push_back(tempCommandSignalsAfter.str());
 
@@ -706,7 +712,7 @@ void PositionControllerWithSphinx::CalculateCommandSignals(geometry_msgs::Twist*
     ref_command_signals->linear.x = linearX;
     ref_command_signals->linear.y = linearY;
     ref_command_signals->linear.z = linearZ_;
-    ref_command_signals->angular.z = angularZ; 
+    ref_command_signals->angular.z = angularZ_; 
 
 }
 
@@ -729,9 +735,12 @@ void PositionControllerWithSphinx::CommandVelocity(double* linearZ){
 void PositionControllerWithSphinx::CommandYawRate(double* yawRate_command){
     assert(yawRate_command);
 
-    e_psi_sum_ = e_psi_sum_ + e_psi_ * TsA;
+    double u_phi, u_theta, u_psi;
+    AttitudeController(&u_phi, &u_theta, &u_psi);
 
-    *yawRate_command = (( (alpha_psi_/mu_psi_) * e_psi_) - ( (beta_psi_/pow(mu_psi_,2)) * e_psi_sum_))/(MAX_ROT_SPEED * M_PI/180);
+    u_psi_sum_ = u_psi_sum_ + u_psi * TsA;
+
+    *yawRate_command = u_psi_sum_/(MAX_ROT_SPEED * M_PI/180);
 
 }
 
@@ -763,6 +772,7 @@ void PositionControllerWithSphinx::VelocityErrors(double* dot_e_x, double* dot_e
    assert(dot_e_y);
    assert(dot_e_z);
 
+   //TODO: This part has to be reviewed when the EKF is in the loop
    // WITH THE EXTENDED KALMAN FILTER
    if(EKF_active_){
 	*dot_e_x = - state_.linearVelocity.x;
@@ -771,10 +781,10 @@ void PositionControllerWithSphinx::VelocityErrors(double* dot_e_x, double* dot_e
    }
    else{
 	   
-       //The linear velocities are already expressed in the ENU reference system
-       *dot_e_x = - state_.linearVelocity.x;
-       *dot_e_y = - state_.linearVelocity.y;
-       *dot_e_z = - state_.linearVelocity.z;
+    //The linear velocities are already expressed in the ENU reference system
+    *dot_e_x = - state_.linearVelocity.x;
+    *dot_e_y = - state_.linearVelocity.y;
+    *dot_e_z = - state_.linearVelocity.z;
 
    }
 
@@ -929,6 +939,9 @@ void PositionControllerWithSphinx::AttitudeErrors(double* e_phi, double* e_theta
    *e_phi = control_.phiR - state_.attitude.roll;
    *e_theta = control_.thetaR - state_.attitude.pitch;
    *e_psi = psi_r - state_.attitude.yaw;
+
+   //Every Tsa the Bebop angular command is updated
+   CommandYawRate(&angularZ_);
 
 }
 

@@ -111,7 +111,6 @@ class PositionControllerParameters {
             void GetOdometry(nav_msgs::Odometry* odometry_filtered);
             void GetReferenceAngles(nav_msgs::Odometry* reference_angles);
             void GetTrajectory(nav_msgs::Odometry* smoothed_trajectory);
-            void GetUTerrComponents(nav_msgs::Odometry* uTerrComponents);
             void GetVelocityAlongZComponents(nav_msgs::Odometry* zVelocity_components);
             void GetPositionAndVelocityErrors(nav_msgs::Odometry* positionAndVelocityErrors);
             void GetAngularAndAngularVelocityErrors(nav_msgs::Odometry* angularAndAngularVelocityErrors);
@@ -155,6 +154,7 @@ class PositionControllerParameters {
             std::vector<string> listCommandSinglasBefore_;
             std::vector<string> listCommandSinglasAfter_;
             std::vector<string> listOdometryFromBebopAutonomyPackage_;
+            std::vector<string> listWaypointFilterParameters_;
           
             //Controller gains
             double beta_x_, beta_y_, beta_z_;
@@ -198,7 +198,7 @@ class PositionControllerParameters {
 
             //Controller interface with Bebop paramters
             double u_z_sum_, vel_command_;
-            double e_psi_sum_, yawRate_command_;            
+            double u_psi_sum_, angularZ_;            
 
             ros::NodeHandle n1_;
             ros::NodeHandle n2_;

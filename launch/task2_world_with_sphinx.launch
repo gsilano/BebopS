@@ -76,13 +76,9 @@
     <!-- Launch the smoothed trajectory plot -->
     <node name="smoothed_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/smoothedTrajectory/pose/pose/position" output="screen" />
 
-    <!-- Launch the uTerr components plot -->
-    <node name="uTerr_components_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/uTerrComponents/pose/pose/position" output="screen" />
-
     <!-- Launch the zVelocity components plot -->
     <node name="zVelocity_components_plot_1" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/zVelocityComponents/pose/pose/position" output="screen" />
-    <node name="zVelocity_components_plot_2" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/zVelocityComponents/twist/twist/linear" output="screen" />
-
+    
     <!-- Launch the filtered output plot -->
     <node name="position_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/filteredOutput/pose/pose/position" output="screen" />
     <node name="velocity_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/filteredOutput/twist/twist/linear" output="screen" />

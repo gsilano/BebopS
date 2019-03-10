@@ -205,7 +205,9 @@ void PositionController::CallbackSaveData(const ros::TimerEvent& event){
       // Saving vehicle parameters in a file
       fileControllerGains << beta_x_ << "," << beta_y_ << "," << beta_z_ << "," << alpha_x_ << "," << alpha_y_ << "," << alpha_z_ << "," << beta_phi_ << ","
     		  << beta_theta_ << "," << beta_psi_ << "," << alpha_phi_ << "," << alpha_theta_ << "," << alpha_psi_ << "," << mu_x_ << "," << mu_y_ << ","
-			  << mu_z_ << "," << mu_phi_ << "," << mu_theta_ << "," << mu_psi_ << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+			    << mu_z_ << "," << mu_phi_ << "," << mu_theta_ << "," << mu_psi_ << "," << "," << lambda_x_ << "," << lambda_y_ << "," << lambda_z_ << 
+          "," << K_x_1_ << "," << K_x_2_ << "," << K_y_1_ << "," << K_y_2_ << "," << K_z_1_ << "," << K_z_2_ << "," << odometry_.timeStampSec << "," 
+          << odometry_.timeStampNsec << "\n";
 
       // Saving vehicle parameters in a file
       fileVehicleParameters << bf_ << "," << l_ << "," << bm_ << "," << m_ << "," << g_ << "," << Ix_ << "," << Iy_ << "," << Iz_ << ","
