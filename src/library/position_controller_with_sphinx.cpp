@@ -210,7 +210,7 @@ void PositionControllerWithSphinx::CallbackSaveData(const ros::TimerEvent& event
    ofstream fileOdometryBebopAutonomyPackage;
    ofstream fileWaypointFilterParameters;
 
-   ROS_INFO("CallbackSaveData function is working. Time: %f seconds, %f nanoseconds", odometry_.timeStampSec, odometry_.timeStampNsec);
+   ROS_INFO("CallbackSaveData function is working. Time: %f seconds, %f nanoseconds", attitude_from_logger_.velocity[0]);
     
    fileControllerGains.open("/home/" + user_ + "/controllerGains.csv", std::ios_base::app);
    fileVehicleParameters.open("/home/" + user_ + "/vehicleParameters.csv", std::ios_base::app);
@@ -234,12 +234,11 @@ void PositionControllerWithSphinx::CallbackSaveData(const ros::TimerEvent& event
    fileControllerGains << beta_x_ << "," << beta_y_ << "," << beta_z_ << "," << alpha_x_ << "," << alpha_y_ << "," << alpha_z_ << "," << beta_phi_ << ","
     		  << beta_theta_ << "," << beta_psi_ << "," << alpha_phi_ << "," << alpha_theta_ << "," << alpha_psi_ << "," << mu_x_ << "," << mu_y_ << ","
 			  << mu_z_ << "," << mu_phi_ << "," << mu_theta_ << "," << mu_psi_ << "," << "," << lambda_x_ << "," << lambda_y_ << "," << lambda_z_ << 
-              "," << K_x_1_ << "," << K_x_2_ << "," << K_y_1_ << "," << K_y_2_ << "," << K_z_1_ << "," << K_z_2_ << "," << odometry_.timeStampSec << "," 
-              << odometry_.timeStampNsec << "\n";
+              "," << K_x_1_ << "," << K_x_2_ << "," << K_y_1_ << "," << K_y_2_ << "," << K_z_1_ << "," << K_z_2_ << "," << attitude_from_logger_.velocity[0] << "\n";
 
    // Saving vehicle parameters in a file
    fileVehicleParameters << bf_ << "," << l_ << "," << bm_ << "," << m_ << "," << g_ << "," << Ix_ << "," << Iy_ << "," << Iz_ << ","
-    		  << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+    		  << attitude_from_logger_.velocity[0] << "\n";
 
    // Saving control signals in a file
    for (unsigned n=0; n < listControlSignals_.size(); ++n) {
@@ -468,7 +467,9 @@ void PositionControllerWithSphinx::SetOdom(const EigenOdometry& odometry) {
 
    // Saving drone attitude in a file
    std::stringstream tempOdometryFromBebopAutonomyPackage;
-   tempOdometryFromBebopAutonomyPackage << odometry_.position[0] << "," << odometry_.position[1] << "," << odometry_.position[2] << "," << roll << "," << pitch << "," << yaw << "," << odometry_.velocity[0] << "," << odometry_.velocity[1] << "," << odometry_.velocity[2] << "," << odometry_.angular_velocity[0] << "," << odometry_.angular_velocity[1] << "," << odometry_.angular_velocity[2] << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
+   tempOdometryFromBebopAutonomyPackage << odometry_.position[0] << "," << odometry_.position[1] << "," << odometry_.position[2] << "," << roll << "," 
+   << pitch << "," << yaw << "," << odometry_.velocity[0] << "," << odometry_.velocity[1] << "," << odometry_.velocity[2] << "," << odometry_.angular_velocity[0] 
+   << "," << odometry_.angular_velocity[1] << "," << odometry_.angular_velocity[2] << "," << attitude_from_logger_.velocity[0] << "\n";
 
    listOdometryFromBebopAutonomyPackage_.push_back(tempOdometryFromBebopAutonomyPackage.str());
 
@@ -510,8 +511,7 @@ void PositionControllerWithSphinx::SetWaypointFilterParameters(){
 
         // Saving drone attitude in a file
         std::stringstream tempWaypointFilterParameters;
-        tempWaypointFilterParameters << Tsf << "," << H << "," << odometry_from_logger_.timeStampSec << "," << 
-        odometry_from_logger_.timeStampNsec << "\n";
+        tempWaypointFilterParameters << Tsf << "," << H << "," << attitude_from_logger_.velocity[0] << "\n";
 
         listWaypointFilterParameters_.push_back(tempWaypointFilterParameters.str());
     }
@@ -639,15 +639,15 @@ void PositionControllerWithSphinx::CalculateCommandSignals(geometry_msgs::Twist*
       
       // Saving drone attitude in a file
       std::stringstream tempDroneAttitude;
-      tempDroneAttitude << state_.attitude.roll << "," << state_.attitude.pitch << "," << state_.attitude.yaw << ","
-          <<odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "\n";
+      tempDroneAttitude << state_.attitude.roll << "," << state_.attitude.pitch << "," << state_.attitude.yaw << "," <<
+          attitude_from_logger_.velocity[0] << "\n";
 
       listDroneAttitude_.push_back(tempDroneAttitude.str());
 
       // Saving the drone angular velocity in the aircraft body reference system
       std:stringstream tempDroneAngularVelocitiesABC;
       tempDroneAngularVelocitiesABC << state_.angularVelocity.x << "," << state_.angularVelocity.y << "," << state_.angularVelocity.z
-        << "," << odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "\n";
+        << "," << attitude_from_logger_.velocity[0] << "\n";
 
       listDroneAngularVelocitiesABC_.push_back(tempDroneAngularVelocitiesABC.str());
     }
@@ -667,7 +667,7 @@ void PositionControllerWithSphinx::CalculateCommandSignals(geometry_msgs::Twist*
       
       // Saving command signals before saturating in a file
       std::stringstream tempCommandSignalsBefore;
-      tempCommandSignalsBefore << linearX << "," << linearY << "," << linearZ_ << "," << angularZ_ << "," << odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "\n";
+      tempCommandSignalsBefore << linearX << "," << linearY << "," << linearZ_ << "," << angularZ_ << "," << attitude_from_logger_.velocity[0] << "\n";
 
       listCommandSinglasBefore_.push_back(tempCommandSignalsBefore.str());
 
@@ -703,7 +703,7 @@ void PositionControllerWithSphinx::CalculateCommandSignals(geometry_msgs::Twist*
       
       // Saving command signals in a file
       std::stringstream tempCommandSignalsAfter;
-      tempCommandSignalsAfter << linearX << "," << linearY << "," << linearZ_ << "," << angularZ_ << "," << odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "\n";
+      tempCommandSignalsAfter << linearX << "," << linearY << "," << linearZ_ << "," << angularZ_ << "," << attitude_from_logger_.velocity[0] << "\n";
 
       listCommandSinglasAfter_.push_back(tempCommandSignalsAfter.str());
 
@@ -727,7 +727,7 @@ void PositionControllerWithSphinx::CommandVelocity(double* linearZ){
 	
     *linearZ = u_z_sum_/MAX_VERT_SPEED;
 
-    ROS_INFO("z_r %f, e_z: %f, u_z: %f, linearZ: %f ", command_trajectory_.position_W[2], e_z_, u_z_internal, *linearZ);
+    ROS_DEBUG("z_r %f, e_z: %f, u_z: %f, linearZ: %f ", command_trajectory_.position_W[2], e_z_, u_z_internal, *linearZ);
 
 }
 
@@ -792,7 +792,7 @@ void PositionControllerWithSphinx::VelocityErrors(double* dot_e_x, double* dot_e
      // Saving drone linear velocity in the aircraft body center reference system
      std::stringstream tempDroneLinearVelocities;
      tempDroneLinearVelocities << state_.linearVelocity.x << "," << state_.linearVelocity.y << "," << state_.linearVelocity.z << ","
-         << odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "\n";
+         << attitude_from_logger_.velocity[0] << "\n";
 
      listDroneLinearVelocities_.push_back(tempDroneLinearVelocities.str());
    }
@@ -906,7 +906,7 @@ void PositionControllerWithSphinx::PosController(double* u_T, double* phi_r, dou
    if(dataStoring_active_){
       //Saving reference angles in a file
       std::stringstream tempReferenceAngles;
-      tempReferenceAngles << *theta_r << "," << *phi_r << "," << odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "\n";
+      tempReferenceAngles << *theta_r << "," << *phi_r << "," << attitude_from_logger_.velocity[0] << "\n";
 
       listReferenceAngles_.push_back(tempReferenceAngles.str());
 	  
@@ -916,7 +916,7 @@ void PositionControllerWithSphinx::PosController(double* u_T, double* phi_r, dou
       //Saving control signals in a file
       std::stringstream tempControlSignals;
       tempControlSignals << *u_T << "," << u_phi << "," << u_theta << "," << u_psi << "," << *u_x << "," << *u_y << ","
-          << *u_Terr << "," << *u_z << "," <<odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "\n";
+          << *u_Terr << "," << *u_z << "," << attitude_from_logger_.velocity[0] << "\n";
 
       listControlSignals_.push_back(tempControlSignals.str());
 
@@ -997,20 +997,20 @@ void PositionControllerWithSphinx::CallbackAttitude(const ros::TimerEvent& event
 
         //Saving attitude derivate errors in a file
         std::stringstream tempDerivativeAttitudeErrors;
-        tempDerivativeAttitudeErrors << dot_e_phi_ << "," << dot_e_theta_ << "," << dot_e_psi_ << "," <<odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "," << secs << "\n";
+        tempDerivativeAttitudeErrors << dot_e_phi_ << "," << dot_e_theta_ << "," << dot_e_psi_ << "," << attitude_from_logger_.velocity[0] << "\n";
 
         listDerivativeAttitudeErrors_.push_back(tempDerivativeAttitudeErrors.str());
 
         //Saving attitude errors in a file
         std::stringstream tempAttitudeErrors;
-        tempAttitudeErrors << e_phi_ << "," << e_theta_ << "," << e_psi_ << "," <<odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << secs << "\n";
+        tempAttitudeErrors << e_phi_ << "," << e_theta_ << "," << e_psi_ << "," << attitude_from_logger_.velocity[0] << "\n";
 
         listAttitudeErrors_.push_back(tempAttitudeErrors.str());
 
         //Saving the drone position along axes
         std::stringstream tempDronePosition;
         tempDronePosition << state_.position.x << "," << state_.position.y << "," << state_.position.z << ","
-            << odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "," << secs << "\n";
+            << attitude_from_logger_.velocity[0] << "\n";
 
         listDronePosition_.push_back(tempDronePosition.str());
 
@@ -1051,20 +1051,20 @@ void PositionControllerWithSphinx::CallbackPosition(const ros::TimerEvent& event
 
         //Saving velocity errors in a file
         std::stringstream tempVelocityErrors;
-        tempVelocityErrors << dot_e_x_ << "," << dot_e_y_ << "," << dot_e_z_ << "," <<odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "," << secs << "\n";
+        tempVelocityErrors << dot_e_x_ << "," << dot_e_y_ << "," << dot_e_z_ << "," << attitude_from_logger_.velocity[0] << "\n";
 
         listVelocityErrors_.push_back(tempVelocityErrors.str());
 
         //Saving trajectory errors in a file
         std::stringstream tempTrajectoryErrors;
-        tempTrajectoryErrors << e_x_ << "," << e_y_ << "," << e_z_ << "," <<odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "," << secs << "\n";
+        tempTrajectoryErrors << e_x_ << "," << e_y_ << "," << e_z_ << "," << attitude_from_logger_.velocity[0] << "\n";
 
         listTrajectoryErrors_.push_back(tempTrajectoryErrors.str());
 
         //Saving the drone trajectory references (them coming from the waypoint filter)
         std::stringstream tempTrajectoryReferences;
         tempTrajectoryReferences << command_trajectory_.position_W[0] << "," << command_trajectory_.position_W[1] << "," << command_trajectory_.position_W[2] << ","
-            <<odometry_from_logger_.timeStampSec << "," << odometry_from_logger_.timeStampNsec << "," << secs << "\n";
+            << attitude_from_logger_.velocity[0] << "\n";
 
         listDroneTrajectoryReference_.push_back(tempTrajectoryReferences.str());
 

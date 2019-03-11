@@ -315,6 +315,9 @@ void PositionControllerWithSphinxNode::LoggerCallback(const bebopS::Sphinx_msgs&
 	    attitude_logger.position[1] = logger_msg.attitudeY;
 	    attitude_logger.position[2] = logger_msg.attitudeZ;
 
+      // Logger Timestamp
+      attitude_logger.velocity[0] = logger_msg.timeStamp;
+
 	    // Drone linear velocity in the inertial reference system
 	    odometry_logger.velocity[0] = logger_msg.velXENU;
 	    odometry_logger.velocity[1] = logger_msg.velYENU;
