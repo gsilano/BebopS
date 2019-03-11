@@ -228,12 +228,12 @@ void PositionControllerWithSphinx::CallbackSaveData(const ros::TimerEvent& event
    fileCommandSignalsBefore.open("/home/" + user_ + "/commandSignalsBeforeSaturation.csv", std::ios_base::app);
    fileCommandSignalsAfter.open("/home/" + user_ + "/commandSignalsAfterSaturation.csv", std::ios_base::app);
    fileOdometryBebopAutonomyPackage.open("/home/" + user_ + "/odometryFromBebopAutonomyPackage.csv", std::ios_base::app);
-   fileWaypointFilterParameters.open("/home/" + user_ + "/filterParameters.csv", std::ios_base::app);
+   fileWaypointFilterParameters.open("/home/" + user_ + "/waypointFilterParameters.csv", std::ios_base::app);
 
    // Saving vehicle parameters in a file
    fileControllerGains << beta_x_ << "," << beta_y_ << "," << beta_z_ << "," << alpha_x_ << "," << alpha_y_ << "," << alpha_z_ << "," << beta_phi_ << ","
     		  << beta_theta_ << "," << beta_psi_ << "," << alpha_phi_ << "," << alpha_theta_ << "," << alpha_psi_ << "," << mu_x_ << "," << mu_y_ << ","
-			  << mu_z_ << "," << mu_phi_ << "," << mu_theta_ << "," << mu_psi_ << "," << "," << lambda_x_ << "," << lambda_y_ << "," << lambda_z_ << 
+			  << mu_z_ << "," << mu_phi_ << "," << mu_theta_ << "," << mu_psi_ << "," << lambda_x_ << "," << lambda_y_ << "," << lambda_z_ << 
               "," << K_x_1_ << "," << K_x_2_ << "," << K_y_1_ << "," << K_y_2_ << "," << K_z_1_ << "," << K_z_2_ << "," << attitude_from_logger_.velocity[0] << "\n";
 
    // Saving vehicle parameters in a file

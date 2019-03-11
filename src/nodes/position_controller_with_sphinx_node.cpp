@@ -239,12 +239,6 @@ void PositionControllerWithSphinxNode::InitializeParams() {
   position_controller_.filter_parameters_.Qp_(4,4) = position_controller_.filter_parameters_.Qp_vy_;                     
   position_controller_.filter_parameters_.Qp_(5,5) = position_controller_.filter_parameters_.Qp_vz_;
 
-  // The controller gains, vehicle, filter and waypoint paramters are set
-  position_controller_.SetControllerGains();
-  position_controller_.SetVehicleParameters();
-  position_controller_.SetFilterParameters();
-  position_controller_.SetWaypointFilterParameters();
-
   //Reading the parameters come from the launch file
   bool waypointFilterActive;
   bool dataStoringActive;
@@ -288,7 +282,12 @@ void PositionControllerWithSphinxNode::InitializeParams() {
       ROS_ERROR("Failed to get param 'csvFilesStoringTime'");
 
   position_controller_.SetLaunchFileParameters();
-
+  
+  // The controller gains, vehicle, filter and waypoint paramters are set
+  position_controller_.SetControllerGains();
+  position_controller_.SetVehicleParameters();
+  position_controller_.SetFilterParameters();
+  position_controller_.SetWaypointFilterParameters();
 }
 
 void PositionControllerWithSphinxNode::Publish(){
