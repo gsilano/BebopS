@@ -7,7 +7,7 @@
   <arg name="config_file" default="$(find bebopS)/config/defaults.yaml" />
   <arg name="camera_info_url" default="package://bebopS/data/$(arg drone_type)_camera_calib.yaml" />
   <arg name="csvFilesStoring" default="true"/>
-  <arg name="csvFilesStoringTime" default="20.0"/> <!-- seconds -->
+  <arg name="csvFilesStoringTime" default="15.0"/> <!-- seconds -->
   <arg name="user_account" default="giuseppe"/>
   <arg name="waypoint_filter" default="true"/>
   <arg name="EKFActive" default="false"/>

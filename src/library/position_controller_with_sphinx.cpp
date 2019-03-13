@@ -677,28 +677,28 @@ void PositionControllerWithSphinx::CalculateCommandSignals(geometry_msgs::Twist*
     }
 
     //The command signals are saturated to take into the SDK constrains in sending commands
-    if(!(linearZ_ > -1 && linearZ_ < 1))
-        if(linearZ_ > 1)
+    if(!(linearZ_ >= -1 && linearZ_ <= 1))
+        if(linearZ_ >= 1)
            linearZ_ = 1;
-        else
+        else if (linearZ_ <= -1)
            linearZ_ = -1;
 
-    if(!(linearX > -1 && linearX < 1))
-        if(linearX > 1)
+    if(!(linearX >= -1 && linearX <= 1))
+        if(linearX >= 1)
            linearX = 1;
-        else
+        else if (linearX <= -1)
            linearX = -1;
 
-    if(!(linearY > -1 && linearY < 1))
-        if(linearY > 1)
+    if(!(linearY >= -1 && linearY <= 1))
+        if(linearY >= 1)
            linearY = 1;
-        else
+        else if (linearY <= -1)
            linearY = -1;
 
-    if(!(angularZ_ > -1 && angularZ_ < 1))
-        if(angularZ_ > 1)
+    if(!(angularZ_ >= -1 && angularZ_ <= 1))
+        if(angularZ_ >= 1)
            angularZ_ = 1;
-        else
+        else if (angularZ_ <= -1)
            angularZ_ = -1;
 
     // Data storing section. It is activated if necessary
