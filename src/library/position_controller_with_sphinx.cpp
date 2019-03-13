@@ -67,7 +67,9 @@ PositionControllerWithSphinx::PositionControllerWithSphinx()
       dataStoringTime_(0),
       stateEmergency_(false),
       linearZ_(0),
+      linearZ_beforeSaturation_(0),
       u_z_sum_(0),
+      u_Terr_(0),
       u_psi_sum_(0),
       angularZ_(0),
       u_z_(0),
@@ -211,7 +213,7 @@ void PositionControllerWithSphinx::CallbackSaveData(const ros::TimerEvent& event
    ofstream fileOdometryBebopAutonomyPackage;
    ofstream fileWaypointFilterParameters;
 
-   ROS_INFO("CallbackSaveData function is working. Time: %f seconds, %f nanoseconds", attitude_from_logger_.velocity[0]);
+   ROS_INFO("CallbackSaveData function is working. Time: %f seconds", attitude_from_logger_.velocity[0]);
     
    fileControllerGains.open("/home/" + user_ + "/controllerGains.csv", std::ios_base::app);
    fileVehicleParameters.open("/home/" + user_ + "/vehicleParameters.csv", std::ios_base::app);
@@ -631,9 +633,9 @@ void PositionControllerWithSphinx::CalculateCommandSignals(geometry_msgs::Twist*
     }
     
     double u_phi, u_theta, u_psi;
-    double u_x, u_y, u_Terr;
+    double u_x, u_y;
     AttitudeController(&u_phi, &u_theta, &u_psi);
-    PosController(&control_.uT, &control_.phiR, &control_.thetaR, &u_x, &u_y, &u_z_, &u_Terr);
+    PosController(&control_.uT, &control_.phiR, &control_.thetaR, &u_x, &u_y, &u_z_, &u_Terr_);
  
     // Data storing section. It is activated if necessary
     if(dataStoring_active_){
@@ -668,7 +670,7 @@ void PositionControllerWithSphinx::CalculateCommandSignals(geometry_msgs::Twist*
       
       // Saving command signals before saturating in a file
       std::stringstream tempCommandSignalsBefore;
-      tempCommandSignalsBefore << linearX << "," << linearY << "," << linearZ_ << "," << angularZ_ << "," << attitude_from_logger_.velocity[0] << "\n";
+      tempCommandSignalsBefore << linearX << "," << linearY << "," << linearZ_beforeSaturation_ << "," << angularZ_ << "," << attitude_from_logger_.velocity[0] << "\n";
 
       listCommandSinglasBefore_.push_back(tempCommandSignalsBefore.str());
 
@@ -727,6 +729,9 @@ void PositionControllerWithSphinx::CommandVelocity(double* linearZ){
     u_z_sum_ = u_z_sum_ + u_z_internal * TsP;
 	
     *linearZ = u_z_sum_/MAX_VERT_SPEED;
+
+    //Allowing to take track of how the linearZ before saturate it evolves during the time 
+    linearZ_beforeSaturation_= *linearZ;
 
     ROS_DEBUG("z_r %f, e_z: %f, u_z: %f, linearZ: %f ", command_trajectory_.position_W[2], e_z_, u_z_internal, *linearZ);
 

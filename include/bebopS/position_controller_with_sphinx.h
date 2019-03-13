@@ -171,10 +171,6 @@ class PositionControllerParameters {
 	        double K_y_1_, K_y_2_;
 	        double K_z_1_, K_z_2_;
 
-            //Bebop's command signals
-            double linearZ_;
-            double u_z_;
-
             //Position and linear velocity errors
             double e_x_;
             double e_y_;
@@ -197,8 +193,10 @@ class PositionControllerParameters {
             double Ix_, Iy_, Iz_;
 
             //Controller interface with Bebop paramters
-            double u_z_sum_, vel_command_;
-            double u_psi_sum_, angularZ_;            
+            double u_z_sum_;
+            double u_psi_sum_, angularZ_;   
+            double linearZ_, linearZ_beforeSaturation_;
+            double u_z_, u_Terr_;         
 
             ros::NodeHandle n1_;
             ros::NodeHandle n2_;
