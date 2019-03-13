@@ -52,10 +52,10 @@
 #define MAX_VERT_SPEED            1  /* Current max vertical speed in m/s */
 #define MAX_ROT_SPEED             100 /* Current max rotation speed in degree/s */
 
-#define MAX_POS_X                 3 /* Max position before emergency state along x-axis */
-#define MAX_POS_Y                 3 /* Max position before emergency state along y-axis */
-#define MAX_POS_Z                 3 /* Max position before emergency state along z-axis */
-#define MAX_VEL_ERR               3 /* Max velocity error before emergency state */
+#define MAX_POS_X                 300 /* Max position before emergency state along x-axis */
+#define MAX_POS_Y                 300 /* Max position before emergency state along y-axis */
+#define MAX_POS_Z                 300 /* Max position before emergency state along z-axis */
+#define MAX_VEL_ERR               300 /* Max velocity error before emergency state */
 
 namespace bebopS {
 
