@@ -43,8 +43,8 @@ static constexpr double DefaultQpVZ = 1e-6;
 class FilterParameters {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  FilterParameters()
-      : dev_x_(DefaultDevX), 
+  FilterParameters(): 
+	dev_x_(DefaultDevX), 
 	dev_y_(DefaultDevY), 
 	dev_z_(DefaultDevZ), 
 	dev_vx_(DefaultDevVX),  

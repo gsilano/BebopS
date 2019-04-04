@@ -61,8 +61,8 @@ ExtendedKalmanFilter::ExtendedKalmanFilter()
 		                            0, 0, 0,     0,    1,    0,
 		                            0, 0, 0,     0,    0,    1;
 
-                            double mean = 0, std = 0.005;
-                            std::normal_distribution<double>  distribution_(mean, std);
+                    double mean = 0, std = 0.005;
+                    std::normal_distribution<double>  distribution_(mean, std);
 
 }
 
@@ -321,10 +321,10 @@ void ExtendedKalmanFilter::CorrectWithoutNoise(){
 
     Meas<< x,
            y,
-	         z,
-	         dx_ENU,
-	         dy_ENU,
-	         dz_ENU;
+	       z,
+	       dx_ENU,
+	       dy_ENU,
+	       dz_ENU;
 	
     Eigen::MatrixXf K(6,6);
     K = P_ * Hp_ * (Hp_.transpose() * P_ * Hp_ + Rp_std_).inverse();

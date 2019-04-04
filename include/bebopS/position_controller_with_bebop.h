@@ -68,7 +68,7 @@ class PositionControllerParameters {
         mu_theta_(MuDefaultPitchController),
         mu_phi_(MuDefaultRollController),
         mu_psi_(MuDefaultYawRateController),
-	U_q_(UqDefaultXYZ){
+	    U_q_(UqDefaultXYZ){
   }
 
   Eigen::Vector2d beta_xy_;
@@ -145,8 +145,8 @@ class PositionControllerParameters {
             double dot_e_theta_; 
             double dot_e_psi_;
 
-	    //Global u_T
-	    double u_T_;
+	        //Global u_T
+	        double u_T_;
 
             //Vehicle parameters
             double bf_, m_, g_;
@@ -171,7 +171,7 @@ class PositionControllerParameters {
 
             nav_msgs::Odometry odometry_filtered_private_;
 
-	    state_t state_;
+	        state_t state_;
             control_t control_;
             mav_msgs::EigenTrajectoryPoint command_trajectory_;
             EigenOdometry odometry_;

@@ -329,9 +329,9 @@ void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& 
 	      //for all propellers, we put them into actuator_msg so they will later be used to control the drone.
 	      for (int i = 0; i < ref_rotor_velocities.size(); i++)
 	        actuator_msg->angular_velocities.push_back(ref_rotor_velocities[i]);
-              actuator_msg->header.stamp = odometry_msg->header.stamp;
-
-              motor_velocity_reference_pub_.publish(actuator_msg);
+              
+        actuator_msg->header.stamp = odometry_msg->header.stamp;
+        motor_velocity_reference_pub_.publish(actuator_msg);
 
 	      //The code reported below is used to plot the data when the simulation is running
 	      nav_msgs::Odometry odometry_filtered;

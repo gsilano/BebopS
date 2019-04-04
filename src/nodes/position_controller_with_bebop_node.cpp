@@ -219,20 +219,20 @@ void PositionControllerWithBebopNode::OdomCallback(const nav_msgs::OdometryConst
 	    position_controller_.CalculateCommandSignals(&ref_command_signals);
 	    motor_velocity_reference_pub_.publish(ref_command_signals);
 
-            nav_msgs::Odometry odometry_filtered;
-            position_controller_.GetOdometry(&odometry_filtered);
-            odometry_filtered.header.stamp = odom_msg->header.stamp;
-            odometry_filtered_pub_.publish(odometry_filtered);
+      nav_msgs::Odometry odometry_filtered;
+      position_controller_.GetOdometry(&odometry_filtered);
+      odometry_filtered.header.stamp = odom_msg->header.stamp;
+      odometry_filtered_pub_.publish(odometry_filtered);
 
-            nav_msgs::Odometry reference_angles;
-            position_controller_.GetReferenceAngles(&reference_angles);
-            reference_angles.header.stamp = odom_msg->header.stamp;
-            reference_angles_pub_.publish(reference_angles);
+      nav_msgs::Odometry reference_angles;
+      position_controller_.GetReferenceAngles(&reference_angles);
+      reference_angles.header.stamp = odom_msg->header.stamp;
+      reference_angles_pub_.publish(reference_angles);
 
-            nav_msgs::Odometry smoothed_reference;
-            position_controller_.GetTrajectory(&smoothed_reference);
-            smoothed_reference.header.stamp = odom_msg->header.stamp;
-            smoothed_reference_pub_.publish(smoothed_reference);
+      nav_msgs::Odometry smoothed_reference;
+      position_controller_.GetTrajectory(&smoothed_reference);
+      smoothed_reference.header.stamp = odom_msg->header.stamp;
+      smoothed_reference_pub_.publish(smoothed_reference);
 
     }	 
 }
