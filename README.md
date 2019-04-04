@@ -5,11 +5,11 @@
 
 # BebopS
 
-BebopS is an extension of the ROS package [RotorS](https://github.com/ethz-asl/rotors_simulator), aimed to modeling, developing and integrating the [Parrot Bebop 2](https://www.parrot.com/us/drones/parrot-bebop-2) quadcopter both in the physics based simulation environment Gazebo and in the software-in-the-loop (SIL) platform [Sphinx](http://www.sphinx-doc.org/en/master/). The contribution can be also considered as a reference guide for expanding the RotorS functionalities in the UAVs filed and for simulating in a way rather close to reality the real aircraft behavior. 
+BebopS is an extension of the ROS package [RotorS](https://github.com/ethz-asl/rotors_simulator), aimed to modeling, developing and integrating the [Parrot Bebop 2](https://www.parrot.com/us/drones/parrot-bebop-2) quadcopter in the physics based simulation environment Gazebo. The contribution can be also considered as a reference guide for expanding the RotorS functionalities in the UAVs filed and for simulating in a way rather close to reality the real aircraft behavior. 
 
 The repository was made for designing complex control systems for the Parrot Bebop, but it can also used for any other aircraft. Indeed, the controller implementation is a not easy process and having a complete software platform for simulating the multirotor behavior, considering also its on-board sensors, could give advantages in terms of coding and deployment of the controller software. 
 
-Moreover, the software platform allows to detect and manage instabilities of the Parrot Bebop 2 that otherwise might not arise when considering only its Matlab/Simulink simulations. Finally, implementation details like synchronization, timing issues, fixed-point computation, overflow, divisions-by-zero, can be isolated when looking at the Matlab/Simulink platform and their effects can be investigated by considering the proposed SIL simulation platform.
+Moreover, the software platform allows to detect and manage instabilities of the Parrot Bebop 2 that otherwise might not arise when considering only its Matlab/Simulink simulations. Finally, implementation details synchronization, overflow or any other software realted issue, can be isolated when looking at the Matlab/Simulink platform only, but their effects can be investigated by considering the proposed repository.
 
 Simple cases study are considered (`task1_world.launch` and `task2_world.launch`) in order to show how the package works and the validity of the employed dynamical model together the control architecture of the quadcopter.
 
@@ -17,7 +17,7 @@ The code is released under Apache license, thus making it available for scientif
 
 The platform has been developed by using Ubuntu 16.04 and the Kinetic Kame version of ROS. Although the platform is fully compatible with Indigo Igloo version of ROS and Ubuntu 14.04, such configuration is not recommended since the ROS support will close in April 2019.
 
-Below we provide the instructions necessary for getting started. See [BbopS' wiki](https://github.com/gsilano/BebopS/wiki) for more instructions and examples.
+Below we provide the instructions necessary for getting started. See [BebopS' wiki](https://github.com/gsilano/BebopS/wiki) for more instructions and examples.
 
 If you are using this simulator within the research for your publication, please take a look at the [Publications page](https://github.com/gsilano/BebopS/wiki/Publications). The page contains core papers and all linked works (using the platform).
 
@@ -69,10 +69,6 @@ To use the code developed and stored in this repository some preliminary actions
    $ echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
    $ source ~/.bashrc
    ```
-Installation Instructions - Ubuntu 16.04 with ROS Kinetic and Sphinx
---------------------------------------------------------------------
-
-**TODO:** `Write something here.`
 
 Basic Usage
 ---------------------------------------------------------
