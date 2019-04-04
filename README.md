@@ -17,7 +17,7 @@ The code is released under Apache license, thus making it available for scientif
 
 The platform has been developed by using Ubuntu 16.04 and the Kinetic Kame version of ROS. Although the platform is fully compatible with Indigo Igloo version of ROS and Ubuntu 14.04, such configuration is not recommended since the ROS support will close in April 2019.
 
-Below we provide the instructions necessary for getting started. See [BbopS' wiki](https://github.com/gsilano/BebopS/wiki) for more instructions and examples.
+Below we provide the instructions necessary for getting started. See [BebopS' wiki](https://github.com/gsilano/BebopS/wiki) for more instructions and examples.
 
 If you are using this simulator within the research for your publication, please take a look at the [Publications page](https://github.com/gsilano/BebopS/wiki/Publications). The page contains core papers and all linked works (using the platform).
 
