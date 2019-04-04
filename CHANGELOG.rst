@@ -2,7 +2,7 @@
 Changelog for package BebopS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-0.2.1 (2019-03-08)
+0.2.2 (2019-XX-XX)
 ------------------
 * The interface between the position_controller and the Parrot Sphinx simulator has been made
 * Added the hovering example file to publish the waypoint when the Parrot-Sphinx simulator is in the loop
@@ -13,6 +13,12 @@ Changelog for package BebopS
 * Added a custom message "Sphinx_msgs.msg" to use the data come from the awk script into the ROS net. The topics has been also integrated in the position_control ROS node with Sphinx
 * Added a timer before starting the controller. It allows to Parrot Bebop to reach the hovering position, one meter from the ground.
 * Contributors: Giuseppe Silano, Peter Griggs
+
+0.2.1 (2019-04-04)
+------------------
+* The namespace was modified considering the ROS rules (only lowercase letters)
+* Improved the code quality and typos in the README.md file
+* Contributors: Giuseppe Silano
 
 0.2.0 (2019-01-31)
 ------------------
