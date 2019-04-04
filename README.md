@@ -9,7 +9,7 @@ BebopS is an extension of the ROS package [RotorS](https://github.com/ethz-asl/r
 
 The repository was made for designing complex control systems for the Parrot Bebop, but it can also used for any other aircraft. Indeed, the controller implementation is a not easy process and having a complete software platform for simulating the multirotor behavior, considering also its on-board sensors, could give advantages in terms of coding and deployment of the controller software. 
 
-Moreover, the software platform allows to detect and manage instabilities of the Parrot Bebop 2 that otherwise might not arise when considering only its Matlab/Simulink simulations. Finally, implementation details like synchronization, timing issues, fixed-point computation, overflow, divisions-by-zero, can be isolated when looking at the Matlab/Simulink platform and their effects can be investigated by considering the proposed SIL simulation platform.
+Moreover, the software platform allows to detect and manage instabilities of the Parrot Bebop 2 that otherwise might not arise when considering only its Matlab/Simulink simulations. Finally, implementation details synchronization, overflow or any other software realted issue, can be isolated when looking at the Matlab/Simulink platform only, but their effects can be investigated by considering the proposed repository.
 
 Simple cases study are considered (`task1_world.launch` and `task2_world.launch`) in order to show how the package works and the validity of the employed dynamical model together the control architecture of the quadcopter.
 
