@@ -2,6 +2,12 @@
 Changelog for package BebopS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.2.1 (2019-04-04)
+------------------
+* The namespace was modified considering the ROS rules (only lowercase letters)
+* Improved the code quality and typos in the README.md file
+* Contributors: Giuseppe Silano
+
 0.2.0 (2019-01-31)
 ------------------
 * The package has been renamed considering the aim of the repository. Therefore, the CMake and include files have been modified based on these changes.

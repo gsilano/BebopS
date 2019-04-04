@@ -20,7 +20,7 @@
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
-          <mesh filename="package://bebopS/meshes/${mesh_file}"
+          <mesh filename="package://bebop_simulator/meshes/${mesh_file}"
             scale="0.001 0.001 0.001" />
           <!-- <box size="${body_width} ${body_width} ${body_height}"/> --> <!-- [m] [m] [m] -->
         </geometry>
@@ -84,7 +84,7 @@
       <visual>
         <geometry>
           <!-- <cylinder length="0.005" radius="${radius_rotor}"/> --> <!-- [m] -->
-          <mesh filename="package://bebopS/meshes/propeller_${direction}.dae"
+          <mesh filename="package://bebop_simulator/meshes/propeller_${direction}.dae"
             scale="0.00055 0.00055 0.00055" />
           <!-- <box size="${2*radius_rotor} 0.01 0.005"/> -->
         </geometry>

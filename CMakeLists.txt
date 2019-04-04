@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(bebopS)
+project(bebop_simulator)
 
 add_definitions(-std=c++11)
 
@@ -94,7 +94,7 @@ install(TARGETS position_controller position_controller_with_bebop_node hovering
 
 install(
   DIRECTORY include/${PROJECT_NAME}/
-  DIRECTORY include/bebopS_msgs/
+  DIRECTORY include/bebop_simulator_msgs/
   DIRECTORY include/bebop_msgs/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
   FILES_MATCHING PATTERN "*.h"

@@ -76,7 +76,7 @@ Basic Usage
 Launching the simulation is quite simple, so as customizing it: it is enough to run in a terminal the command
 
    ```
-   $ roslaunch bebops bebop_without_controller.launch
+   $ roslaunch bebop_simulator bebop_without_controller.launch
    ```
    
 > **Note** The first run of gazebo might take considerably long, as it will download some models from an online database. To avoid any problems when starting the simulation for the first time, you may run the `gazebo` command in the terminal line.
@@ -94,7 +94,7 @@ To speed up the simulation, a certain set of sensors can be included when simula
 These value can be modified before simulating the drone behavior acting on the launch file or at runtime by running on the terminal:
 
    ```
-   $ roslaunch bebops bebop_without_controller.launch enable_odometry_sensor_with_noise:=true
+   $ roslaunch bebop_simulator bebop_without_controller.launch enable_odometry_sensor_with_noise:=true
    ```
    
 Finally, the waypoint and Kalman filters, as well as the data storage, can be enabled/disabled by using the variables: `csvFilesStoring`, `csvFilesStoringTime` (simulation time after which the data will be saved), `user_account` (required to define the storage path), `waypoint_filter` and `EKFActive`.   
@@ -102,13 +102,13 @@ Finally, the waypoint and Kalman filters, as well as the data storage, can be en
 While, running in a terminal the command
 
    ```
-   $ roslaunch bebops task1_world.launch
+   $ roslaunch bebop_simulator task1_world.launch
    ```
    
 the Parrot Bebop takes off from the ground and keeps indefinitely the hovering position subjected to wind gusts (up to 0.5 N) for a minute. Conversely, 
 
    ```
-   $ roslaunch bebops task2_world.launch
+   $ roslaunch bebop_simulator task2_world.launch
    ```
    
 the drone starts to follow the trajectory expressed as a sequence of waypoints (x_r, y_r, z_r and \psi_r) published at a settled time (t_0, t_1, t_3, etc.), as described in `waypoint.txt` file. To avoid system instabilities, a waypoint filter is employed to smooth the trajectory.

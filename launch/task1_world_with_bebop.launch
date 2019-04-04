@@ -5,14 +5,14 @@
   <arg name="use_sim_time" default="true"/>
   <arg name="ip" default="192.168.42.1" />            <!-- IPv4 address of your drone -->
   <arg name="drone_type" default="bebop2" />          <!-- available drone types: bebop1, bebop2 -->
-  <arg name="config_file" default="$(find bebopS)/config/defaults.yaml" />
-  <arg name="camera_info_url" default="package://bebopS/data/$(arg drone_type)_camera_calib.yaml" />
+  <arg name="config_file" default="$(find bebop_simulator)/config/defaults.yaml" />
+  <arg name="camera_info_url" default="package://bebop_simulator/data/$(arg drone_type)_camera_calib.yaml" />
   
      <!-- Launch the controller  -->
-     <node name="position_controller_node_with_bebop" pkg="bebopS" type="position_controller_node_with_bebop" output="screen"> 
-       <rosparam command="load" file="$(find bebopS)/resource/controller_bebop.yaml" />
-       <rosparam command="load" file="$(find bebopS)/resource/bebop.yaml" />
-       <rosparam command="load" file="$(find bebopS)/resource/EKF_matrix.yaml" />
+     <node name="position_controller_node_with_bebop" pkg="bebop_simulator" type="position_controller_node_with_bebop" output="screen"> 
+       <rosparam command="load" file="$(find bebop_simulator)/resource/controller_bebop.yaml" />
+       <rosparam command="load" file="$(find bebop_simulator)/resource/bebop.yaml" />
+       <rosparam command="load" file="$(find bebop_simulator)/resource/EKF_matrix.yaml" />
        <param name="use_sim_time" value="$(arg use_sim_time)" />
        <remap from="/odometry" to="/bebop/odometry" />
        <remap from="/command/trajectory" to="/bebop/command/trajectory" />
@@ -24,7 +24,7 @@
    <group ns="$(arg name)">
 
    <!-- Launch the trajectory generator -->
-     <node name="hovering_example" pkg="bebopS" type="hovering_example" output="screen"/> 
+     <node name="hovering_example" pkg="bebop_simulator" type="hovering_example" output="screen"/> 
 
      <node pkg="bebop_driver" name="bebop_driver" type="bebop_driver_node" output="screen">
         <param name="camera_info_url" value="$(arg camera_info_url)" />
@@ -39,7 +39,7 @@
 
     <!-- Launch the trajectory plot -->
     <node name="position_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/odometry/pose/pose/position" output="screen" />
-    <node name="quaternion_to_rpy" pkg="bebopS" type="quaternion_to_rpy" output="screen" >
+    <node name="quaternion_to_rpy" pkg="bebop_simulator" type="quaternion_to_rpy" output="screen" >
        <remap from="/odometry" to="/bebop/odometry" />
        <remap from="/orientation_rpy" to="/bebop/orientation_rpy" />
     </node>

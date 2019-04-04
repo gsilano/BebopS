@@ -31,7 +31,7 @@
 
 using namespace std;
 
-namespace bebopS {
+namespace bebop_simulator {
 
 	class WaypointFilter{
 

@@ -31,12 +31,12 @@
 #include <ros/ros.h>
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
 
-#include "bebopS/common.h"
-#include "bebopS/position_controller_with_bebop.h"
-#include "bebopS/parameters_ros.h"
-#include "bebopS/parameters.h"
+#include "bebop_simulator/common.h"
+#include "bebop_simulator/position_controller_with_bebop.h"
+#include "bebop_simulator/parameters_ros.h"
+#include "bebop_simulator/parameters.h"
 
-namespace bebopS {
+namespace bebop_simulator {
 
     class PositionControllerWithBebopNode{
         public:

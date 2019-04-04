@@ -22,7 +22,7 @@
 #include <Eigen/Eigen>
 #include <ros/ros.h>
 
-namespace bebopS {
+namespace bebop_simulator {
 
 static constexpr double DefaultDevX = 0.01;
 static constexpr double DefaultDevY = 0.01;

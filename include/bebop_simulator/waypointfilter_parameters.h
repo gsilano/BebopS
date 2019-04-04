@@ -21,7 +21,7 @@
 #include <Eigen/Eigen>
 #include <ros/ros.h>
 
-namespace bebopS {
+namespace bebop_simulator {
 
 static constexpr double DefaultH = 10e-3; /* Sampling time [s] */
 static constexpr double DefaultTsf = 1.5; /* Waypoint filter pole [s] */

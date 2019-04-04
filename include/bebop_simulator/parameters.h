@@ -19,7 +19,7 @@
 #ifndef INCLUDE_BEBOP_CONTROL_PARAMETERS_H_
 #define INCLUDE_BEBOP_CONTROL_PARAMETERS_H_
 
-namespace bebopS {
+namespace bebop_simulator {
 
 // Default Bebop 2 parameters
 static constexpr double kDefaultMass = 0.5;

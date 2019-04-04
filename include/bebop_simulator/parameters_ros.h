@@ -5,7 +5,7 @@
 
 #include "parameters.h"
 
-namespace bebopS {
+namespace bebop_simulator {
 
 template<typename T> inline void GetRosParameter(const ros::NodeHandle& nh,
                                                  const std::string& key,

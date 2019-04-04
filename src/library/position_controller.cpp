@@ -16,11 +16,11 @@
  * limitations under the License.
  */
 
-#include "bebopS/position_controller.h"
-#include "bebopS/transform_datatypes.h"
-#include "bebopS/Matrix3x3.h"
-#include "bebopS/Quaternion.h" 
-#include "bebopS/stabilizer_types.h"
+#include "bebop_simulator/position_controller.h"
+#include "bebop_simulator/transform_datatypes.h"
+#include "bebop_simulator/Matrix3x3.h"
+#include "bebop_simulator/Quaternion.h" 
+#include "bebop_simulator/stabilizer_types.h"
 
 #include <math.h> 
 #include <time.h>
@@ -47,7 +47,7 @@
 
 using namespace std;
 
-namespace bebopS {
+namespace bebop_simulator {
 
 PositionController::PositionController()
     : controller_active_(false),

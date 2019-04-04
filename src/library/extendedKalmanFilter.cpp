@@ -16,12 +16,12 @@
  * limitations under the License.
  */
 
-#include "bebopS/extendedKalmanFilter.h"
-#include "bebopS/transform_datatypes.h"
-#include "bebopS/Matrix3x3.h"
-#include "bebopS/Quaternion.h" 
-#include "bebopS/stabilizer_types.h"
-#include "bebopS/common.h"
+#include "bebop_simulator/extendedKalmanFilter.h"
+#include "bebop_simulator/transform_datatypes.h"
+#include "bebop_simulator/Matrix3x3.h"
+#include "bebop_simulator/Quaternion.h" 
+#include "bebop_simulator/stabilizer_types.h"
+#include "bebop_simulator/common.h"
 
 #include <math.h> 
 #include <ros/ros.h>
@@ -35,7 +35,7 @@
 
 #define TsP                       10e-3  /* Position control sampling time */
 
-namespace bebopS {
+namespace bebop_simulator {
 
 ExtendedKalmanFilter::ExtendedKalmanFilter()
        :Xp_(Eigen::VectorXf::Zero(6)), 

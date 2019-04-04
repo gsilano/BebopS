@@ -19,14 +19,14 @@
     <arg name="enable_wind_plugin" default="false"/>
     <arg name="enable_laser1D" default="false"/>
     
-    <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find bebopS)/models"/>
-    <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find bebopS)/models"/>
+    <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find bebop_simulator)/models"/>
+    <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find bebop_simulator)/models"/>
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
-       <arg name="world_name" value="$(find bebopS)/worlds/$(arg world_name).world" />
+       <arg name="world_name" value="$(find bebop_simulator)/worlds/$(arg world_name).world" />
     </include>
 
     <!-- Launch UAV -->
-    <include file="$(find bebopS)/launch/spawn_bebop.launch">
+    <include file="$(find bebop_simulator)/launch/spawn_bebop.launch">
        <arg name="name" value="$(arg name)" />
        <arg name="x" value="$(arg x)"/>
        <arg name="y" value="$(arg y)"/>

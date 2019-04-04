@@ -24,12 +24,12 @@
 
 #include "position_controller_with_bebop_node.h"
 
-#include "bebopS/parameters_ros.h"
+#include "bebop_simulator/parameters_ros.h"
 
-#include "bebopS_msgs/default_topics.h"
+#include "bebop_simulator_msgs/default_topics.h"
 #include "bebop_msgs/default_topics.h"
 
-namespace bebopS {
+namespace bebop_simulator {
 
 PositionControllerWithBebopNode::PositionControllerWithBebopNode() {
 
@@ -47,11 +47,11 @@ PositionControllerWithBebopNode::PositionControllerWithBebopNode() {
 
     takeoff_pub_ = nh.advertise<std_msgs::Empty>(bebop_msgs::default_topics::TAKE_OFF, 1);
 
-    odometry_filtered_pub_ = nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::FILTERED_OUTPUT, 1);
+    odometry_filtered_pub_ = nh.advertise<nav_msgs::Odometry>(bebop_simulator_msgs::default_topics::FILTERED_OUTPUT, 1);
 
-    reference_angles_pub_ = nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::REFERENCE_ANGLES, 1);
+    reference_angles_pub_ = nh.advertise<nav_msgs::Odometry>(bebop_simulator_msgs::default_topics::REFERENCE_ANGLES, 1);
 
-    smoothed_reference_pub_  = nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::SMOOTHED_TRAJECTORY, 1);
+    smoothed_reference_pub_  = nh.advertise<nav_msgs::Odometry>(bebop_simulator_msgs::default_topics::SMOOTHED_TRAJECTORY, 1);
 
 }
 
@@ -256,7 +256,7 @@ int main(int argc, char** argv){
 
     ros::NodeHandle nh2;
     
-    bebopS::PositionControllerWithBebopNode position_controller_with_bebop_node;
+    bebop_simulator::PositionControllerWithBebopNode position_controller_with_bebop_node;
 
     ros::spin();
 

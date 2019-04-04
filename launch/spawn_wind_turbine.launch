@@ -11,7 +11,7 @@
   <arg name="enable_ground_truth" default="true"/>
   <arg name="log_file" default="force_sensor_log"/>
   <arg name="exclude_floor_link_from_collision_check" default="ground_plane::link"/>
-  <arg name="model" value="$(find bebopS)/urdf/wind_turbine.gazebo.xacro" />
+  <arg name="model" value="$(find bebop_simulator)/urdf/wind_turbine.gazebo.xacro" />
 
   <!-- send the robot XML to param server -->
   <param name="/$(arg name)/robot_description" command="
