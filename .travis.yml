@@ -93,7 +93,6 @@ install:
   # Create the devel/setup.bash (run catkin_make with an empty workspace) and
   # source it to set the path variables.
   - git clone https://github.com/gsilano/BebopS.git
-  - git clone https://github.com/gsilano/med_uav_description.git
   - git clone https://github.com/gsilano/rotors_simulator.git
   - git clone https://github.com/gsilano/mav_comm.git
   - git clone https://github.com/AutonomyLab/bebop_autonomy.git
