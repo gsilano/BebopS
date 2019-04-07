@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-#include "bebopS/waypoint_filter.h"
+#include "bebop_simulator/waypoint_filter.h"
 
 #include <Eigen/Eigen>
 #include <chrono>
@@ -27,7 +27,7 @@
 
 using namespace std;
 
-namespace bebopS {
+namespace bebop_simulator {
 
 WaypointFilter::WaypointFilter()
          :filter_initialized_(false){
@@ -55,8 +55,8 @@ WaypointFilter::~WaypointFilter() {}
 void WaypointFilter::SetParameters(WaypointFilterParameters *waypointFilter_parameters_){
 
 
-     Tsf_ = waypointFilter_parameters_->tsf_;
-     H_ = waypointFilter_parameters_->h_;
+    Tsf_ = waypointFilter_parameters_->tsf_;
+    H_ = waypointFilter_parameters_->h_;
 
 }
 

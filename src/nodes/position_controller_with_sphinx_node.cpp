@@ -25,9 +25,9 @@
 
 #include "position_controller_with_sphinx_node.h"
 
-#include "bebopS/parameters_ros.h"
-#include "bebopS_msgs/default_topics.h"
-#include "bebopS/Sphinx_msgs.h"
+#include "bebop_simulator/parameters_ros.h"
+#include "bebop_simulator_msgs/default_topics.h"
+#include "bebop_simulator/Sphinx_msgs.h"
 
 #include "bebop_msgs/default_topics.h"
 
@@ -39,7 +39,7 @@
 #define MAX_RANGE_HOVER   1.10 //Maximum hovering interval before starting the timer
 #define WAITING_RANGE        3    //Waiting range before starting the controller
 
-namespace bebopS {
+namespace bebop_simulator {
 
 PositionControllerWithSphinxNode::PositionControllerWithSphinxNode() {
 
@@ -54,7 +54,7 @@ PositionControllerWithSphinxNode::PositionControllerWithSphinxNode() {
     cmd_multi_dof_joint_trajectory_sub_ = nh.subscribe(mav_msgs::default_topics::COMMAND_TRAJECTORY, 1,  &PositionControllerWithSphinxNode::MultiDofJointTrajectoryCallback, this);
 
     //To get data coming from the Parrot-Sphinx data logger
-    logger_sub_ = nh.subscribe(bebopS_msgs::default_topics::PARROT_SPHINX_LOGGER, 30, &PositionControllerWithSphinxNode::LoggerCallback, this);
+    logger_sub_ = nh.subscribe(bebop_simulator_msgs::default_topics::PARROT_SPHINX_LOGGER, 30, &PositionControllerWithSphinxNode::LoggerCallback, this);
 
     //To get data coming from the bebop_autonomy package odometry topic
     odom_sub_ = nh.subscribe(bebop_msgs::default_topics::ODOM, 30, &PositionControllerWithSphinxNode::OdomCallback, this);
@@ -66,22 +66,22 @@ PositionControllerWithSphinxNode::PositionControllerWithSphinxNode() {
     takeoff_pub_ = nh.advertise<std_msgs::Empty>(bebop_msgs::default_topics::TAKE_OFF, 1);
 
     //Needed for representing the variables into plots
-    odometry_filtered_pub_ = nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::FILTERED_OUTPUT, 1);
+    odometry_filtered_pub_ = nh.advertise<nav_msgs::Odometry>(bebop_simulator_msgs::default_topics::FILTERED_OUTPUT, 1);
 
     //Just for data plotting
-    reference_angles_pub_ = nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::REFERENCE_ANGLES, 1);
+    reference_angles_pub_ = nh.advertise<nav_msgs::Odometry>(bebop_simulator_msgs::default_topics::REFERENCE_ANGLES, 1);
 
     //Just for data plotting
-    smoothed_reference_pub_  = nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::SMOOTHED_TRAJECTORY, 1);
+    smoothed_reference_pub_  = nh.advertise<nav_msgs::Odometry>(bebop_simulator_msgs::default_topics::SMOOTHED_TRAJECTORY, 1);
     
     //Just for data plotting
-    zVelocity_components_pub_ = nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::Z_VELOCITY_COMPONENTS, 1);
+    zVelocity_components_pub_ = nh.advertise<nav_msgs::Odometry>(bebop_simulator_msgs::default_topics::Z_VELOCITY_COMPONENTS, 1);
 
     //Just for data plotting
-    positionAndVelocityErrors_pub_= nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::POSITION_AND_VELOCITY_ERRORS, 1);
+    positionAndVelocityErrors_pub_= nh.advertise<nav_msgs::Odometry>(bebop_simulator_msgs::default_topics::POSITION_AND_VELOCITY_ERRORS, 1);
 
     //Just for data plotting
-    angularAndAngularVelocityErrors_pub_= nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::ANGULAR_AND_ANGULAR_VELOCITY_ERRORS, 1);
+    angularAndAngularVelocityErrors_pub_= nh.advertise<nav_msgs::Odometry>(bebop_simulator_msgs::default_topics::ANGULAR_AND_ANGULAR_VELOCITY_ERRORS, 1);
 
 }
 
@@ -293,7 +293,7 @@ void PositionControllerWithSphinxNode::InitializeParams() {
 void PositionControllerWithSphinxNode::Publish(){
 }
 
-void PositionControllerWithSphinxNode::LoggerCallback(const bebopS::Sphinx_msgs& logger_msg) {
+void PositionControllerWithSphinxNode::LoggerCallback(const bebop_simulator::Sphinx_msgs& logger_msg) {
 
     ROS_INFO_ONCE("PositionController with Bebop got first logger odometry message.");
 
@@ -441,7 +441,7 @@ int main(int argc, char** argv){
 
     ros::NodeHandle nh2;
     
-    bebopS::PositionControllerWithSphinxNode position_controller_with_bebop_node;
+    bebop_simulator::PositionControllerWithSphinxNode position_controller_with_bebop_node;
 
     ros::spin();
 

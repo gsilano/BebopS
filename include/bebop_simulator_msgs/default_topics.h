@@ -18,7 +18,7 @@
 #ifndef BEBOPS_DEFAULT_MESSAGES_H_
 #define BEBOPS_DEFAULT_MESSAGES_H_
 
-namespace bebopS_msgs {
+namespace bebop_simulator_msgs {
 	namespace default_topics {
 
 	static constexpr char PARROT_SPHINX_LOGGER[] = "parrotSphinx";
@@ -41,6 +41,6 @@ namespace bebopS_msgs {
 
 
 	}  // end namespace default_topics
-}  // end namespace bebopS_msgs
+}  // end namespace bebop_simulator_msgs
 
 #endif /* BEBOPS_DEFAULT_MESSAGES_H_ */

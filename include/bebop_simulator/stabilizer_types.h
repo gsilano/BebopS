@@ -46,7 +46,7 @@
 
 #include <ros/ros.h>
 
-namespace bebopS {
+namespace bebop_simulator {
 
 // Frequencies to bo used with the RATE_DO_EXECUTE_HZ macro. Do NOT use an arbitrary number.
 #define RATE_1000_HZ 1000

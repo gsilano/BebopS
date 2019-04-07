@@ -32,14 +32,14 @@
 #include <ros/ros.h>
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
 
-#include "bebopS/common.h"
-#include "bebopS/position_controller_with_sphinx.h"
-#include "bebopS/parameters_ros.h"
-#include "bebopS/parameters.h"
+#include "bebop_simulator/common.h"
+#include "bebop_simulator/position_controller_with_sphinx.h"
+#include "bebop_simulator/parameters_ros.h"
+#include "bebop_simulator/parameters.h"
 
-#include "bebopS/Sphinx_msgs.h"
+#include "bebop_simulator/Sphinx_msgs.h"
 
-namespace bebopS {
+namespace bebop_simulator {
 
     class PositionControllerWithSphinxNode{
         public:
@@ -83,7 +83,7 @@ namespace bebopS {
             void MultiDofJointTrajectoryCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& msg);
             void TakeOff();
             void OdomCallback(const nav_msgs::OdometryConstPtr& odom_msg);
-            void LoggerCallback(const bebopS::Sphinx_msgs& logger_msg);
+            void LoggerCallback(const bebop_simulator::Sphinx_msgs& logger_msg);
 
 
     };

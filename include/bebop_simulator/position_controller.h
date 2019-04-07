@@ -1,8 +1,7 @@
 /*
- * Copyright 2019 Giuseppe Silano, University of Sannio in Benevento, Italy
- * Copytight 2019 Peter Griggs, MIT, USA
- * Copyright 2019 Pasquale Oppido, University of Sannio in Benevento, Italy
- * Copyright 2019 Luigi Iannelli, University of Sannio in Benevento, Italy
+ * Copyright 2018 Giuseppe Silano, University of Sannio in Benevento, Italy
+ * Copyright 2018 Pasquale Oppido, University of Sannio in Benevento, Italy
+ * Copyright 2018 Luigi Iannelli, University of Sannio in Benevento, Italy
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +16,8 @@
  * limitations under the License.
  */
 
-#ifndef BEBOP_CONTROL_POSITION_WITH_SPHINX_CONTROLLER_H
-#define BEBOP_CONTROL_POSITION_WITH_SPHINX_CONTROLLER_H
+#ifndef BEBOP_CONTROL_POSITION_CONTROLLER_H
+#define BEBOP_CONTROL_POSITION_CONTROLLER_H
 
 #include <mav_msgs/conversions.h>
 #include <mav_msgs/eigen_mav_msgs.h>
@@ -26,8 +25,6 @@
 #include <string>
 
 #include <ros/time.h>
-
-#include <std_msgs/Empty.h>
 
 #include "extendedKalmanFilter.h"
 #include "waypoint_filter.h"
@@ -37,9 +34,11 @@
 #include "parameters.h"
 #include "common.h"
 
+#include <gazebo_msgs/GetWorldProperties.h>
+
 using namespace std;
 
-namespace bebopS {
+namespace bebop_simulator {
 
 // Default values for the Parrot Bebop controller. For more information about the control architecture, please take a look
 // at the publications page into the Wiki section.
@@ -59,7 +58,6 @@ static const double MuDefaultYawRateController = 0.44;
 
 static const Eigen::Vector3d UqDefaultXYZ = Eigen::Vector3d(1.1810, 1.1810, 4.6697);
 
-
 class PositionControllerParameters {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -74,7 +72,7 @@ class PositionControllerParameters {
         mu_theta_(MuDefaultPitchController),
         mu_phi_(MuDefaultRollController),
         mu_psi_(MuDefaultYawRateController),
-	    U_q_(UqDefaultXYZ){
+	U_q_(UqDefaultXYZ){
   }
 
   Eigen::Vector2d beta_xy_;
@@ -94,23 +92,23 @@ class PositionControllerParameters {
   Eigen::Vector3d U_q_;
 };
     
-    class PositionControllerWithSphinx{
+    class PositionController{
         public:
-            PositionControllerWithSphinx();
-            ~PositionControllerWithSphinx();
-            void CalculateCommandSignals(geometry_msgs::Twist* ref_command_signals);
+            PositionController();
+            ~PositionController();
+            void CalculateRotorVelocities(Eigen::Vector4d* rotor_velocities);
 
-            void SetOdom(const EigenOdometry& odometry);
-            void SetOdomFromLogger(const EigenOdometry& odometry_from_logger, const EigenOdometry& attitude_from_logger);
+            void SetOdometry(const EigenOdometry& odometry);
             void SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory_positionControllerNode);
             void SetControllerGains();
             void SetVehicleParameters();
             void SetWaypointFilterParameters();
             void SetFilterParameters();
-            void SetLaunchFileParameters();
             void GetOdometry(nav_msgs::Odometry* odometry_filtered);
             void GetReferenceAngles(nav_msgs::Odometry* reference_angles);
             void GetTrajectory(nav_msgs::Odometry* smoothed_trajectory);
+            void GetUTerrComponents(nav_msgs::Odometry* uTerrComponents);
+            void SetLaunchFileParameters();
             void GetVelocityAlongZComponents(nav_msgs::Odometry* zVelocity_components);
             void GetPositionAndVelocityErrors(nav_msgs::Odometry* positionAndVelocityErrors);
             void GetAngularAndAngularVelocityErrors(nav_msgs::Odometry* angularAndAngularVelocityErrors);
@@ -131,30 +129,40 @@ class PositionControllerParameters {
 
             EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         private:
-            //Boolean variables to active/inactive the controller and the data storage
+            //Boolean variables to active/unactive the controller and the data storage
             bool controller_active_;
-            bool stateEmergency_;
 
-            //publisher
-            ros::Publisher land_pub_;
-            ros::Publisher reset_pub_;
+            //Wall clock time offset variable
+            double wallSecsOffset_;
+
+            //Gazebo Message for attitude and position
+            gazebo_msgs::GetWorldProperties my_messagePosition_;
+            ros::NodeHandle clientHandlePosition_;
+            ros::ServiceClient clientPosition_;
+
+            ros::NodeHandle clientHandleAttitude_;
+            ros::ServiceClient clientAttitude_;
+            gazebo_msgs::GetWorldProperties my_messageAttitude_;
 
             //Sting vectors used to stare data
             std::vector<string> listControlSignals_;
+            std::vector<string> listControlMixerTerms_;
+            std::vector<string> listPropellersAngularVelocities_;
             std::vector<string> listReferenceAngles_;
             std::vector<string> listVelocityErrors_;
             std::vector<string> listDroneAttitude_;
             std::vector<string> listTrajectoryErrors_;
             std::vector<string> listAttitudeErrors_;
             std::vector<string> listDerivativeAttitudeErrors_;
+            std::vector<string> listTimeAttitudeErrors_;
+            std::vector<string> listTimePositionErrors_;
             std::vector<string> listDroneAngularVelocitiesABC_;
             std::vector<string> listDroneTrajectoryReference_;
-	        std::vector<string> listDroneLinearVelocities_;
+            std::vector<string> listControlMixerTermsSaturated_;
+	        std::vector<string> listControlMixerTermsUnsaturated_;
+	        std::vector<string> listDroneLinearVelocitiesABC_;
 	        std::vector<string> listDronePosition_;
-            std::vector<string> listCommandSinglasBefore_;
-            std::vector<string> listCommandSinglasAfter_;
-            std::vector<string> listOdometryFromBebopAutonomyPackage_;
-            std::vector<string> listWaypointFilterParameters_;
+            std::vector<string> listControlMixerTermsUnSaturatedBefore_;
           
             //Controller gains
             double beta_x_, beta_y_, beta_z_;
@@ -191,17 +199,10 @@ class PositionControllerParameters {
             double bf_, m_, g_;
             double l_, bm_;
             double Ix_, Iy_, Iz_;
-
-            //Controller interface with Bebop paramters
-            double u_z_sum_;
-            double u_psi_sum_, angularZ_;   
-            double linearZ_, linearZ_beforeSaturation_;
-            double u_z_, u_Terr_;         
-
+            
             ros::NodeHandle n1_;
             ros::NodeHandle n2_;
             ros::NodeHandle n3_;
-            ros::NodeHandle n4_;
             ros::Timer timer1_;
             ros::Timer timer2_;
             ros::Timer timer3_;
@@ -210,7 +211,6 @@ class PositionControllerParameters {
             void CallbackAttitude(const ros::TimerEvent& event);
             void CallbackPosition(const ros::TimerEvent& event);
             void CallbackSaveData(const ros::TimerEvent& event);
-            void CallbackLand(const ros::TimerEvent& event);
 
             nav_msgs::Odometry odometry_filtered_private_;
 
@@ -218,24 +218,17 @@ class PositionControllerParameters {
             control_t control_;
             mav_msgs::EigenTrajectoryPoint command_trajectory_;
             EigenOdometry odometry_;
-            EigenOdometry odometry_from_logger_;
-            EigenOdometry attitude_from_logger_;
 
-            void Emergency();
-            void LandEmergency();
             void SetOdometryEstimated();
-            void CommandVelocity(double* linearZ);
-            void CommandYawRate(double* yawRate_command);
             void Quaternion2Euler(double* roll, double* pitch, double* yaw) const;
             void AttitudeController(double* u_phi, double* u_theta, double* u_psi);
-            void AngularVelocityErrors(double* dot_e_phi, double* dot_e_theta, double* dot_e_psi);
-            void AttitudeErrors(double* e_phi, double* e_theta, double* e_psi);
+            void AngularVelocityErrors(double* dot_e_phi_, double* dot_e_theta_, double* dot_e_psi_);
+            void AttitudeErrors(double* e_phi_, double* e_theta_, double* e_psi_);
             void PosController(double* u_T, double* phi_r, double* theta_r, double* u_x, double* u_y, double* u_z, double* u_Terr);
             void PositionErrors(double* e_x, double* e_y, double* e_z);
             void VelocityErrors(double* dot_e_x, double* dot_e_y, double* dot_e_z);
-            void ReferenceAngles(double* phi_r, double* theta_r);
 
     };
 
 }
-#endif // BEBOP_CONTROL_POSITION_WITH_SPHINX_CONTROLLER_H
+#endif // BEBOP_CONTROL_POSITION_CONTROLLER_H

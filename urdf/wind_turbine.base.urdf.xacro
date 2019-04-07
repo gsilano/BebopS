@@ -23,7 +23,7 @@
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
-          <mesh filename="package://bebopS/meshes/wind_turbine_base.dae"
+          <mesh filename="package://bebop_simulator/meshes/wind_turbine_base.dae"
             scale="2 2 2" />
         </geometry>
       </visual>
@@ -31,7 +31,7 @@
       <collision name='collision'>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="package://bebopS/meshes/wind_turbine_base.dae"
+          <mesh filename="package://bebop_simulator/meshes/wind_turbine_base.dae"
             scale="2 2 2" />
         </geometry>
       </collision>
@@ -54,7 +54,7 @@
       <visual>
         <origin xyz="0.16228 -0.00566 0.1" rpy="0 0 0" />
         <geometry>
-          <mesh filename="package://bebopS/meshes/wind_turbine_rotor.dae"
+          <mesh filename="package://bebop_simulator/meshes/wind_turbine_rotor.dae"
             scale="2 2 2" />
         </geometry>
       </visual>
@@ -62,7 +62,7 @@
       <collision name='collision'>
         <origin xyz="0.16228 -0.00566 0.1" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="package://bebopS/meshes/wind_turbine_rotor.dae"
+          <mesh filename="package://bebop_simultor/meshes/wind_turbine_rotor.dae"
             scale="2 2 2" />
         </geometry>
       </collision>

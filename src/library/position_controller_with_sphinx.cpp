@@ -17,11 +17,11 @@
  * limitations under the License.
  */
 
-#include "bebopS/position_controller_with_sphinx.h"
-#include "bebopS/transform_datatypes.h"
-#include "bebopS/Matrix3x3.h"
-#include "bebopS/Quaternion.h" 
-#include "bebopS/stabilizer_types.h"
+#include "bebop_simulator/position_controller_with_sphinx.h"
+#include "bebop_simulator/transform_datatypes.h"
+#include "bebop_simulator/Matrix3x3.h"
+#include "bebop_simulator/Quaternion.h" 
+#include "bebop_simulator/stabilizer_types.h"
 
 #include "bebop_msgs/default_topics.h"
 
@@ -57,7 +57,7 @@
 #define MAX_POS_Z                 300 /* Max position before emergency state along z-axis */
 #define MAX_VEL_ERR               300 /* Max velocity error before emergency state */
 
-namespace bebopS {
+namespace bebop_simulator {
 
 PositionControllerWithSphinx::PositionControllerWithSphinx()
     : controller_active_(false),

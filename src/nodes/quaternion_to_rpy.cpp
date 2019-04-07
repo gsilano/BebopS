@@ -16,9 +16,9 @@
  * limitations under the License.
  */
 
-#include "bebopS/transform_datatypes.h"
-#include "bebopS/Matrix3x3.h"
-#include "bebopS/Quaternion.h"
+#include "bebop_simulator/transform_datatypes.h"
+#include "bebop_simulator/Matrix3x3.h"
+#include "bebop_simulator/Quaternion.h"
 
 #include <math.h> 
 #include <ros/ros.h>

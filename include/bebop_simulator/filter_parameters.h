@@ -22,7 +22,7 @@
 #include <Eigen/Eigen>
 #include <ros/ros.h>
 
-namespace bebopS {
+namespace bebop_simulator {
 
 static constexpr double DefaultDevX = 0.01;
 static constexpr double DefaultDevY = 0.01;
@@ -45,19 +45,19 @@ class FilterParameters {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   FilterParameters()
       : dev_x_(DefaultDevX), 
-	dev_y_(DefaultDevY), 
-	dev_z_(DefaultDevZ), 
-	dev_vx_(DefaultDevVX),  
-	dev_vy_(DefaultDevVY),
-	dev_vz_(DefaultDevVZ),
-	Qp_x_(DefaultQpX), 
-	Qp_y_(DefaultQpY), 
-	Qp_z_(DefaultQpZ), 
-	Qp_vx_(DefaultQpVX),  
-	Qp_vy_(DefaultQpVY),
-	Qp_vz_(DefaultQpVZ),
-	Rp_(Eigen::MatrixXf::Zero(6,6)),
-	Qp_(Eigen::MatrixXf::Identity(6,6)){
+				dev_y_(DefaultDevY), 
+				dev_z_(DefaultDevZ), 
+				dev_vx_(DefaultDevVX),  
+				dev_vy_(DefaultDevVY),
+				dev_vz_(DefaultDevVZ),
+				Qp_x_(DefaultQpX), 
+				Qp_y_(DefaultQpY), 
+				Qp_z_(DefaultQpZ), 
+				Qp_vx_(DefaultQpVX),  
+				Qp_vy_(DefaultQpVY),
+				Qp_vz_(DefaultQpVZ),
+				Rp_(Eigen::MatrixXf::Zero(6,6)),
+				Qp_(Eigen::MatrixXf::Identity(6,6)){
   }
 
   Eigen::MatrixXf Rp_, Qp_;

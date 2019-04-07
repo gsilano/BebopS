@@ -4,8 +4,8 @@
   <arg name="name" default="bebop"/>
   <arg name="ip" default="10.202.0.1" />            <!-- IPv4 address of your drone -->
   <arg name="drone_type" default="bebop2" />          <!-- available drone types: bebop1, bebop2 -->
-  <arg name="config_file" default="$(find bebopS)/config/defaults.yaml" />
-  <arg name="camera_info_url" default="package://bebopS/data/$(arg drone_type)_camera_calib.yaml" />
+  <arg name="config_file" default="$(find bebop_simulator)/config/defaults.yaml" />
+  <arg name="camera_info_url" default="package://bebop_simulator/data/$(arg drone_type)_camera_calib.yaml" />
   <arg name="plotName" default="bebopPlots"/>   
   <arg name="enable_plots" default="false"/>
   <arg name="csvFilesStoring" default="false"/>
@@ -15,11 +15,11 @@
   <arg name="EKFActive" default="false"/>
   
   <!-- Launch the controller  -->
-  <node name="position_controller_with_sphinx_node" pkg="bebopS" type="position_controller_with_sphinx_node" output="screen"> 
-    <rosparam command="load" file="$(find bebopS)/resource/controller_bebop.yaml" />
-    <rosparam command="load" file="$(find bebopS)/resource/bebop.yaml" />
-    <rosparam command="load" file="$(find bebopS)/resource/EKF_matrix.yaml" />
-    <rosparam command="load" file="$(find bebopS)/resource/waypoint_filter.yaml" />
+  <node name="position_controller_with_sphinx_node" pkg="bebop_simulator" type="position_controller_with_sphinx_node" output="screen"> 
+    <rosparam command="load" file="$(find bebop_simulator)/resource/controller_bebop.yaml" />
+    <rosparam command="load" file="$(find bebop_simulator)/resource/bebop.yaml" />
+    <rosparam command="load" file="$(find bebop_simulator)/resource/EKF_matrix.yaml" />
+    <rosparam command="load" file="$(find bebop_simulator)/resource/waypoint_filter.yaml" />
     <param name="csvFilesStoring" value="$(arg csvFilesStoring)"/>
     <param name="csvFilesStoringTime" value="$(arg csvFilesStoringTime)"/>
     <param name="user_account" value="$(arg user_account)"/>
@@ -45,7 +45,7 @@
    <group ns="$(arg name)">
 
     <!-- Launch the trajectory generator -->
-    <node name="waypoint_example_with_sphinx" pkg="bebopS" type="waypoint_example_with_sphinx" output="screen" args="$(find bebopS)/resource/waypoints.txt"/>   
+    <node name="waypoint_example_with_sphinx" pkg="bebop_simulator" type="waypoint_example_with_sphinx" output="screen" args="$(find bebop_simulator)/resource/waypoints.txt"/>   
 
      <node pkg="bebop_driver" name="bebop_driver" type="bebop_driver_node" output="screen">
         <param name="camera_info_url" value="$(arg camera_info_url)" />
@@ -63,7 +63,7 @@
     <group ns="$(arg plotName)" if="$(arg enable_plots)">
     <node name="position_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/odometry/pose/pose/position" output="screen" />
 
-    <node name="quaternion_to_rpy" pkg="bebopS" type="quaternion_to_rpy" output="screen" >
+    <node name="quaternion_to_rpy" pkg="bebop_simulator" type="quaternion_to_rpy" output="screen" >
        <remap from="/odometry" to="/bebop/odometry" />
        <remap from="/orientation_rpy" to="/bebop/orientation_rpy" />
     </node>

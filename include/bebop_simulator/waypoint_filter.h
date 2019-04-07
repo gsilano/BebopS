@@ -31,7 +31,7 @@
 
 using namespace std;
 
-namespace bebopS {
+namespace bebop_simulator {
 
 	class WaypointFilter{
 
@@ -42,9 +42,9 @@ namespace bebopS {
 
 		    void SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint& command_trajectory_positionControllerNode);
 		    void GetTrajectoryPoint(mav_msgs::EigenTrajectoryPoint* command_trajectory_positionController);
-                    void TrajectoryGeneration();
-                    void SetParameters(WaypointFilterParameters *waypointFilter_parameters_);
-                    void Initialize(state_t state_);
+            void TrajectoryGeneration();
+            void SetParameters(WaypointFilterParameters *waypointFilter_parameters_);
+            void Initialize(state_t state_);
 
 		    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	      private:

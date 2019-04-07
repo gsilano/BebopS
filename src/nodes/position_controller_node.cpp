@@ -22,10 +22,10 @@
 
 #include "position_controller_node.h"
 
-#include "bebopS/parameters_ros.h"
-#include "bebopS_msgs/default_topics.h"
+#include "bebop_simulator/parameters_ros.h"
+#include "bebop_simulator_msgs/default_topics.h"
 
-namespace bebopS {
+namespace bebop_simulator {
 
 //Constructor
 PositionControllerNode::PositionControllerNode() {
@@ -47,31 +47,31 @@ PositionControllerNode::PositionControllerNode() {
     motor_velocity_reference_pub_ = nh.advertise<mav_msgs::Actuators>(mav_msgs::default_topics::COMMAND_ACTUATORS, 1);
 
     //Useful to compare the results obtained by using the noised and biased virtual odometry sensor
-    odometry_sub_gt_ = nh.subscribe(bebopS_msgs::default_topics::ODOMETRY_GT, 1, &PositionControllerNode::OdometryGTCallback, this);
+    odometry_sub_gt_ = nh.subscribe(bebop_simulator_msgs::default_topics::ODOMETRY_GT, 1, &PositionControllerNode::OdometryGTCallback, this);
 
     //Needed for representing the variables into plots
-    odometry_filtered_pub_ = nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::FILTERED_OUTPUT, 1);
+    odometry_filtered_pub_ = nh.advertise<nav_msgs::Odometry>(bebop_simulator_msgs::default_topics::FILTERED_OUTPUT, 1);
 
     //Just for data plotting
-    filtered_errors_pub_ = nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::STATE_ERRORS, 1);
+    filtered_errors_pub_ = nh.advertise<nav_msgs::Odometry>(bebop_simulator_msgs::default_topics::STATE_ERRORS, 1);
 
     //Just for data plotting
-    reference_angles_pub_ = nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::REFERENCE_ANGLES, 1);
+    reference_angles_pub_ = nh.advertise<nav_msgs::Odometry>(bebop_simulator_msgs::default_topics::REFERENCE_ANGLES, 1);
 
     //Just for data plotting
-    smoothed_reference_pub_  = nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::SMOOTHED_TRAJECTORY, 1);
+    smoothed_reference_pub_  = nh.advertise<nav_msgs::Odometry>(bebop_simulator_msgs::default_topics::SMOOTHED_TRAJECTORY, 1);
 
     //Just for data plotting
-    uTerr_components_pub_  = nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::U_TERR_COMPONENTS, 1);
+    uTerr_components_pub_  = nh.advertise<nav_msgs::Odometry>(bebop_simulator_msgs::default_topics::U_TERR_COMPONENTS, 1);
 
     //Just for data plotting
-    zVelocity_components_pub_ = nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::Z_VELOCITY_COMPONENTS, 1);
+    zVelocity_components_pub_ = nh.advertise<nav_msgs::Odometry>(bebop_simulator_msgs::default_topics::Z_VELOCITY_COMPONENTS, 1);
 
     //Just for data plotting
-    positionAndVelocityErrors_pub_= nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::POSITION_AND_VELOCITY_ERRORS, 1);
+    positionAndVelocityErrors_pub_= nh.advertise<nav_msgs::Odometry>(bebop_simulator_msgs::default_topics::POSITION_AND_VELOCITY_ERRORS, 1);
 
     //Just for data plotting
-    angularAndAngularVelocityErrors_pub_= nh.advertise<nav_msgs::Odometry>(bebopS_msgs::default_topics::ANGULAR_AND_ANGULAR_VELOCITY_ERRORS, 1);
+    angularAndAngularVelocityErrors_pub_= nh.advertise<nav_msgs::Odometry>(bebop_simulator_msgs::default_topics::ANGULAR_AND_ANGULAR_VELOCITY_ERRORS, 1);
 
 }
 
@@ -329,9 +329,9 @@ void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& 
 	      //for all propellers, we put them into actuator_msg so they will later be used to control the drone.
 	      for (int i = 0; i < ref_rotor_velocities.size(); i++)
 	        actuator_msg->angular_velocities.push_back(ref_rotor_velocities[i]);
-              actuator_msg->header.stamp = odometry_msg->header.stamp;
-
-              motor_velocity_reference_pub_.publish(actuator_msg);
+        
+        actuator_msg->header.stamp = odometry_msg->header.stamp;
+        motor_velocity_reference_pub_.publish(actuator_msg);
 
 	      //The code reported below is used to plot the data when the simulation is running
 	      nav_msgs::Odometry odometry_filtered;
@@ -398,7 +398,7 @@ int main(int argc, char** argv){
 
     ros::NodeHandle nh2;
     
-    bebopS::PositionControllerNode position_controller_node;
+    bebop_simulator::PositionControllerNode position_controller_node;
 
     ros::spin();
 

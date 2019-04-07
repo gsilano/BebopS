@@ -15,7 +15,7 @@
   <xacro:property name="enable_laser1D" value="$(arg enable_laser1D)" />
 
   <!-- Instantiate bebop "mechanics" -->
-  	<xacro:include filename="$(find bebopS)/urdf/bebop_base.urdf.xacro" />
+  	<xacro:include filename="$(find bebop_simulator)/urdf/bebop_base.urdf.xacro" />
   	<xacro:include filename="$(find rotors_description)/urdf/component_snippets.xacro" />
 
   	<!-- Realistic odometry sensor with noise and bias -->

@@ -22,7 +22,7 @@
         <arg name="use_sim_time" value="true"/>
     </include>
     
-    <include file="$(find bebopS)/launch/spawn_bebop.launch">
+    <include file="$(find bebop_simulator)/launch/spawn_bebop.launch">
         <arg name="name" value="$(arg name)" />
         <arg name="x" value="$(arg x)"/>
         <arg name="y" value="$(arg y)"/>

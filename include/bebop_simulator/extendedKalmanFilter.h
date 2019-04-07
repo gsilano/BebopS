@@ -19,9 +19,9 @@
 #ifndef _ESTIMATOR_EXTENDED_KALMAN_FILTER_H_
 #define _ESTIMATOR_EXTENDED_KALMAN_FILTER_H_
 
-#include "bebopS/transform_datatypes.h"
-#include "bebopS/Matrix3x3.h"
-#include "bebopS/Quaternion.h"
+#include "bebop_simulator/transform_datatypes.h"
+#include "bebop_simulator/Matrix3x3.h"
+#include "bebop_simulator/Quaternion.h"
 
 #include <nav_msgs/Odometry.h>
 #include <mav_msgs/conversions.h>
@@ -36,7 +36,7 @@
 #include "common.h"
 #include "parameters_ros.h"
 
-namespace bebopS {
+namespace bebop_simulator {
 
 class ExtendedKalmanFilter {
   public:

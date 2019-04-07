@@ -27,14 +27,14 @@
     <arg name="enable_plots" default="false"/>
 
     
-  <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find bebopS)/models"/>
-  <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find bebopS)/models"/>
+  <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find bebop_simulator)/models"/>
+  <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find bebop_simulator)/models"/>
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find bebopS)/worlds/$(arg world_name).world" />
+    <arg name="world_name" value="$(find bebop_simulator)/worlds/$(arg world_name).world" />
   </include>
 
     <!-- Launch UAV -->
-    <include file="$(find bebopS)/launch/spawn_bebop.launch">
+    <include file="$(find bebop_simulator)/launch/spawn_bebop.launch">
        <arg name="name" value="$(arg name)" />
        <arg name="x" value="$(arg x)"/>
        <arg name="y" value="$(arg y)"/>
@@ -56,11 +56,11 @@
     </include>
 
     <!-- Launch the controller  -->
-    <node name="position_controller_node" pkg="bebopS" type="position_controller_node" output="screen"> 
-      <rosparam command="load" file="$(find bebopS)/resource/controller_bebop.yaml" />
-      <rosparam command="load" file="$(find bebopS)/resource/bebop.yaml" />
-      <rosparam command="load" file="$(find bebopS)/resource/EKF_matrix.yaml" />
-      <rosparam command="load" file="$(find bebopS)/resource/waypoint_filter.yaml" />
+    <node name="position_controller_node" pkg="bebop_simulator" type="position_controller_node" output="screen"> 
+      <rosparam command="load" file="$(find bebop_simulator)/resource/controller_bebop.yaml" />
+      <rosparam command="load" file="$(find bebop_simulator)/resource/bebop.yaml" />
+      <rosparam command="load" file="$(find bebop_simulator)/resource/EKF_matrix.yaml" />
+      <rosparam command="load" file="$(find bebop_simulator)/resource/waypoint_filter.yaml" />
       <param name="use_sim_time" value="$(arg use_sim_time)" />
       <param name="csvFilesStoring" value="$(arg csvFilesStoring)"/>
       <param name="csvFilesStoringTime" value="$(arg csvFilesStoringTime)"/>
@@ -83,13 +83,13 @@
 
     <!-- Launch the trajectory generator -->
    <group ns="$(arg name)">
-       <node name="waypoint_example" pkg="bebopS" type="waypoint_example" output="screen" args="$(find bebopS)/resource/waypoints.txt"/>   
+       <node name="waypoint_example" pkg="bebop_simulator" type="waypoint_example" output="screen" args="$(find bebop_simulator)/resource/waypoints.txt"/>   
     </group>
 
     <!-- Launch the trajectory plot -->
    <group ns="$(arg plotName)" if="$(arg enable_plots)">
     <node name="position_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/odometry/pose/pose/position" output="screen" />
-    <node name="quaternion_to_rpy" pkg="bebopS" type="quaternion_to_rpy" output="screen" >
+    <node name="quaternion_to_rpy" pkg="bebop_simulator" type="quaternion_to_rpy" output="screen" >
        <remap from="/odometry" to="/bebop/odometry" />
        <remap from="/orientation_rpy" to="/bebop/orientation_rpy" />
     </node>

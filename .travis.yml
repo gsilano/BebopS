@@ -74,6 +74,11 @@ before_install:
   - sudo apt-get update
   - sudo apt-get install ros-$ROS_DISTRO-desktop-full ros-$ROS_DISTRO-joy ros-$ROS_DISTRO-octomap-ros python-wstool python-catkin-tools
   - sudo apt-get install protobuf-compiler libgoogle-glog-dev
+  - sudo apt-get install build-essential python-rosdep python-catkin-tools
+  - echo "deb http://plf.parrot.com/sphinx/binary `lsb_release -cs`/" | sudo tee /etc/apt/sources.list.d/sphinx.list > /dev/null
+  - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 508B1AE5
+  - sudo apt-get update
+  - sudo apt-get install parrot-sphinx
  # Prepare rosdep to install dependencies.  
   - sudo rosdep init 
   - rosdep update
@@ -87,15 +92,18 @@ install:
   - wstool init
   # Create the devel/setup.bash (run catkin_make with an empty workspace) and
   # source it to set the path variables.
-  - git clone https://github.com/gsilano/teamsannio_med_control.git
+  - git clone https://github.com/gsilano/BebopS.git
   - git clone https://github.com/gsilano/med_uav_description.git
   - git clone https://github.com/gsilano/rotors_simulator.git
   - git clone https://github.com/gsilano/mav_comm.git
+  - git clone https://github.com/AutonomyLab/bebop_autonomy.git
   - cd ~/catkin_ws/src/rotors_simulator 
   - git checkout med18
   - cd ~/catkin_ws/src/mav_comm 
   - git checkout med18
   - cd ~/catkin_ws
+  - rosdep update
+  - rosdep install --from-paths src -i
   - catkin build
   - echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
   - source ~/.bashrc

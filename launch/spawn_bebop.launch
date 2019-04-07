@@ -18,7 +18,7 @@
   <arg name="enable_ground_truth_sensor" default="false"/>
   <arg name="enable_wind_plugin" default="false"/>
   <arg name="enable_laser1D" default="false"/>
-  <arg name="model" value="$(find bebopS)/urdf/bebop.urdf.xacro" />
+  <arg name="model" value="$(find bebop_simulator)/urdf/bebop.urdf.xacro" />
 
   <!-- send the robot XML to param server -->
   <param name="robot_description" command="

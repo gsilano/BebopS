@@ -28,7 +28,7 @@
 #include <nav_msgs/Odometry.h>
 
 
-namespace bebopS {
+namespace bebop_simulator {
 
 // Default values.
 static const std::string kDefaultNamespace = "";
