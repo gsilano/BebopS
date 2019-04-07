@@ -124,6 +124,6 @@ YouTube video
 ---------------------------------------------------------
 A YouTube video showing the Parrot Bebop during the trajectory tracking is reported. The trajectory, described using waypoints, is shown in the `waypoint.txt` file.
 
-[![MED18_Industrial_Challenge, BebopS](https://github.com/gsilano/BebopS/wiki/images/Video_Miniature_YouTube_ECC19.png)](https://youtu.be/ERkgSCoM6OI "MED18_Industrial_Challenge, BebopS")
+[![MED18_Industrial_Challenge, BebopS](https://github.com/gsilano/BebopS/wiki/images/Video_Miniature_YouTube_SMC19.png)](https://youtu.be/ERkgSCoM6OI "MED18_Industrial_Challenge, BebopS")
 
 
