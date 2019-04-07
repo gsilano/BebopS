@@ -30,11 +30,11 @@ Changelog for package BebopS
 
 0.1.6 (2018-06-18)
 ------------------
-* A plot relating to the attitude of the aircraft has been included in the launch files of the task1 and task2 as descripted in the 26th MED18 Aerial Robotics and Perception Challenge.
+* A plot relating to the attitude of the aircraft has been included in the launch files of the task1 and task2 as described in the 26th MED18 Aerial Robotics and Perception Challenge.
 * The hovering and waypoints publishers have been inserted as nodes in the repository.
-* Task2 has been added. Such task models the drone the trajectory tracking (it is modeled by using a sequence of waypoints). The same task was integrated also with the Parrot Bebop2 control algorithm interface.
+* Task2 has been added. Such task models the drone trajectory tracking (it is modeled by using a sequence of waypoints). The same task was integrated also with the Parrot Bebop2 control algorithm interface.
 * A waypoint filter has been added to avoid system instabilities.
-* Bug fixing. In particular it has been fixed the bag into the Extended Kalman Filter: the linear velocity in ABC reference system was used to control the UAV.
+* Bug fixing. In particular, it has been fixed the bag into the Extended Kalman Filter: the linear velocity in ABC reference system was used to control the UAV.
 * Typos fixing
 * Contributors: Giuseppe Silano, Pasquale Opppido, Luigi Iannelli
 
