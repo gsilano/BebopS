@@ -46,33 +46,33 @@ Changelog for package BebopS
 
 0.1.4 (2018-06-11)
 ------------------
-* added the Kalman filter
-* added plots in the launch file to monitor the position and linear velocity errors between the Kalman filter output and the odometry ground truth values. In order to develop such functionality, the teamsannio messages have been created.
+* Added the Kalman filter
+* Added plots in the launch file to monitor the position and linear velocity errors between the Kalman filter output and the odometry ground truth values. In order to develop such functionality, the teamsannio messages have been created.
 * A yaml file needed to set up the Kalman filter has been created. Such file contains the tuning matrix of the filter and the standard deviations that characterize the odometry virtual sensor.
 * The Kalman filter works with the noisy attitude (standard deviation 0.017). This function considers the nonideality of the attitude filter onboard the quadrotor.   
 * Contributors: Pasquale Oppido, Giuseppe Silano, Luigi Iannelli
 
 0.1.3 (2018-05-25)
 -----------
-* added the data storage section in the position controller file. This section allows to storage, in suitable csv files, the aircraft and controller states.
-* bug fixing
-* the sim time has been added in the launch file. Now the position controller node uses the simulation and not wall clock time.
+* Added the data storage section in the position controller file. This section allows to storage, in suitable csv files, the aircraft and controller states.
+* Bug fixing
+* The sim time has been added in the launch file. Now the position controller node uses the simulation and not wall clock time.
 * Contributors: Giuseppe Silano, Luigi Iannelli
 
 0.1.2 (2018-05-15)
 ------------------
-* added the basic.world file
-* the launch files have been modified considering the ROS package architecture
-* the iteration number has been moved from 1000 to 50 in order to speed up the simulation
+* Added the basic.world file
+* The launch files have been modified considering the ROS package architecture
+* The iteration number has been moved from 1000 to 50 in order to speed up the simulation
 * Contributors: Giuseppe Silano, Luigi Iannelli
 
 0.1.1 (2018-05-13)
 ------------------
-* fixed issues in the control law development
+* Fixed issues in the control law development
 * Contributors: Giuseppe Silano, Pasquale Oppido, Luigi Iannelli
 
 0.1.0 (2018-04-30)
 ------------------
-* initial Ubuntu package release
+* Initial Ubuntu package release
 * Contributors: Giuseppe Silano, Pasquale Oppido, Luigi Iannelli
 
