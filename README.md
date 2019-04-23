@@ -40,7 +40,7 @@ To use the code developed and stored in this repository some preliminary actions
  $ rosdep update
  $ echo "source /opt/ros/kinetic/setup.bash" >> ~/.bashrc
  $ source ~/.bashrc
- $ sudo apt-get install python-rosinstall pythonrosinstall-generator python-wstool build-essential
+ $ sudo apt-get install python-rosinstall python-rosinstall-generator python-wstool build-essential
  ```
  2. If you don't have ROS workspace yet you can do so by
 
