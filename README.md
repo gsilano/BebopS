@@ -61,7 +61,7 @@ To use the code developed and stored in this repository some preliminary actions
 
    ```
    $ cd ~/catkin_ws/
-   $ rosdept install --from-paths serc -i
+   $ rosdep install --from-paths src -i
    $ catkin build
    ```
 
