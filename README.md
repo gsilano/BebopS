@@ -21,7 +21,7 @@ Below we provide the instructions necessary for getting started. See [BebopS' wi
 
 If you are using this simulator within the research for your publication, please take a look at the [Publications page](https://github.com/gsilano/BebopS/wiki/Publications). The page contains core papers and all linked works (using the platform).
 
-The authors are grateful to the [LARICS Lab](https://larics.fer.hr/larics) of the University of Zagreb that created the basis for the software repository through the [sofware repositry](https://github.com/larics/mmuav_gazebo). In fact, the platform is an extract of the work carried out for the industrial challenge of the 26th Mediterranean Conference on Control and Automation (MED’18) in which the authors took part.
+The authors are grateful to the [LARICS Lab](https://larics.fer.hr/larics) of the University of Zagreb that created the basis for the software repository through the [sofware repositry](https://github.com/larics/mmuav_gazebo). In fact, the platform is an extract of the work carried out for the industrial challenge of the 26th Mediterranean Conference on Control and Automation (MED’18) in which the authors took part ([here the link](https://ieeexplore.ieee.org/document/8667511) to the conference report).
 
 Installation Instructions - Ubuntu 16.04 with ROS Kinetic
 ---------------------------------------------------------
