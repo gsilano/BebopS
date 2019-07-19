@@ -15,13 +15,13 @@ Simple cases study are considered (`task1_world.launch` and `task2_world.launch`
 
 The code is released under Apache license, thus making it available for scientific and educational activities.
 
-The platform has been developed by using Ubuntu 16.04 and the Kinetic Kame version of ROS. Although the platform is fully compatible with Indigo Igloo version of ROS and Ubuntu 14.04, such configuration is not recommended since the ROS support will close in April 2019.
+The platform has been developed by using Ubuntu 16.04 and the Kinetic Kame version of ROS. Although the platform is fully compatible with Indigo Igloo version of ROS and Ubuntu 14.04, such configuration is not recommended since the ROS support is expected to be closed in April 2019.
 
 Below we provide the instructions necessary for getting started. See [BebopS' wiki](https://github.com/gsilano/BebopS/wiki) for more instructions and examples.
 
 If you are using this simulator within the research for your publication, please take a look at the [Publications page](https://github.com/gsilano/BebopS/wiki/Publications). The page contains core papers and all linked works (using the platform).
 
-The authors are grateful to the [LARICS Lab](https://larics.fer.hr/larics) of the University of Zagreb that created the basis for the software repository through the [sofware repositry](https://github.com/larics/mmuav_gazebo). In fact, the platform is an extract of the work carried out for the industrial challenge of the 26th Mediterranean Conference on Control and Automation (MED’18) in which the authors took part ([here the link](https://ieeexplore.ieee.org/document/8667511) to the conference report).
+The authors are grateful to the [LARICS Lab](https://larics.fer.hr/larics) of the University of Zagreb that created the basis for the ROS package through the [sofware repositry](https://github.com/larics/mmuav_gazebo). In fact, the platform is an extract of the work carried out for the industrial challenge of the 26th Mediterranean Conference on Control and Automation (MED’18) in which the authors took part ([here the link](https://ieeexplore.ieee.org/document/8667511) to the conference report).
 
 Installation Instructions - Ubuntu 16.04 with ROS Kinetic
 ---------------------------------------------------------
@@ -34,7 +34,7 @@ To use the code developed and stored in this repository some preliminary actions
  > /etc/apt/sources.list.d/ros-latest.list'
  $ wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
  $ sudo apt-get update
- $ sudo apt-get install ros-kinetic-desktop-full ros-kinetic-joy ros-kinetic-octomap-ros ros-kinetic-mavlink 
+ $ sudo apt-get install ros-kinetic-desktop-full ros-kinetic-joy ros-kinetic-octomap-ros ros-kinetic-mavlink \
  python-wstool python-catkin-tools protobuf-compiler libgoogle-glog-dev ros-kinetic-control-toolbox
  $ sudo rosdep init
  $ rosdep update
@@ -49,9 +49,9 @@ To use the code developed and stored in this repository some preliminary actions
  $ cd ~/catkin_ws/src
  $ catkin_init_workspace  # initialize your catkin workspace
  $ catkin init
- $ git clone git@github.com:larics/rotors_simulator.git
- $ git clone git@github.com:larics/mav_comm.git
- $ git clone git@github.com:larics/BebopS.git
+ $ git clone https://github.com/gsilano/rotors_simulator.git
+ $ git clone https://github.com/gsilano/mav_comm
+ $ git clone https://github.com/gsilano/BebopS.git
  $ cd ~/catkin_ws/src/rotors_simulator & git checkout med18
  $ cd ~/catkin_ws/src/mav_comm & git checkout med18
  $ rosdep update
