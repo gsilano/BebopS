@@ -104,6 +104,6 @@ When we decide to publish these new features in a new software release (roughly 
 
 ```sh
 git checkout master
-git merge --no-ff devel
+git merge --no-ff dev
 git push origin master
 ```
