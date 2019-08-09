@@ -60,7 +60,7 @@ To use the code developed and stored in this repository some preliminary actions
  3. Build your workspace with `python_catkin_tools` (therefore you need `python_catkin_tools`)
 
    ```
-   $ cd ~/catkin_ws/
+   $ cd ~/catkin_ws
    $ rosdep install --from-paths src -i
    $ catkin build
    ```
