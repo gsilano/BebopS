@@ -52,8 +52,10 @@ To use the code developed and stored in this repository some preliminary actions
  $ git clone https://github.com/gsilano/rotors_simulator.git
  $ git clone https://github.com/gsilano/mav_comm
  $ git clone https://github.com/gsilano/BebopS.git
- $ cd ~/catkin_ws/src/rotors_simulator & git checkout med18
- $ cd ~/catkin_ws/src/mav_comm & git checkout med18
+ $ cd ~/catkin_ws/src/rotors_simulator 
+ $ git checkout med18
+ $ cd ~/catkin_ws/src/mav_comm 
+ $ git checkout med18
  $ rosdep update
  ```
 
