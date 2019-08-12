@@ -57,23 +57,24 @@ To use the code developed and stored in this repository some preliminary actions
  $ git checkout med18
  $ cd ~/catkin_ws/src/mav_comm 
  $ git checkout med18
+ $ cd ~/catkin_ws/
  $ rosdep update
  ```
 
  3. Build your workspace with `python_catkin_tools` (therefore you need `python_catkin_tools`)
 
-   ```
-   $ cd ~/catkin_ws/
-   $ rosdep install --from-paths src -i
-   $ catkin build
-   ```
+ ```
+ $ rosdep install --from-paths src -i
+ $ catkin build
+ ```
 
  4. Add sourcing to your `.bashrc` file
 
-   ```
-   $ echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
-   $ source ~/.bashrc
-   ```
+ ```
+ $ echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
+ $ source ~/.bashrc
+ ```
+ 
    Basic Usage
 ---------------------------------------------------------
 
