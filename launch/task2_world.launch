@@ -57,10 +57,10 @@
 
     <!-- Launch the controller  -->
     <node name="position_controller_node" pkg="bebop_simulator" type="position_controller_node" output="screen"> 
-      <rosparam command="load" file="$(find BebopS)/resource/controller_bebop.yaml" />
-      <rosparam command="load" file="$(find bebopS)/resource/bebop.yaml" />
-      <rosparam command="load" file="$(find bebopS)/resource/EKF_matrix.yaml" />
-      <rosparam command="load" file="$(find bebopS)/resource/waypoint_filter.yaml" />
+      <rosparam command="load" file="$(find bebop_simulator)/resource/controller_bebop.yaml" />
+      <rosparam command="load" file="$(find bebop_simulator)/resource/bebop.yaml" />
+      <rosparam command="load" file="$(find bebop_simulator)/resource/EKF_matrix.yaml" />
+      <rosparam command="load" file="$(find bebop_simulator)/resource/waypoint_filter.yaml" />
       <param name="use_sim_time" value="$(arg use_sim_time)" />
       <param name="csvFilesStoring" value="$(arg csvFilesStoring)"/>
       <param name="csvFilesStoringTime" value="$(arg csvFilesStoringTime)"/>
@@ -83,7 +83,7 @@
 
     <!-- Launch the trajectory generator -->
    <group ns="$(arg name)">
-       <node name="waypoint_example" pkg="bebop_simulator" type="waypoint_example" output="screen" args="$(find BebopS)/resource/waypoints.txt"/>   
+       <node name="waypoint_example" pkg="bebop_simulator" type="waypoint_example" output="screen" args="$(find bebop_simulator)/resource/waypoints.txt"/>   
     </group>
 
     <!-- Launch the trajectory plot -->
