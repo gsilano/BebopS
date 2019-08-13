@@ -83,7 +83,7 @@
 
     <!-- Launch the trajectory generator -->
    <group ns="$(arg name)">
-       <node name="waypoint_example" pkg="bebop_simulator" type="waypoint_example" output="screen" args="$(find bebopS)/resource/waypoints.txt"/>   
+       <node name="waypoint_example" pkg="bebop_simulator" type="waypoint_example" output="screen" args="$(find BebopS)/resource/waypoints.txt"/>   
     </group>
 
     <!-- Launch the trajectory plot -->
