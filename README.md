@@ -34,8 +34,8 @@ To use the code developed and stored in this repository some preliminary actions
  > /etc/apt/sources.list.d/ros-latest.list'
  $ wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
  $ sudo apt-get update
- $ sudo apt-get install ros-kinetic-desktop-full ros-kinetic-joy ros-kinetic-octomap-ros ros-kinetic-mavlink \
- python-wstool python-catkin-tools protobuf-compiler libgoogle-glog-dev ros-kinetic-control-toolbox
+ $ sudo apt-get install ros-kinetic-desktop-full ros-kinetic-joy ros-kinetic-octomap-ros ros-kinetic-mavlink
+ $ sudo apt-get install python-wstool python-catkin-tools protobuf-compiler libgoogle-glog-dev ros-kinetic-control-toolbox
  $ sudo rosdep init
  $ rosdep update
  $ echo "source /opt/ros/kinetic/setup.bash" >> ~/.bashrc
@@ -52,15 +52,18 @@ To use the code developed and stored in this repository some preliminary actions
  $ git clone https://github.com/gsilano/rotors_simulator.git
  $ git clone https://github.com/gsilano/mav_comm
  $ git clone https://github.com/gsilano/BebopS.git
- $ cd ~/catkin_ws/src/rotors_simulator & git checkout med18
- $ cd ~/catkin_ws/src/mav_comm & git checkout med18
+ $ git clone https://github.com/AutonomyLab/bebop_autonomy.git
+ $ cd ~/catkin_ws/src/rotors_simulator 
+ $ git checkout med18
+ $ cd ~/catkin_ws/src/mav_comm
+ $ git checkout med18
+ $ cd ~/catkin_ws
  $ rosdep update
  ```
 
  3. Build your workspace with `python_catkin_tools` (therefore you need `python_catkin_tools`)
 
    ```
-   $ cd ~/catkin_ws
    $ rosdep install --from-paths src -i
    $ catkin build
    ```
