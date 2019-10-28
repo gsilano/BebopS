@@ -49,6 +49,7 @@ To use the code developed and stored in this repository some preliminary actions
  $ catkin_init_workspace  # initialize your catkin workspace
  $ cd ~/catkin_ws
  $ catkin init
+ $ cd ~/catkin_ws/src
  $ git clone https://github.com/gsilano/rotors_simulator.git
  $ git clone https://github.com/gsilano/mav_comm
  $ git clone https://github.com/gsilano/BebopS.git
