@@ -120,6 +120,27 @@ the Parrot Bebop takes off from the ground and keeps indefinitely the hovering p
    
 the drone starts to follow the trajectory expressed as a sequence of waypoints (x_r, y_r, z_r and \psi_r) published at a settled time (t_0, t_1, t_3, etc.), as described in `waypoint.txt` file. To avoid system instabilities, a waypoint filter is employed to smooth the trajectory.
 
+Gazebo Version
+--------------
+
+At a minimum, Gazebo `v2.x` is required (which is installed by default with ROS Indigo). However, it is **recommended to install at least Gazebo `v5.x`** for full functionlity, although the platform is fully compatible with the Gazebo 9. Before running the script, consider the following limitations:
+
+1. `iris.sdf` can only be generated with Gazebo >= `v3.0`, as it requires use of the `gz sdf ...` tool. If this requirement is not met, you will not be able to use the Iris MAV in any of the simulations.
+2. The Gazebo plugins `GazeboGeotaggedImagesPlugin`, `LidarPlugin` and the `LiftDragPlugin` all require Gazebo >= `v5.0`, and will not be built if this requirement is not met.
+
+ROS Kinetic installs Gazebo 7 by default so it is recommended to remove the previous installation. Proceeded to the installation section if installing for the first time.
+
+```
+$ sudo apt-get remove ros-kinetic-gazebo*
+$ sudo apt-get upgrade
+```
+
+Install the core of the ROS and rest of the packages can be added manually
+
+```
+$ sudo apt-get install ros-kinetic-gazebo9-ros-pkgs ros-kinetic-gazebo9-ros-control ros-kinetic-gazebo9* (for Gazebo 9)
+```
+
 Bugs & Feature Requests
 --------------------------
 
