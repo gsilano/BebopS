@@ -9,6 +9,7 @@
   <xacro:property name="wind_direction_y" value="$(arg wind_direction_y)" />
   <xacro:property name="wind_direction_z" value="$(arg wind_direction_z)" />
   <xacro:property name="enable_odometry_sensor_with_noise" value="$(arg enable_odometry_sensor_with_noise)" />
+  <xacro:property name="enable_imu" value="$(arg enable_imu)" />
   <xacro:property name="disable_odometry_sensor_with_noise" value="$(arg disable_odometry_sensor_with_noise)" />
   <xacro:property name="enable_ground_truth_sensor" value="$(arg enable_ground_truth_sensor)" />
   <xacro:property name="enable_wind_plugin" value="$(arg enable_wind_plugin)" />
@@ -49,6 +50,30 @@
 		<inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" /> <!-- [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] [kg m^2] -->
 		<origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
 	</xacro:odometry_plugin_macro>
+        </xacro:if>
+
+        <!-- RotorS default IMU -->
+        <xacro:if value="$(arg enable_imu)">
+	<!-- ADIS16448 IMU. -->
+	<xacro:imu_plugin_macro
+		namespace="${namespace}"
+		imu_suffix=""
+		parent_link="base_link"
+		imu_topic="imu"
+		measurement_delay="0"
+		measurement_divisor="1"
+		mass_imu_sensor="0.015"
+		gyroscope_noise_density="0.0003394"
+		gyroscope_random_walk="0.000038785"
+		gyroscope_bias_correlation_time="1000.0"
+		gyroscope_turn_on_bias_sigma="0.0087"
+		accelerometer_noise_density="0.004"
+		accelerometer_random_walk="0.006"
+		accelerometer_bias_correlation_time="300.0"
+		accelerometer_turn_on_bias_sigma="0.1960">
+		<inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001" />
+		<origin xyz="0 0 0" rpy="0 0 0" />
+	</xacro:imu_plugin_macro>
         </xacro:if>
 
   	<!-- Realistic odometry sensor without noise and bias -->
