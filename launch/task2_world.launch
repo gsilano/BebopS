@@ -25,6 +25,7 @@
     <arg name="enable_wind_plugin" default="false"/>
     <arg name="enable_laser1D" default="false"/>
     <arg name="enable_plots" default="false"/>
+    <arg name="enable_imu" default="true"/>
 
     
   <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find bebop_simulator)/models"/>
@@ -53,6 +54,7 @@
        <arg name="enable_ground_truth_sensor" value="$(arg enable_ground_truth_sensor)"/>
        <arg name="enable_wind_plugin" value="$(arg enable_wind_plugin)"/>
        <arg name="enable_laser1D" value="$(arg enable_laser1D)"/>
+       <arg name="enable_imu" value="$(arg enable_imu)"/>
     </include>
 
     <!-- Launch the controller  -->
@@ -67,7 +69,7 @@
       <param name="user_account" value="$(arg user_account)"/>
       <param name="waypoint_filter" value="$(arg waypoint_filter)"/>
       <param name="EKFActive" value="$(arg EKFActive)"/>
-      <remap from="/command/motor_speed" to="/gazebo/command/motor_speed" />
+      <!-- <remap from="/command/motor_speed" to="/gazebo/command/motor_speed" /> -->
       <remap from="/odometry" to="/bebop/odometry" />
       <remap from="/odometry_gt" to="/bebop/odometry_gt" />
       <remap from="/filteredOutput" to="/bebop/filteredOutput" />
