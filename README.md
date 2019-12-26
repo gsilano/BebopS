@@ -39,7 +39,7 @@ $ sudo rosdep init
 $ rosdep update
 $ echo "source /opt/ros/melodic/setup.bash" >> ~/.bashrc
 $ source ~/.bashrc
-$ sudo apt install python-rosinstall python-rosinstall-generator python-wstool build-essential
+$ sudo apt install python-rosinstall python-rosinstall-generator build-essential
 ```
 
 2. If you don't have ROS workspace yet you can do so by
@@ -97,7 +97,7 @@ $ sudo rosdep init
 $ rosdep update
 $ echo "source /opt/ros/kinetic/setup.bash" >> ~/.bashrc
 $ source ~/.bashrc
-$ sudo apt-get install python-rosinstall python-rosinstall-generator python-wstool build-essential
+$ sudo apt-get install python-rosinstall python-rosinstall-generator build-essential
  ```
 
  2. If you don't have ROS workspace yet you can do so by
