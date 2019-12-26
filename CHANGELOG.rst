@@ -2,6 +2,11 @@
 Changelog for package BebopS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.2.2 (2019-12-26)
+------------------
+* Inserted the default RotorS IMU (ADIS16448 IMU) in the list of the available sensors when running the simulation
+* Contributors: Giuseppe Silano
+
 0.2.1 (2019-04-04)
 ------------------
 * The namespace was modified considering the ROS rules (only lowercase letters)

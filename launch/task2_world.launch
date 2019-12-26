@@ -25,6 +25,7 @@
     <arg name="enable_wind_plugin" default="false"/>
     <arg name="enable_laser1D" default="false"/>
     <arg name="enable_plots" default="false"/>
+    <arg name="enable_imu" default="true"/>
 
     
   <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find bebop_simulator)/models"/>
@@ -52,6 +53,7 @@
        <arg name="disable_odometry_sensor_with_noise" value="$(arg disable_odometry_sensor_with_noise)"/>
        <arg name="enable_ground_truth_sensor" value="$(arg enable_ground_truth_sensor)"/>
        <arg name="enable_wind_plugin" value="$(arg enable_wind_plugin)"/>
+       <arg name="enable_imu" value="$(arg enable_imu)"/>
        <arg name="enable_laser1D" value="$(arg enable_laser1D)"/>
     </include>
 
