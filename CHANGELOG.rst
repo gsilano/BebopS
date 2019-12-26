@@ -5,6 +5,7 @@ Changelog for package BebopS
 0.2.2 (2019-12-26)
 ------------------
 * Inserted the default RotorS IMU (ADIS16448 IMU) in the list of the available sensors when running the simulation
+* Updated the README.md file with instructions for Ubuntu 18.04, ROS Melodic Morenia and Gazebo 9
 * Contributors: Giuseppe Silano
 
 0.2.1 (2019-04-04)

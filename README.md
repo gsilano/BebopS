@@ -23,7 +23,7 @@ If you are using this simulator for research purposes especially for your public
 
 The authors are grateful to the [LARICS Lab](https://larics.fer.hr/larics), University of Zagreb, for the initial work done to make the platform compatible with the latest changes to the RotorS package. Here the link to them [sofware repositry](https://github.com/larics/mmuav_gazebo). The software platform is an extract of the work carried out for the industrial challenge of the 26th Mediterranean Conference on Control and Automation (MED’18) in which the authors took part ([here the link](https://ieeexplore.ieee.org/document/8667511) to the conference report).
 
-Installation Instructions - Ubuntu 18.04 with ROS Melodic
+Installation Instructions - Ubuntu 18.04 with ROS Melodic and Gazebo 9
 ---------------------------------------------------------
 To use the code developed and stored in this repository some preliminary actions are needed. They are listed below.
 
@@ -72,7 +72,16 @@ $ echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
 $ source ~/.bashrc
 ```
 
-Installation Instructions - Ubuntu 16.04 with ROS Kinetic
+5. Update the pre-installed Gazebo version. This fix the issue with the `error in REST request for accessing api.ignition.org`
+
+```console
+$ sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
+$ wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
+$ sudo apt update
+$ sudo apt-get install gazebo9
+```
+
+Installation Instructions - Ubuntu 16.04 with ROS Kinetic and Gazebo 7
 ---------------------------------------------------------
 To use the code developed and stored in this repository some preliminary actions are needed. They are listed below.
 
@@ -115,10 +124,10 @@ $ catkin build
 
  4. Add sourcing to your `.bashrc` file
 
-   ```console
-   $ echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
-   $ source ~/.bashrc
-   ```
+```console
+$ echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
+$ source ~/.bashrc
+```
 
 Basic Usage
 ---------------------------------------------------------
@@ -152,46 +161,33 @@ To speed up the simulation, a certain set of sensors can be included when simula
 
 These value can be modified before simulating the drone behavior acting on the launch file or at runtime by running on the terminal:
 
-   ```console
-   $ roslaunch bebop_simulator bebop_without_controller.launch enable_odometry_sensor_with_noise:=true
-   ```
+ ```console
+$ roslaunch bebop_simulator bebop_without_controller.launch enable_odometry_sensor_with_noise:=true
+```
 
-Finally, the waypoint and Kalman filters, as well as the data storage, can be enabled/disabled by using the variables: `csvFilesStoring`, `csvFilesStoringTime` (simulation time after which the data will be saved), `user_account` (required to define the storage path), `waypoint_filter` and `EKFActive`.   
+Finally, the waypoint and the Kalman filters, as well as the data storage (file used as log), can be enabled/disabled by using the variables: `csvFilesStoring`, `csvFilesStoringTime` (simulation time after which the data will be saved), `user_account` (required to define the storage path), `waypoint_filter` and `EKFActive`.   
 
 While, running in a terminal the command
 
-   ```console
-   $ roslaunch bebop_simulator task1_world.launch
-   ```
+```console
+$ roslaunch bebop_simulator task1_world.launch
+```
 
 the Parrot Bebop takes off from the ground and keeps indefinitely the hovering position subjected to wind gusts (up to 0.5 N) for a minute. Conversely,
 
-   ```console
-   $ roslaunch bebop_simulator task2_world.launch
-   ```
+```console
+$ roslaunch bebop_simulator task2_world.launch
+```
 
-the drone starts to follow the trajectory expressed as a sequence of waypoints (x_r, y_r, z_r and \psi_r) published at a settled time (t_0, t_1, t_3, etc.), as described in `waypoint.txt` file. To avoid system instabilities, a waypoint filter is employed to smooth the trajectory.
+the drone starts to follow the trajectory expressed as a sequence of waypoints (```math x_r, y_r, z_r``` and ```math \psi_r```) published at a settled time (```math t_0, t_1, t_3```, etc.), as described in `waypoint.txt` file. To avoid system instabilities, a waypoint filter is employed to smooth the trajectory.
 
 Gazebo Version
 --------------
 
-At a minimum, Gazebo `v2.x` is required (which is installed by default with ROS Indigo). However, it is **recommended to install at least Gazebo `v5.x`** for full functionlity, although the platform is fully compatible with the Gazebo 9. Before running the script, consider the following limitations:
+At a minimum, Gazebo `v2.x` is required (which is installed by default with ROS Indigo). However, it is **recommended to install at least Gazebo `v5.x`** for full functionality, although the platform is fully compatible with the **Gazebo 9**. Before running the script, consider the following limitations:
 
 1. `iris.sdf` can only be generated with Gazebo >= `v3.0`, as it requires use of the `gz sdf ...` tool. If this requirement is not met, you will not be able to use the Iris MAV in any of the simulations.
 2. The Gazebo plugins `GazeboGeotaggedImagesPlugin`, `LidarPlugin` and the `LiftDragPlugin` all require Gazebo >= `v5.0`, and will not be built if this requirement is not met.
-
-ROS Kinetic installs Gazebo 7 by default so it is recommended to remove the previous installation. Proceeded to the installation section if installing for the first time.
-
-```console
-$ sudo apt-get remove ros-kinetic-gazebo*
-$ sudo apt-get upgrade
-```
-
-Install the core of the ROS and rest of the packages can be added manually
-
-```console
-$ sudo apt-get install ros-kinetic-gazebo9-ros-pkgs ros-kinetic-gazebo9-ros-control ros-kinetic-gazebo9* (for Gazebo 9)
-```
 
 Bugs & Feature Requests
 --------------------------
