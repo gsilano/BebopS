@@ -78,7 +78,7 @@ $ source ~/.bashrc
 $ sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
 $ wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
 $ sudo apt update
-$ sudo apt-get install gazebo9
+$ sudo apt-get install gazebo9 gazebo9-*
 ```
 
 Installation Instructions - Ubuntu 16.04 with ROS Kinetic and Gazebo 7
