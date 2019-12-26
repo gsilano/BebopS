@@ -48,11 +48,11 @@ matrix:
     - os: linux
       dist: xenial
       sudo: required
-      env: ROS_DISTRO=kinetic
+      env: ROS_DISTRO=kinetic, OS_DISTRO=xenial
     - os: linux
       dist: bionic
       sudo: required
-      env: ROS_DISTRO=melodic
+      env: ROS_DISTRO=melodic, OS_DISTRO=bionic
 
 language:
   - generic
@@ -100,13 +100,15 @@ install:
   - git clone https://github.com/gsilano/BebopS.git
   - git clone https://github.com/gsilano/rotors_simulator.git
   - git clone https://github.com/gsilano/mav_comm.git
-  - git clone https://github.com/gsilano/med_aerial_challenge_launch.git
   - git clone https://github.com/gsilano/bebop_autonomy.git
   - cd ~/catkin_ws/src/rotors_simulator 
-  - git checkout med18
+  - if [[ "$ROS_DISTRO" == "kinetic" ]]; then git checkout med18; fi
+  - if [[ "$ROS_DISTRO" == "melodic" ]]; then git checkout med18_gazebo9; fi
   - cd ~/catkin_ws/src/mav_comm 
-  - git checkout med18
-  - rosdep update
+  - if [[ "$ROS_DISTRO" == "kinetic" ]]; then git checkout med18; fi
+  - if [[ "$ROS_DISTRO" == "melodic" ]]; then git checkout med18_gazebo9; fi
+  - cd ~/catkin_ws/src/BebopS 
+  - if [[ "$ROS_DISTRO" == "melodic" ]]; then git checkout dev/gazebo9; fi
   - cd ~/catkin_ws
   - rosdep install --from-paths src -i
   - catkin build
