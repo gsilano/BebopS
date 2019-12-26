@@ -2,6 +2,19 @@
 Changelog for package BebopS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.1 (2019-12-26)
+------------------
+* Deleted the README.md file to avoid misunderstanding in the installation procedure.
+* Inserted the default RotorS IMU (ADIS16448 IMU) in the list of the available sensors when running the simulation
+* Disable shadows in Gazebo 9 and added the rotors_interface_plugin. The plugin is necessary for reading the sensors messages
+* Contributors: Giuseppe Silano
+
+0.2.2 (2019-12-26)
+------------------
+Inserted the default RotorS IMU (ADIS16448 IMU) in the list of the available sensors when running the simulation
+Disabled shadows in Gazebo 9
+Contributors: Giuseppe Silano
+
 0.2.1 (2019-04-04)
 ------------------
 * The namespace was modified considering the ROS rules (only lowercase letters)
