@@ -6,6 +6,7 @@ Changelog for package BebopS
 ------------------
 * Updated the README.md file with instructions for Ubuntu 18.04, ROS Melodic Morenia and Gazebo 9
 * Disabled shadows in Gazebo 9
+* TravisCI (.travis.yml file) is now compatible with the Melodic distro of ROS and Ubuntu 18.04
 * Contributors: Giuseppe Silano
 
 0.2.2 (2019-12-26)
