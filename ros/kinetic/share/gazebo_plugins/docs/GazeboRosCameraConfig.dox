@@ -1,0 +1,6 @@
+\subsubsection parameters ROS parameters
+
+Reads and maintains the following parameters on the ROS server
+
+- \b "~imager_rate" : \b [double] Sets the frame rate of the imager. In externally triggered mode this must be more than trig_rate min: 1.0, default: 2.0, max: 50.0
+

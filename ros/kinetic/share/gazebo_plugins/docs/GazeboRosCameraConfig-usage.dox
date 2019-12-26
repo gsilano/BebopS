@@ -1,0 +1,7 @@
+\subsubsection usage Usage
+\verbatim
+<node name="gazebo_ros_camera" pkg="gazebo_plugins" type="gazebo_ros_camera">
+  <param name="imager_rate" type="double" value="2.0" />
+</node>
+\endverbatim
+

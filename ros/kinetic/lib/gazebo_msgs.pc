@@ -1,0 +1,8 @@
+prefix=/home/giuseppe/catkin_ws_make/devel
+
+Name: gazebo_msgs
+Description: Description of gazebo_msgs
+Version: 2.5.19
+Cflags: -I/home/giuseppe/catkin_ws_make/devel/include
+Libs: -L/home/giuseppe/catkin_ws_make/devel/lib 
+Requires: message_runtime std_msgs trajectory_msgs geometry_msgs sensor_msgs std_srvs

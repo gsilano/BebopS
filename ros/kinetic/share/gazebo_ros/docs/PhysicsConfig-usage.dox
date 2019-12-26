@@ -1,0 +1,21 @@
+\subsubsection usage Usage
+\verbatim
+<node name="physics_node" pkg="gazebo_ros" type="physics_node">
+  <param name="time_step" type="double" value="0.001" />
+  <param name="max_update_rate" type="double" value="60.0" />
+  <param name="gravity_x" type="double" value="0.0" />
+  <param name="gravity_y" type="double" value="0.0" />
+  <param name="gravity_z" type="double" value="-9.8" />
+  <param name="auto_disable_bodies" type="bool" value="False" />
+  <param name="sor_pgs_precon_iters" type="int" value="0" />
+  <param name="sor_pgs_iters" type="int" value="20" />
+  <param name="sor_pgs_w" type="double" value="1.3" />
+  <param name="sor_pgs_rms_error_tol" type="double" value="-1.0" />
+  <param name="cfm" type="double" value="0.0" />
+  <param name="erp" type="double" value="0.2" />
+  <param name="contact_surface_layer" type="double" value="0.001" />
+  <param name="contact_max_correcting_vel" type="double" value="100.0" />
+  <param name="max_contacts" type="int" value="100" />
+</node>
+\endverbatim
+

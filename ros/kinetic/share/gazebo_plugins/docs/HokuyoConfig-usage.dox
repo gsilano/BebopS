@@ -1,0 +1,16 @@
+\subsubsection usage Usage
+\verbatim
+<node name="hokuyo_node" pkg="gazebo_plugins" type="hokuyo_node">
+  <param name="min_ang" type="double" value="-1.57079632679" />
+  <param name="max_ang" type="double" value="1.57079632679" />
+  <param name="intensity" type="bool" value="False" />
+  <param name="cluster" type="int" value="1" />
+  <param name="skip" type="int" value="0" />
+  <param name="port" type="str" value="/dev/ttyACM0" />
+  <param name="calibrate_time" type="bool" value="True" />
+  <param name="frame_id" type="str" value="laser" />
+  <param name="time_offset" type="double" value="0.0" />
+  <param name="allow_unsafe_settings" type="bool" value="False" />
+</node>
+\endverbatim
+

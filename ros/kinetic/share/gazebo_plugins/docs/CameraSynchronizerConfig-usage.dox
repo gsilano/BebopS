@@ -1,0 +1,20 @@
+\subsubsection usage Usage
+\verbatim
+<node name="camera_synchronizer" pkg="gazebo_plugins" type="camera_synchronizer">
+  <param name="projector_rate" type="double" value="60.0" />
+  <param name="projector_pulse_length" type="double" value="0.002" />
+  <param name="projector_pulse_shift" type="double" value="0.0" />
+  <param name="projector_mode" type="int" value="2" />
+  <param name="prosilica_projector_inhibit" type="bool" value="False" />
+  <param name="stereo_rate" type="double" value="30.0" />
+  <param name="wide_stereo_trig_mode" type="int" value="4" />
+  <param name="narrow_stereo_trig_mode" type="int" value="4" />
+  <param name="forearm_r_rate" type="double" value="30.0" />
+  <param name="forearm_r_trig_mode" type="int" value="1" />
+  <param name="forearm_l_rate" type="double" value="30.0" />
+  <param name="forearm_l_trig_mode" type="int" value="1" />
+  <param name="projector_tweak" type="double" value="0.0" />
+  <param name="camera_reset" type="bool" value="False" />
+</node>
+\endverbatim
+

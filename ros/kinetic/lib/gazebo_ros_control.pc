@@ -1,0 +1,8 @@
+prefix=/home/giuseppe/catkin_ws_make/devel
+
+Name: gazebo_ros_control
+Description: Description of gazebo_ros_control
+Version: 2.5.19
+Cflags: -I/home/giuseppe/catkin_ws_make/src/gazebo_ros_pkgs/gazebo_ros_control/include
+Libs: -L/home/giuseppe/catkin_ws_make/devel/lib -lgazebo_ros_control -ldefault_robot_hw_sim
+Requires: roscpp std_msgs controller_manager control_toolbox pluginlib hardware_interface transmission_interface joint_limits_interface urdf angles

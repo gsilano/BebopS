@@ -1,0 +1,8 @@
+prefix=/home/giuseppe/catkin_ws_make/devel
+
+Name: gazebo_dev
+Description: Description of gazebo_dev
+Version: 2.5.19
+Cflags: 
+Libs: -L/home/giuseppe/catkin_ws_make/devel/lib 
+Requires: 

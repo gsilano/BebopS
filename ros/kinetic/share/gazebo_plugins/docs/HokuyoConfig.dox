@@ -1,0 +1,15 @@
+\subsubsection parameters ROS parameters
+
+Reads and maintains the following parameters on the ROS server
+
+- \b "~min_ang" : \b [double] The angle of the first range measurement. The unit depends on ~ang_radians. min: -3.14159265359, default: -1.57079632679, max: 3.14159265359
+- \b "~max_ang" : \b [double] The angle of the first range measurement. The unit depends on ~ang_radians. min: -3.14159265359, default: 1.57079632679, max: 3.14159265359
+- \b "~intensity" : \b [bool] Whether or not the hokuyo returns intensity values. min: False, default: False, max: True
+- \b "~cluster" : \b [int] The number of adjacent range measurements to cluster into a single reading min: 0, default: 1, max: 99
+- \b "~skip" : \b [int] The number of scans to skip between each measured scan min: 0, default: 0, max: 9
+- \b "~port" : \b [str] The serial port where the hokuyo device can be found min: , default: /dev/ttyACM0, max: 
+- \b "~calibrate_time" : \b [bool] Whether the node should calibrate the hokuyo's time offset min: False, default: True, max: True
+- \b "~frame_id" : \b [str] The frame in which laser scans will be returned min: , default: laser, max: 
+- \b "~time_offset" : \b [double] An offet to add to the timestamp before publication of a scan min: -0.25, default: 0.0, max: 0.25
+- \b "~allow_unsafe_settings" : \b [bool] Turn this on if you wish to use the UTM-30LX with an unsafe angular range. Turning this option on may cause occasional crashes or bad data. This option is a tempory workaround that will hopefully be removed in an upcoming driver version. min: False, default: False, max: True
+

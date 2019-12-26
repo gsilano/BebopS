@@ -1,0 +1,8 @@
+prefix=/home/giuseppe/catkin_ws_make/devel
+
+Name: gazebo_ros
+Description: Description of gazebo_ros
+Version: 2.5.19
+Cflags: -I/home/giuseppe/catkin_ws_make/devel/include -I/usr/include
+Libs: -L/home/giuseppe/catkin_ws_make/devel/lib -lgazebo_ros_api_plugin -lgazebo_ros_paths_plugin /usr/lib/x86_64-linux-gnu/libtinyxml.so
+Requires: roslib roscpp geometry_msgs std_srvs tf rosgraph_msgs dynamic_reconfigure std_msgs gazebo_msgs

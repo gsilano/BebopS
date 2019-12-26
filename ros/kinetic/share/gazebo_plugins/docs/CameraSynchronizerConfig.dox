@@ -1,0 +1,19 @@
+\subsubsection parameters ROS parameters
+
+Reads and maintains the following parameters on the ROS server
+
+- \b "~projector_rate" : \b [double] Projector pulse frequency in Hz. min: 40.0, default: 60.0, max: 120.0
+- \b "~projector_pulse_length" : \b [double] Length of the projector pulses in s. At high currents the hardware may limit the pulse length. min: 0.001, default: 0.002, max: 0.002
+- \b "~projector_pulse_shift" : \b [double] How far off-center the intermediate projector pulses are. Zero is on-center, one is touching the following pulse. min: 0.0, default: 0.0, max: 1.0
+- \b "~projector_mode" : \b [int] Indicates whether the projector should be off, on when in use or on all the time. min: 1, default: 2, max: 3
+- \b "~prosilica_projector_inhibit" : \b [bool] Indicates if the projector should turn off when the prosilica camera is exposing. min: False, default: False, max: True
+- \b "~stereo_rate" : \b [double] Indicates the frame rate for both stereo cameras in Hz. (Gets rounded to suitable divisors of projector_rate.) min: 1.0, default: 30.0, max: 60.0
+- \b "~wide_stereo_trig_mode" : \b [int] Indicates the triggering mode of the wide stereo camera. min: 2, default: 4, max: 4
+- \b "~narrow_stereo_trig_mode" : \b [int] Indicates the triggering mode of the narrow stereo camera. min: 2, default: 4, max: 5
+- \b "~forearm_r_rate" : \b [double] Indicates the frame rate for the right forearm camera in Hz. (Gets rounded to suitable divisors of projector_rate.) min: 1.0, default: 30.0, max: 60.0
+- \b "~forearm_r_trig_mode" : \b [int] Indicates the triggering mode of the right forearm camera. min: 1, default: 1, max: 4
+- \b "~forearm_l_rate" : \b [double] Indicates the frame rate for the left forearm camera in Hz. (Gets rounded to suitable divisors of projector_rate.) min: 1.0, default: 30.0, max: 60.0
+- \b "~forearm_l_trig_mode" : \b [int] Indicates the triggering mode of the left forearm camera. min: 1, default: 1, max: 4
+- \b "~projector_tweak" : \b [double] Adds a time shift in seconds to the projector timing. Useful for debugging but not in normal use. min: -0.1, default: 0.0, max: 0.1
+- \b "~camera_reset" : \b [bool] Does a hard reset of all the cameras using a long pulse on the trigger line. This parameter resets itself to false after 3 to 4 seconds. min: False, default: False, max: True
+
