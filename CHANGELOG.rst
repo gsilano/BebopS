@@ -4,7 +4,8 @@ Changelog for package BebopS
 
 2.0.1 (2019-12-26)
 ------------------
-* Deleted the README.md file to avoid misunderstanding in the installation procedure.
+* Updated the README.md file with instructions for Ubuntu 18.04, ROS Melodic Morenia and Gazebo 9 (master)
+* Deleted the README.md file to avoid misunderstanding in the installation procedure (dev/gazebo9 branch)
 * Inserted the default RotorS IMU (ADIS16448 IMU) in the list of the available sensors when running the simulation
 * Disable shadows in Gazebo 9 and added the rotors_interface_plugin. The plugin is necessary for reading the sensors messages
 * Deleted TravisCI (.travisci.yml) file. Only one file is present in the master. The file handles all the distro. 
