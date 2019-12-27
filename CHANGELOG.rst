@@ -2,6 +2,11 @@
 Changelog for package BebopS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.0.1 (2019-12-27)
+------------------
+* Updated the README.md file with instructions for Ubuntu 16.04, ROS Kinetic Kame and Gazebo 9 (master)
+* Contributors: Giuseppe Silano
+
 2.0.1 (2019-12-26)
 ------------------
 * Updated the README.md file with instructions for Ubuntu 18.04, ROS Melodic Morenia and Gazebo 9 (master)
