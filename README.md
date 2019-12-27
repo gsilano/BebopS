@@ -31,7 +31,7 @@ To use the code developed and stored in this repository some preliminary actions
 
 ```console
 $ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
-$sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+$ sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
 $ sudo apt update
 $ sudo apt install ros-melodic-desktop-fulll ros-melodic-joy ros-melodic-octomap-ros ros-melodic-mavlink
 $ sudo apt install python-wstool python-catkin-tools protobuf-compiler libgoogle-glog-dev ros-melodic-control-toolbox
@@ -88,7 +88,7 @@ To use the code developed and stored in this repository some preliminary actions
 
  1. Install and initialize ROS Kinetic desktop full, additional ROS packages, catkin-tools, and wstool:
 
- ```console
+```console
 $ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" > /etc/apt/sources.list.d/ros-latest.list'
 $ wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
 $ sudo apt-get update
@@ -99,11 +99,11 @@ $ rosdep update
 $ echo "source /opt/ros/kinetic/setup.bash" >> ~/.bashrc
 $ source ~/.bashrc
 $ sudo apt-get install python-rosinstall python-rosinstall-generator build-essential
- ```
+```
 
  2. If you don't have ROS workspace yet you can do so by
 
- ```console
+```console
 $ mkdir -p ~/catkin_ws/src
 $ cd ~/catkin_ws/src
 $ catkin_init_workspace  # initialize your catkin workspace
@@ -114,7 +114,7 @@ $ git clone -b med18 https://github.com/gsilano/rotors_simulator.git
 $ git clone -b med18 https://github.com/gsilano/mav_comm
 $ git clone https://github.com/gsilano/BebopS.git
 $ git clone https://github.com/AutonomyLab/bebop_autonomy.git
- ```
+```
 
  3. Build your workspace with `python_catkin_tools` (therefore you need `python_catkin_tools`)
 
@@ -135,9 +135,9 @@ Basic Usage
 
 Launching the simulation is quite simple, so as customizing it: it is enough to run in a terminal the command
 
-   ```console
-   $ roslaunch bebop_simulator bebop_without_controller.launch
-   ```
+```console
+$ roslaunch bebop_simulator bebop_without_controller.launch
+```
 
 > **Note** The first run of gazebo might take considerably long, as it will download some models from an on-line database. To avoid any problems when starting the simulation for the first time, you may run the `gazebo` command in the terminal line.
 
@@ -162,7 +162,7 @@ To speed up the simulation, a certain set of sensors can be included when simula
 
 These value can be modified before simulating the drone behavior acting on the launch file or at runtime by running on the terminal:
 
- ```console
+```console
 $ roslaunch bebop_simulator bebop_without_controller.launch enable_odometry_sensor_with_noise:=true
 ```
 
