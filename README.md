@@ -53,7 +53,7 @@ $ catkin init
 $ cd ~/catkin_ws/src
 $ git clone -b med18_gazebo9 https://github.com/gsilano/rotors_simulator.git
 $ git clone -b med18_gazebo9 https://github.com/gsilano/mav_comm
-$ git clone -b gazebo9 https://github.com/gsilano/BebopS.git
+$ git clone -b dev/gazebo9 https://github.com/gsilano/BebopS.git
 $ git clone https://github.com/AutonomyLab/bebop_autonomy.git
 $ cd ~/catkin_ws
 ```
