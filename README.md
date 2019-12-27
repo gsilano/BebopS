@@ -53,7 +53,7 @@ $ catkin init
 $ cd ~/catkin_ws/src
 $ git clone -b med18_gazebo9 https://github.com/gsilano/rotors_simulator.git
 $ git clone -b med18_gazebo9 https://github.com/gsilano/mav_comm
-$ git clone -b gazebo9 https://github.com/gsilano/BebopS.git
+$ git clone -b dev/gazebo9 https://github.com/gsilano/BebopS.git
 $ git clone https://github.com/AutonomyLab/bebop_autonomy.git
 $ cd ~/catkin_ws
 ```
@@ -134,11 +134,49 @@ Installation Instructions - Ubuntu 16.04 with ROS Kinetic and Gazebo 9
 ---------------------------------------------------------
 To use the code developed and stored in this repository with ROS Kinetic and Gazebo 9, first follow what is reported in the previous section. Then, use the instruction below.
 
- 1. Remove Gazebo 7 and all related packages, then install Gazebo 9:
+ 1. Remove Gazebo 7 and all related packages, and then install Gazebo 9:
 
 ```console
-$ sudo apt-get remove ros-kinetic-gazebo*
-$ sudo apt-get install ros-kinetic-gazebo9-ros-pkgs ros-kinetic-gazebo9-ros-control ros-kinetic-gazebo9*
+$ sudo apt-get remove ros-kinetic-gazebo* gazebo*
+$ sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
+$ wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add -
+$ sudo apt-get update
+$ sudo apt-get install gazebo9 gazebo9-* ros-kinetic-gazebo9-*
+$ sudo apt upgrade
+```
+
+ 2. Additional packages are required to build the package.
+
+```console
+$ sudo apt-get install libeigen3-dev ros-kinetic-image-view ros-kinetic-parrot-arsdk libprotobuf-dev libprotoc-dev ros-kinetic-joy-teleop ros-kinetic-nav-msgs ros-kinetic-mav-msgs libyaml-cpp-dev ros-kinetic-nodelet ros-kinetic-mav-planning-msgs ros-kinetic-urdf ros-kinetic-image-transport ros-kinetic-roslint ros-kinetic-angles ros-kinetic-cv-bridge ros-kinetic-tf2-geometry-msgs ros-kinetic-xacro ffmpeg libavcodec-dev libavformat-dev libavutil-dev libswscale-dev ros-kinetic-camera-info-manager ros-kinetic-cmake-modules ros-kinetic-gazebo-msgs ros-kinetic-mavros-msgs ros-kinetic-control-toolbox ros-kinetic-mav-msgs ros-kinetic-libmavconn ros-kinetic-mavros ros-kinetic-octomap-msgs ros-kinetic-geographic-msgs ros-kinetic-mavlink ros-kinetic-mavros-extras ros-kinetic-mav-planning-msgs ros-kinetic-joy
+```
+> **Note** Missing packages can be found and then installed by using the command `rosdep check --from-paths src` into the `catkin_ws` folder.
+
+ 3. Make Gazebo 9 compatible with ROS Kinetic Kame
+
+```console
+$ cd ~
+$ mkdir -p ros-kinetic-gazebo9-pkgs
+$ cd ros-kinetic-gazebo9-pkgs
+$ git clone -b feature/ros-kinetic-gazebo9-pkgs https://github.com/gsilano/BebopS.git
+$ chmod 777 gazebo9.sh
+$ ./gazebo9.sh
+```
+
+4. Clean the workspace and compile again the code
+
+```console
+$ cd ~/catkin_ws
+$ catkin clean # digit y when required
+$ cd ~/catkin_ws/src/rotors_simulator
+$ git checkout med18_gazebo9
+$ cd ~/catkin_ws/src/mav_comm
+$ git checkout med18_gazebo9
+$ cd ~/catkin_ws/src/BebopS
+$ git checkout dev/gazebo9
+$ cd ~/catkin_ws
+$ catkin build
+$ source ~/.bashrc
 ```
 
 Basic Usage
