@@ -179,6 +179,8 @@ $ catkin build
 $ source ~/.bashrc
 ```
 
+This guide can be used a basis for fixing what has been discussed in [ethz-asl/rotors_simulator#506](https://github.com/ethz-asl/rotors_simulator/pull/506).
+
 Basic Usage
 ---------------------------------------------------------
 
