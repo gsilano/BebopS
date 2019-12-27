@@ -8,7 +8,8 @@ Changelog for package BebopS
 * Deleted the README.md file to avoid misunderstanding in the installation procedure (dev/gazebo9 branch)
 * Inserted the default RotorS IMU (ADIS16448 IMU) in the list of the available sensors when running the simulation
 * Disable shadows in Gazebo 9 and added the rotors_interface_plugin. The plugin is necessary for reading the sensors messages
-* Deleted TravisCI (.travisci.yml) file. Only one file is present in the master. The file handles all the distro. * Contributors: Giuseppe Silano
+* Deleted TravisCI (.travisci.yml) file. Only one file is present in the master. The file handles all the distro.
+* Contributors: Giuseppe Silano
 
 0.2.2 (2019-12-26)
 ------------------
@@ -51,7 +52,7 @@ Changelog for package BebopS
 * Added the Kalman filter
 * Added plots in the launch file to monitor the position and linear velocity errors between the Kalman filter output and the odometry ground truth values. In order to develop such functionality, the teamsannio messages have been created.
 * A yaml file needed to set up the Kalman filter has been created. Such file contains the tuning matrix of the filter and the standard deviations that characterize the odometry virtual sensor.
-* The Kalman filter works with the noisy attitude (standard deviation 0.017). This function considers the nonideality of the attitude filter onboard the quadrotor.   
+* The Kalman filter works with the noisy attitude (standard deviation 0.017). This function considers the nonideality of the attitude filter onboard the quadrotor.
 * Contributors: Pasquale Oppido, Giuseppe Silano, Luigi Iannelli
 
 0.1.3 (2018-05-25)
@@ -77,4 +78,3 @@ Changelog for package BebopS
 ------------------
 * Initial Ubuntu package release
 * Contributors: Giuseppe Silano, Pasquale Oppido, Luigi Iannelli
-
