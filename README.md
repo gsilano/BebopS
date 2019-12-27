@@ -130,14 +130,25 @@ $ echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
 $ source ~/.bashrc
 ```
 
+Installation Instructions - Ubuntu 16.04 with ROS Kinetic and Gazebo 9
+---------------------------------------------------------
+To use the code developed and stored in this repository with ROS Kinetic and Gazebo 9, first follow what is reported in the previous section. Then, use the instruction below.
+
+ 1. Remove Gazebo 7 and all related packages, then install Gazebo 9:
+
+```console
+$ sudo apt-get remove ros-kinetic-gazebo*
+$ sudo apt-get install ros-kinetic-gazebo9-ros-pkgs ros-kinetic-gazebo9-ros-control ros-kinetic-gazebo9*
+```
+
 Basic Usage
 ---------------------------------------------------------
 
-Launching the simulation is quite simple, so as customizing it: it is enough to run in a terminal the command
+Running the simulation is quite simple, so as customizing it: it is enough to run in a terminal the command
 
-   ```console
-   $ roslaunch bebop_simulator bebop_without_controller.launch
-   ```
+```console
+$ roslaunch bebop_simulator bebop_without_controller.launch
+```
 
 > **Note** The first run of gazebo might take considerably long, as it will download some models from an on-line database. To avoid any problems when starting the simulation for the first time, you may run the `gazebo` command in the terminal line.
 
