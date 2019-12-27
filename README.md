@@ -180,7 +180,7 @@ the Parrot Bebop takes off from the ground and keeps indefinitely the hovering p
 $ roslaunch bebop_simulator task2_world.launch
 ```
 
-the drone starts to follow the trajectory expressed as a sequence of waypoints (```math x_r, y_r, z_r``` and ```math \psi_r```) published at a settled time (```math t_0, t_1, t_3```, etc.), as described in `waypoint.txt` file. To avoid system instabilities, a waypoint filter is employed to smooth the trajectory.
+the drone starts to follow the trajectory expressed as a sequence of waypoints (`x_r, y_r, z_r` and `\psi_r`) published at a settled time (`t_0, t_1, t_3`, etc.), as described in `waypoint.txt` file. To avoid system instabilities, a waypoint filter is employed to smooth the trajectory.
 
 Gazebo Version
 --------------
