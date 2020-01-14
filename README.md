@@ -163,6 +163,7 @@ $ git clone -b feature/ros-kinetic-gazebo9-pkgs https://github.com/gsilano/Bebop
 $ cd BebopS
 $ chmod 777 gazebo9.sh
 $ ./gazebo9.sh
+$ cd ~
 $ sudo rm -rf ros-kinetic-gazebo9-pkgs # delete the folder after the installation
 ```
 
