@@ -70,7 +70,6 @@ int main(int argc, char** argv){
   const float DEG_2_RAD = M_PI / 180.0;
 
   std::ifstream wp_file(args.at(1).c_str());
-
   if (wp_file.is_open()) {
     double t, x, y, z, yaw;
     // Only read complete waypoints.
@@ -112,12 +111,18 @@ int main(int argc, char** argv){
 
   ROS_INFO("Start publishing waypoints.");
 
-  for (size_t i = 0; i < waypoints.size(); ++i) {
-
+  int count = 0;
+  int wTime = 0.01;
+  int totalDuration = 100000;
+  float zPos = 1.0;
+  for (size_t i = 0; i < totalDuration; ++i) {
+        count++;
         trajectory_msgs::MultiDOFJointTrajectory trajectory_msg;
         trajectory_msg.header.stamp = ros::Time::now();
-        Eigen::Vector3d desired_position(waypoints[i].position.x(), waypoints[i].position.y(), waypoints[i].position.z());
-        double desired_yaw = waypoints[i].yaw;
+        float xPos = sin(0.1*count);
+        float yPos = cos(0.1*count);
+        Eigen::Vector3d desired_position(xPos, yPos, zPos);
+        double desired_yaw = 0.0;
         mav_msgs::msgMultiDofJointTrajectoryFromPositionYaw(desired_position, desired_yaw, &trajectory_msg);
 
         ROS_INFO("Publishing waypoint on namespace %s: [%f, %f, %f].",       
@@ -128,7 +133,7 @@ int main(int argc, char** argv){
         trajectory_pub.publish(trajectory_msg);
 
          // Wait for t seconds to let the Gazebo GUI show up.
-         double t = waypoints[i].waiting_time;
+         double t = wTime;
          ros::Duration(t).sleep();
 
   }
