@@ -1,33 +1,34 @@
 <?xml version="1.0"?>
 
 <launch>
-    <arg name="name" default="bebop"/>
-    <arg name="plotName" default="bebopPlots"/>
-    <arg name="x" default="0.0" />
-    <arg name="y" default="0.0" />
-    <arg name="z" default="0.0" />
-    <arg name="use_sim_time" default="true"/>
-    <arg name="world_name" default="basic"/>
-    <arg name="wind_force" default="0.25"/>
-    <arg name="wind_start" default="5.0"/>
-    <arg name="wind_duration" default="40.0"/>
-    <arg name="wind_direction_x" default="1.0"/>
-    <arg name="wind_direction_y" default="0.0"/>
-    <arg name="wind_direction_z" default="0.0"/>
-    <arg name="csvFilesStoring" default="false"/>
-    <arg name="csvFilesStoringTime" default="60.0"/> <!-- seconds -->
-    <arg name="user_account" default="giuseppe"/> <!-- account name of your pc -->
-    <arg name="waypoint_filter" default="true"/>
-    <arg name="EKFActive" default="false"/>
-    <arg name="enable_odometry_sensor_with_noise" default="false"/>
-    <arg name="disable_odometry_sensor_with_noise" default="true"/>
-    <arg name="enable_ground_truth_sensor" default="false"/>
-    <arg name="enable_wind_plugin" default="false"/>
-    <arg name="enable_laser1D" default="false"/>
-    <arg name="enable_plots" default="false"/>
-    <arg name="enable_imu" default="true"/>
+  <arg name="name" default="bebop"/>
+  <arg name="plotName" default="bebopPlots"/>
+  <arg name="x" default="0.0" />
+  <arg name="y" default="0.0" />
+  <arg name="z" default="0.0" />
+  <arg name="use_sim_time" default="true"/>
+  <arg name="world_name" default="basic"/>
+  <arg name="wind_force" default="0.25"/>
+  <arg name="wind_start" default="5.0"/>
+  <arg name="wind_duration" default="40.0"/>
+  <arg name="wind_direction_x" default="1.0"/>
+  <arg name="wind_direction_y" default="0.0"/>
+  <arg name="wind_direction_z" default="0.0"/>
+  <arg name="csvFilesStoring" default="false"/>
+  <arg name="csvFilesStoringTime" default="60.0"/> <!-- seconds -->
+  <arg name="user_account" default="giuseppe"/> <!-- account name of your pc -->
+  <arg name="waypoint_filter" default="true"/>
+  <arg name="EKFActive" default="false"/>
+  <arg name="enable_odometry_sensor_with_noise" default="false"/>
+  <arg name="disable_odometry_sensor_with_noise" default="true"/>
+  <arg name="enable_ground_truth_sensor" default="false"/>
+  <arg name="enable_wind_plugin" default="false"/>
+  <arg name="enable_laser1D" default="false"/>
+  <arg name="enable_plots" default="false"/>
+  <arg name="enable_imu" default="true"/>
+  <arg name="spline_generator" default="false"/>
 
-    
+
   <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find bebop_simulator)/models"/>
   <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find bebop_simulator)/models"/>
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -58,11 +59,12 @@
     </include>
 
     <!-- Launch the controller  -->
-    <node name="position_controller_node" pkg="bebop_simulator" type="position_controller_node" output="screen"> 
+    <node name="position_controller_node" pkg="bebop_simulator" type="position_controller_node" output="screen">
       <rosparam command="load" file="$(find bebop_simulator)/resource/controller_bebop.yaml" />
       <rosparam command="load" file="$(find bebop_simulator)/resource/bebop.yaml" />
       <rosparam command="load" file="$(find bebop_simulator)/resource/EKF_matrix.yaml" />
       <rosparam command="load" file="$(find bebop_simulator)/resource/waypoint_filter.yaml" />
+      <param name="spline_generator" value="$(arg spline_generator)" />
       <param name="use_sim_time" value="$(arg use_sim_time)" />
       <param name="csvFilesStoring" value="$(arg csvFilesStoring)"/>
       <param name="csvFilesStoringTime" value="$(arg csvFilesStoringTime)"/>
@@ -85,7 +87,7 @@
 
     <!-- Launch the trajectory generator -->
    <group ns="$(arg name)">
-       <node name="waypoint_example" pkg="bebop_simulator" type="waypoint_example" output="screen" args="$(find bebop_simulator)/resource/waypoints.txt"/>   
+       <node name="waypoint_example" pkg="bebop_simulator" type="waypoint_example" output="screen" args="$(find bebop_simulator)/resource/waypoints.txt"/>
     </group>
 
     <!-- Launch the trajectory plot -->
@@ -118,7 +120,7 @@
     <!-- Launch the state errors plot -->
     <node name="state_errors_position_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/stateErrors/pose/pose/position" output="screen" />
     <node name="state_errors_velocity_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/stateErrors/twist/twist/linear" output="screen" />
-    
+
     <!-- Launch the position and velocity errors plot -->
     <node name="position_errors_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/positionAndVelocityErrors/pose/pose/position" output="screen" />
     <node name="velocity_errors_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/positionAndVelocityErrors/twist/twist/linear" output="screen" />

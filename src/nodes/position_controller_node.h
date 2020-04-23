@@ -26,6 +26,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <mav_msgs/Actuators.h>
 #include <mav_msgs/AttitudeThrust.h>
+#include <mav_msgs/DroneState.h>
 #include <mav_msgs/eigen_mav_msgs.h>
 #include <nav_msgs/Odometry.h>
 #include <ros/callback_queue.h>
@@ -43,7 +44,7 @@ namespace bebop_simulator {
         public:
             PositionControllerNode();
             ~PositionControllerNode();
-             
+
             void InitializeParams();
             void Publish();
 
@@ -74,6 +75,7 @@ namespace bebop_simulator {
             nav_msgs::Odometry odometry_gt_;
 
             void MultiDofJointTrajectoryCallback(const trajectory_msgs::MultiDOFJointTrajectoryConstPtr& trajectory_reference_msg);
+            void MultiDofJointTrajectorySplineCallback(const mav_msgs::DroneState& drone_state_msg);
             void OdometryGTCallback(const nav_msgs::OdometryConstPtr& odometry_msg_gt);
             void OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg);
 

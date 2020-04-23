@@ -62,10 +62,10 @@ class PositionControllerParameters {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   PositionControllerParameters()
-      : beta_xy_(kPDefaultXYController), 
-        beta_z_(kPDefaultAltitudeController), 
-        beta_phi_(kPDefaultRollController), 
-        beta_theta_(kPDefaultPitchController),  
+      : beta_xy_(kPDefaultXYController),
+        beta_z_(kPDefaultAltitudeController),
+        beta_phi_(kPDefaultRollController),
+        beta_theta_(kPDefaultPitchController),
         beta_psi_(kPDefaultYawRateController),
         mu_xy_(MuDefaultXYController),
         mu_z_(MuDefaultAltitudeController),
@@ -88,10 +88,10 @@ class PositionControllerParameters {
   double mu_phi_;
   double mu_theta_;
   double mu_psi_;
-  
+
   Eigen::Vector3d U_q_;
 };
-    
+
     class PositionController{
         public:
             PositionController();
@@ -112,7 +112,8 @@ class PositionControllerParameters {
             void GetVelocityAlongZComponents(nav_msgs::Odometry* zVelocity_components);
             void GetPositionAndVelocityErrors(nav_msgs::Odometry* positionAndVelocityErrors);
             void GetAngularAndAngularVelocityErrors(nav_msgs::Odometry* angularAndAngularVelocityErrors);
-            
+            void SetTrajectoryPointSpline(const mav_msgs::EigenDroneState& command_trajectory);
+
             PositionControllerParameters controller_parameters_;
             ExtendedKalmanFilter extended_kalman_filter_bebop_;
             VehicleParameters vehicle_parameters_;
@@ -159,11 +160,11 @@ class PositionControllerParameters {
             std::vector<string> listDroneAngularVelocitiesABC_;
             std::vector<string> listDroneTrajectoryReference_;
             std::vector<string> listControlMixerTermsSaturated_;
-	        std::vector<string> listControlMixerTermsUnsaturated_;
-	        std::vector<string> listDroneLinearVelocitiesABC_;
-	        std::vector<string> listDronePosition_;
+  	        std::vector<string> listControlMixerTermsUnsaturated_;
+  	        std::vector<string> listDroneLinearVelocitiesABC_;
+  	        std::vector<string> listDronePosition_;
             std::vector<string> listControlMixerTermsUnSaturatedBefore_;
-          
+
             //Controller gains
             double beta_x_, beta_y_, beta_z_;
             double beta_phi_, beta_theta_, beta_psi_;
@@ -173,33 +174,37 @@ class PositionControllerParameters {
 
             double mu_x_, mu_y_, mu_z_;
             double mu_phi_, mu_theta_, mu_psi_;
-			
-	        double lambda_x_, lambda_y_, lambda_z_;
-	        double K_x_1_, K_x_2_;
-	        double K_y_1_, K_y_2_;
-	        double K_z_1_, K_z_2_;
+
+  	        double lambda_x_, lambda_y_, lambda_z_;
+  	        double K_x_1_, K_x_2_;
+  	        double K_y_1_, K_y_2_;
+  	        double K_z_1_, K_z_2_;
 
             //Position and linear velocity errors
             double e_x_;
             double e_y_;
             double e_z_;
             double dot_e_x_;
-            double dot_e_y_; 
+            double dot_e_y_;
             double dot_e_z_;
- 
+
             //Attitude and angular velocity errors
             double e_phi_;
             double e_theta_;
             double e_psi_;
             double dot_e_phi_;
-            double dot_e_theta_; 
+            double dot_e_theta_;
             double dot_e_psi_;
 
             //Vehicle parameters
             double bf_, m_, g_;
             double l_, bm_;
             double Ix_, Iy_, Iz_;
-            
+
+            // check if the spline generator works
+            bool spline_generator_;
+            mav_msgs::EigenDroneState command_trajectory_spline_;
+
             ros::NodeHandle n1_;
             ros::NodeHandle n2_;
             ros::NodeHandle n3_;
@@ -214,7 +219,7 @@ class PositionControllerParameters {
 
             nav_msgs::Odometry odometry_filtered_private_;
 
-	        state_t state_;
+  	        state_t state_;
             control_t control_;
             mav_msgs::EigenTrajectoryPoint command_trajectory_;
             EigenOdometry odometry_;
@@ -227,6 +232,7 @@ class PositionControllerParameters {
             void PosController(double* u_T, double* phi_r, double* theta_r, double* u_x, double* u_y, double* u_z, double* u_Terr);
             void PositionErrors(double* e_x, double* e_y, double* e_z);
             void VelocityErrors(double* dot_e_x, double* dot_e_y, double* dot_e_z);
+            void Quaternion2EulerCommandTrajectory(double* roll, double* pitch, double* yaw) const;
 
     };
 

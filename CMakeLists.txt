@@ -21,8 +21,9 @@ find_package(
 catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
   LIBRARIES position_controller extendedKalmanFilter position_controller_with_bebop waypoint_filter
+    spline_trajectory_generator
   CATKIN_DEPENDS geometry_msgs mav_msgs nav_msgs roscpp sensor_msgs std_msgs
-  DEPENDS Eigen 
+  DEPENDS Eigen
 )
 
 
@@ -40,6 +41,10 @@ add_library(position_controller_with_bebop
    src/library/position_controller_with_bebop.cpp
 )
 
+add_library(spline_trajectory_generator
+   src/library/spline_trajectory_generator.cpp
+)
+
 add_library(extendedKalmanFilter
    src/library/extendedKalmanFilter.cpp
 )
@@ -50,6 +55,9 @@ add_library(waypoint_filter
 
 target_link_libraries(position_controller ${catkin_LIBRARIES})
 add_dependencies(position_controller ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(spline_trajectory_generator ${catkin_LIBRARIES})
+add_dependencies(spline_trajectory_generator ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(position_controller_with_bebop ${catkin_LIBRARIES})
 add_dependencies(position_controller_with_bebop ${catkin_EXPORTED_TARGETS})
@@ -62,17 +70,21 @@ add_dependencies(waypoint_filter ${catkin_EXPORTED_TARGETS})
 
 add_executable(position_controller_node src/nodes/position_controller_node.cpp)
 add_dependencies(position_controller_node ${catkin_EXPORTED_TARGETS})
-target_link_libraries(position_controller_node
+target_link_libraries(position_controller_node spline_trajectory_generator
   position_controller extendedKalmanFilter waypoint_filter ${catkin_LIBRARIES})
 
 add_executable(position_controller_with_bebop_node src/nodes/position_controller_with_bebop_node.cpp)
 add_dependencies(position_controller_with_bebop_node ${catkin_EXPORTED_TARGETS})
-target_link_libraries(position_controller_with_bebop_node
+target_link_libraries(position_controller_with_bebop_node spline_trajectory_generator
   position_controller_with_bebop extendedKalmanFilter waypoint_filter  ${catkin_LIBRARIES})
 
 add_executable(hovering_example src/nodes/hovering_example.cpp)
 target_link_libraries(hovering_example ${catkin_LIBRARIES})
 add_dependencies(hovering_example ${catkin_EXPORTED_TARGETS})
+
+add_executable(hovering_example_spline src/nodes/hovering_example_spline.cpp)
+target_link_libraries(hovering_example_spline ${catkin_LIBRARIES})
+add_dependencies(hovering_example_spline spline_trajectory_generator ${catkin_EXPORTED_TARGETS})
 
 add_executable(waypoint_example src/nodes/waypoint_example.cpp)
 target_link_libraries(waypoint_example ${catkin_LIBRARIES})
@@ -83,10 +95,12 @@ target_link_libraries(quaternion_to_rpy ${catkin_LIBRARIES})
 add_dependencies(quaternion_to_rpy ${catkin_EXPORTED_TARGETS})
 
 install(TARGETS position_controller extendedKalmanFilter position_controller_with_bebop waypoint_filter
+    spline_trajectory_generator
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
-install(TARGETS position_controller position_controller_with_bebop_node hovering_example waypoint_example quaternion_to_rpy
+install(TARGETS position_controller_node position_controller_with_bebop_node hovering_example
+    waypoint_example quaternion_to_rpy hovering_example_spline
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

@@ -18,7 +18,7 @@
 
 #include <ros/ros.h>
 #include <mav_msgs/default_topics.h>
-#include <ros/console.h> 
+#include <ros/console.h>
 
 #include "position_controller_node.h"
 
@@ -37,8 +37,24 @@ PositionControllerNode::PositionControllerNode() {
 
     ros::NodeHandle nh;
 
-    //To get the trajectory to follow
-    cmd_multi_dof_joint_trajectory_sub_ = nh.subscribe(mav_msgs::default_topics::COMMAND_TRAJECTORY, 1,  &PositionControllerNode::MultiDofJointTrajectoryCallback, this);
+    if(pnh_node.getParam("spline_generator", spline_generator_)){
+      ROS_INFO("Got param 'spline_generator': %d", spline_generator_);
+    }
+
+    // If the trajectory is provided as a spline
+    if (spline_generator_){
+
+      cmd_multi_dof_joint_trajectory_spline_sub_ = nh.subscribe(mav_msgs::default_topics::DRONE_STATE, 1,
+              &PositionControllerNode::MultiDofJointTrajectorySplineCallback, this);
+
+    }
+    else{
+
+      //To get the trajectory to follow
+      cmd_multi_dof_joint_trajectory_sub_ = nh.subscribe(mav_msgs::default_topics::COMMAND_TRAJECTORY, 1,
+        &PositionControllerNode::MultiDofJointTrajectoryCallback, this);
+
+    }
 
     //To get data coming from the the virtual odometry sensor
     odometry_sub_ = nh.subscribe(mav_msgs::default_topics::ODOMETRY, 1, &PositionControllerNode::OdometryCallback, this, ros::TransportHints().tcpNoDelay(true));
@@ -99,6 +115,31 @@ void PositionControllerNode::MultiDofJointTrajectoryCallback(const trajectory_ms
   }
 }
 
+void PositionControllerNode::MultiDofJointTrajectorySplineCallback(const mav_msgs::DroneState& drone_state_msg){
+    // Clear all pending commands.
+    command_timer_.stop();
+    commands_.clear();
+    command_waiting_times_.clear();
+
+    if(drone_state_msg.position.z <= 0){
+      ROS_WARN_STREAM("Got MultiDOFJointTrajectorySpline message, but message has no points.");
+      return;
+    }
+
+    // We can trigger the first command immediately.
+    mav_msgs::EigenDroneState eigen_reference;
+    mav_msgs::eigenDroneStateFromMsg(drone_state_msg, &eigen_reference);
+    position_controller_.SetTrajectoryPointSpline(eigen_reference);
+
+    ROS_DEBUG("Drone desired position [x_d: %f, y_d: %f, z_d: %f]", eigen_reference.position_W[0],
+            eigen_reference.position_W[1], eigen_reference.position_W[2]);
+
+    if (drone_state_msg.position.z > 0) {
+      waypointHasBeenPublished_ = true;
+      ROS_INFO_ONCE("PositionController got first [SplineTrajectory] MultiDOFJointTrajectory message.");
+    }
+}
+
 void PositionControllerNode::InitializeParams() {
   ros::NodeHandle pnh("~");
 
@@ -113,7 +154,7 @@ void PositionControllerNode::InitializeParams() {
   GetRosParameter(pnh, "beta_z/beta_z",
                   position_controller_.controller_parameters_.beta_z_,
                   &position_controller_.controller_parameters_.beta_z_);
-  
+
   GetRosParameter(pnh, "beta_phi/beta_phi",
                   position_controller_.controller_parameters_.beta_phi_,
                   &position_controller_.controller_parameters_.beta_phi_);
@@ -133,7 +174,7 @@ void PositionControllerNode::InitializeParams() {
   GetRosParameter(pnh, "mu_z/mu_z",
                   position_controller_.controller_parameters_.mu_z_,
                   &position_controller_.controller_parameters_.mu_z_);
-  
+
   GetRosParameter(pnh, "mu_phi/mu_phi",
                   position_controller_.controller_parameters_.mu_phi_,
                   &position_controller_.controller_parameters_.mu_phi_);
@@ -143,7 +184,7 @@ void PositionControllerNode::InitializeParams() {
   GetRosParameter(pnh, "mu_psi/mu_psi",
                   position_controller_.controller_parameters_.mu_psi_,
                   &position_controller_.controller_parameters_.mu_psi_);
-				  
+
   GetRosParameter(pnh, "U_xyz/U_x",
                   position_controller_.controller_parameters_.U_q_.x(),
                   &position_controller_.controller_parameters_.U_q_.x());
@@ -170,7 +211,7 @@ void PositionControllerNode::InitializeParams() {
   GetRosParameter(pnh, "dev_x",
                   position_controller_.filter_parameters_.dev_x_,
                   &position_controller_.filter_parameters_.dev_x_);
-   
+
   GetRosParameter(pnh, "dev_y",
                   position_controller_.filter_parameters_.dev_y_,
                   &position_controller_.filter_parameters_.dev_y_);
@@ -194,7 +235,7 @@ void PositionControllerNode::InitializeParams() {
   GetRosParameter(pnh, "Qp/aa",
                   position_controller_.filter_parameters_.Qp_x_,
                   &position_controller_.filter_parameters_.Qp_x_);
-   
+
   GetRosParameter(pnh, "Qp/bb",
                   position_controller_.filter_parameters_.Qp_y_,
                   &position_controller_.filter_parameters_.Qp_y_);
@@ -215,18 +256,18 @@ void PositionControllerNode::InitializeParams() {
                   position_controller_.filter_parameters_.Qp_vz_,
                   &position_controller_.filter_parameters_.Qp_vz_);
 
-  position_controller_.filter_parameters_.Rp_(0,0) = position_controller_.filter_parameters_.dev_x_; 
-  position_controller_.filter_parameters_.Rp_(1,1) = position_controller_.filter_parameters_.dev_y_; 
+  position_controller_.filter_parameters_.Rp_(0,0) = position_controller_.filter_parameters_.dev_x_;
+  position_controller_.filter_parameters_.Rp_(1,1) = position_controller_.filter_parameters_.dev_y_;
   position_controller_.filter_parameters_.Rp_(2,2) = position_controller_.filter_parameters_.dev_z_;
-  position_controller_.filter_parameters_.Rp_(3,3) = position_controller_.filter_parameters_.dev_vx_; 
-  position_controller_.filter_parameters_.Rp_(4,4) = position_controller_.filter_parameters_.dev_vy_;                     
+  position_controller_.filter_parameters_.Rp_(3,3) = position_controller_.filter_parameters_.dev_vx_;
+  position_controller_.filter_parameters_.Rp_(4,4) = position_controller_.filter_parameters_.dev_vy_;
   position_controller_.filter_parameters_.Rp_(5,5) = position_controller_.filter_parameters_.dev_vz_;
 
-  position_controller_.filter_parameters_.Qp_(0,0) = position_controller_.filter_parameters_.Qp_x_; 
-  position_controller_.filter_parameters_.Qp_(1,1) = position_controller_.filter_parameters_.Qp_y_; 
+  position_controller_.filter_parameters_.Qp_(0,0) = position_controller_.filter_parameters_.Qp_x_;
+  position_controller_.filter_parameters_.Qp_(1,1) = position_controller_.filter_parameters_.Qp_y_;
   position_controller_.filter_parameters_.Qp_(2,2) = position_controller_.filter_parameters_.Qp_z_;
-  position_controller_.filter_parameters_.Qp_(3,3) = position_controller_.filter_parameters_.Qp_vx_; 
-  position_controller_.filter_parameters_.Qp_(4,4) = position_controller_.filter_parameters_.Qp_vy_;                     
+  position_controller_.filter_parameters_.Qp_(3,3) = position_controller_.filter_parameters_.Qp_vx_;
+  position_controller_.filter_parameters_.Qp_(4,4) = position_controller_.filter_parameters_.Qp_vy_;
   position_controller_.filter_parameters_.Qp_(5,5) = position_controller_.filter_parameters_.Qp_vz_;
 
   // The controller gains, vehicle, filter and waypoint paramters are set
@@ -321,7 +362,7 @@ void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& 
 	      Eigen::Vector4d ref_rotor_velocities;
 	      position_controller_.CalculateRotorVelocities(&ref_rotor_velocities);
 
-	      //creating a new mav message. actuator_msg is used to send the velocities of the propellers.  
+	      //creating a new mav message. actuator_msg is used to send the velocities of the propellers.
 	      mav_msgs::ActuatorsPtr actuator_msg(new mav_msgs::Actuators);
 
 	      //we use clear because we later want to be sure that we used the previously calculated velocity.
@@ -329,7 +370,7 @@ void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& 
 	      //for all propellers, we put them into actuator_msg so they will later be used to control the drone.
 	      for (int i = 0; i < ref_rotor_velocities.size(); i++)
 	        actuator_msg->angular_velocities.push_back(ref_rotor_velocities[i]);
-              
+
         actuator_msg->header.stamp = odometry_msg->header.stamp;
         motor_velocity_reference_pub_.publish(actuator_msg);
 
@@ -387,7 +428,7 @@ void PositionControllerNode::OdometryCallback(const nav_msgs::OdometryConstPtr& 
 	      filtered_errors.header.stamp = odometry_msg->header.stamp;
 	      filtered_errors_pub_.publish(filtered_errors);
 
-    }	 
+    }
 }
 
 
@@ -397,11 +438,10 @@ int main(int argc, char** argv){
     ros::init(argc, argv, "position_controller_node");
 
     ros::NodeHandle nh2;
-    
+
     bebop_simulator::PositionControllerNode position_controller_node;
 
     ros::spin();
 
     return 0;
 }
-

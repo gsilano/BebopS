@@ -19,6 +19,7 @@
   <arg name="enable_wind_plugin" default="false"/>
   <arg name="enable_laser1D" default="false"/>
   <arg name="enable_imu" default="false"/>
+  <arg name="spline_generator" default="false"/>
   <arg name="model" value="$(find bebop_simulator)/urdf/bebop.urdf.xacro" />
 
   <!-- send the robot XML to param server -->
@@ -31,6 +32,7 @@
     enable_wind_plugin:='$(arg enable_wind_plugin)'
     enable_laser1D:='$(arg enable_laser1D)'
     enable_imu:='$(arg enable_imu)'
+    spline_generator:='$(arg spline_generator)'
     namespace:=$(arg name)
     wind_force:=$(arg wind_force)
     wind_start:=$(arg wind_start)

@@ -19,10 +19,10 @@
 #include "bebop_simulator/position_controller.h"
 #include "bebop_simulator/transform_datatypes.h"
 #include "bebop_simulator/Matrix3x3.h"
-#include "bebop_simulator/Quaternion.h" 
+#include "bebop_simulator/Quaternion.h"
 #include "bebop_simulator/stabilizer_types.h"
 
-#include <math.h> 
+#include <math.h>
 #include <time.h>
 #include <iostream>
 #include <fstream>
@@ -60,13 +60,13 @@ PositionController::PositionController()
       e_y_(0),
       e_z_(0),
       dot_e_x_(0),
-      dot_e_y_(0), 
+      dot_e_y_(0),
       dot_e_z_(0),
       e_phi_(0),
       e_theta_(0),
       e_psi_(0),
       dot_e_phi_(0),
-      dot_e_theta_(0), 
+      dot_e_theta_(0),
       dot_e_psi_(0),
       bf_(0),
       l_(0),
@@ -103,8 +103,9 @@ PositionController::PositionController()
       lambda_x_(0),
       lambda_y_(0),
       lambda_z_(0),
+      spline_generator_(false),
       control_({0,0,0,0}), //roll, pitch, yaw rate, thrust
-      state_({0,  //Position.x 
+      state_({0,  //Position.x
               0,  //Position.y
               0,  //Position.z
               0,  //Linear velocity x
@@ -117,33 +118,33 @@ PositionController::PositionController()
               0,  //Angular velocity x
               0,  //Angular velocity y
               0}) //Angular velocity z)
-              {  
+              {
 
-			          // Command signals initialization
-            		command_trajectory_.setFromYaw(0);
-            		command_trajectory_.position_W[0] = 0;
-            		command_trajectory_.position_W[1] = 0;
-            		command_trajectory_.position_W[2] = 0;
+        // Command signals initialization
+    		command_trajectory_.setFromYaw(0);
+    		command_trajectory_.position_W[0] = 0;
+    		command_trajectory_.position_W[1] = 0;
+    		command_trajectory_.position_W[2] = 0;
 
-            		// Kalman filter's parameters initialization
-            		filter_parameters_.dev_x_ = 0;
-            		filter_parameters_.dev_y_ = 0;
-            		filter_parameters_.dev_z_ = 0;
-            		filter_parameters_.dev_vx_ = 0;
-            		filter_parameters_.dev_vy_ = 0;
-            		filter_parameters_.dev_vz_ = 0;
-            		filter_parameters_.Qp_x_ = 0;
-            		filter_parameters_.Qp_y_ = 0;
-            		filter_parameters_.Qp_z_ = 0;
-            		filter_parameters_.Qp_vx_ = 0;
-            		filter_parameters_.Qp_vy_ = 0;
-            		filter_parameters_.Qp_vz_ = 0;
-            		filter_parameters_.Rp_ = Eigen::MatrixXf::Zero(6,6);
-            		filter_parameters_.Qp_ = Eigen::MatrixXf::Identity(6,6);
+    		// Kalman filter's parameters initialization
+    		filter_parameters_.dev_x_ = 0;
+    		filter_parameters_.dev_y_ = 0;
+    		filter_parameters_.dev_z_ = 0;
+    		filter_parameters_.dev_vx_ = 0;
+    		filter_parameters_.dev_vy_ = 0;
+    		filter_parameters_.dev_vz_ = 0;
+    		filter_parameters_.Qp_x_ = 0;
+    		filter_parameters_.Qp_y_ = 0;
+    		filter_parameters_.Qp_z_ = 0;
+    		filter_parameters_.Qp_vx_ = 0;
+    		filter_parameters_.Qp_vy_ = 0;
+    		filter_parameters_.Qp_vz_ = 0;
+    		filter_parameters_.Rp_ = Eigen::MatrixXf::Zero(6,6);
+    		filter_parameters_.Qp_ = Eigen::MatrixXf::Identity(6,6);
 
-            	  // Timers set the outer and inner loops working frequency
-            		timer1_ = n1_.createTimer(ros::Duration(TsA), &PositionController::CallbackAttitude, this, false, true);
-            		timer2_ = n2_.createTimer(ros::Duration(TsP), &PositionController::CallbackPosition, this, false, true);
+    	  // Timers set the outer and inner loops working frequency
+    		timer1_ = n1_.createTimer(ros::Duration(TsA), &PositionController::CallbackAttitude, this, false, true);
+    		timer2_ = n2_.createTimer(ros::Duration(TsP), &PositionController::CallbackPosition, this, false, true);
 
 
 }
@@ -180,7 +181,7 @@ void PositionController::CallbackSaveData(const ros::TimerEvent& event){
       ofstream fileControlMixerUnSaturatedBefore;
 
       ROS_INFO("CallbackSavaData function is working. Time: %f seconds, %f nanoseconds", odometry_.timeStampSec, odometry_.timeStampNsec);
-    
+
       fileControllerGains.open("/home/" + user_ + "/controllerGains.csv", std::ios_base::app);
       fileVehicleParameters.open("/home/" + user_ + "/vehicleParameters.csv", std::ios_base::app);
       fileControlSignals.open("/home/" + user_ + "/controlSignals.csv", std::ios_base::app);
@@ -240,7 +241,7 @@ void PositionController::CallbackSaveData(const ros::TimerEvent& event){
       for (unsigned n=0; n < listDroneAttitude_.size(); ++n) {
           fileDroneAttiude << listDroneAttitude_.at( n );
       }
- 
+
       // Saving the trajectory errors in a file
       for (unsigned n=0; n < listTrajectoryErrors_.size(); ++n) {
           fileTrajectoryErrors << listTrajectoryErrors_.at( n );
@@ -354,18 +355,18 @@ void PositionController::SetControllerGains(){
 
       mu_phi_ = controller_parameters_.mu_phi_;
       mu_theta_ = controller_parameters_.mu_theta_;
-      mu_psi_ = controller_parameters_.mu_psi_; 
+      mu_psi_ = controller_parameters_.mu_psi_;
 
       lambda_x_ = controller_parameters_.U_q_.x();
       lambda_y_ = controller_parameters_.U_q_.y();
       lambda_z_ = controller_parameters_.U_q_.z();
-	  
+
       K_x_1_ = 1/mu_x_;
       K_x_2_ = -2 * (beta_x_/mu_x_);
-	  
+
       K_y_1_ = 1/mu_y_;
       K_y_2_ = -2 * (beta_y_/mu_y_);
-	  
+
       K_z_1_ = 1/mu_z_;
       K_z_2_ = -2 * (beta_z_/mu_z_);
 
@@ -447,18 +448,18 @@ void PositionController::Quaternion2Euler(double* roll, double* pitch, double* y
     y = odometry_.orientation.y();
     z = odometry_.orientation.z();
     w = odometry_.orientation.w();
-    
+
     tf::Quaternion q(x, y, z, w);
     tf::Matrix3x3 m(q);
     m.getRPY(*roll, *pitch, *yaw);
-	
+
 }
 
 // When a new odometry message comes, the content of the message is stored in private variable. At the same time, the controller is going to be active.
 // The attitude of the aircraft is computer (as we said before it move from quaterninon to Euler angles) and also the angular velocity is stored.
 void PositionController::SetOdometry(const EigenOdometry& odometry) {
-    
-    odometry_ = odometry; 
+
+    odometry_ = odometry;
     controller_active_= true;
 
     Quaternion2Euler(&state_.attitude.roll, &state_.attitude.pitch, &state_.attitude.yaw);
@@ -486,6 +487,43 @@ void PositionController::SetTrajectoryPoint(const mav_msgs::EigenTrajectoryPoint
   else
     command_trajectory_ = command_trajectory_positionControllerNode;
 
+
+}
+
+// The function sets the filter trajectory points
+void PositionController::SetTrajectoryPointSpline(const mav_msgs::EigenDroneState& command_trajectory) {
+
+    spline_generator_ = true;
+    command_trajectory_spline_ = command_trajectory;
+
+    double psi_r, roll_r, pitch_r;
+    Quaternion2EulerCommandTrajectory(&roll_r, &pitch_r, &psi_r);
+
+    ROS_DEBUG("Drone desired position [x_d: %f, y_d: %f, z_d: %f]",  command_trajectory_spline_.position_W[0],
+            command_trajectory_spline_.position_W[1], command_trajectory_spline_.position_W[2]);
+    ROS_DEBUG("Drone desired attitude [roll_d: %f, pitch_d: %f, yaw_d: %f]", roll_r, pitch_r, psi_r);
+    ROS_DEBUG("Drone desired linear velocity [x_d_dot: %f, y_d_dot: %f, z_d_dot: %f]", command_trajectory_spline_.velocity[0],
+          command_trajectory_spline_.velocity[1], command_trajectory_spline_.velocity[2]);
+
+}
+
+void PositionController::Quaternion2EulerCommandTrajectory(double* roll, double* pitch, double* yaw) const {
+    assert(roll);
+    assert(pitch);
+    assert(yaw);
+
+    // The estimated quaternion values
+    double x, y, z, w;
+    x = command_trajectory_spline_.orientation_W_B.x();
+    y = command_trajectory_spline_.orientation_W_B.y();
+    z = command_trajectory_spline_.orientation_W_B.z();
+    w = command_trajectory_spline_.orientation_W_B.w();
+
+    tf::Quaternion q(x, y, z, w);
+    tf::Matrix3x3 m(q);
+    m.getRPY(*roll, *pitch, *yaw);
+
+    ROS_DEBUG("Roll Trajectory: %f, Pitch Trajectory: %f, Yaw Trajectory: %f", *roll, *pitch, *yaw);
 
 }
 
@@ -590,7 +628,7 @@ void PositionController::SetOdometryEstimated() {
 // The function computes the propellers angular velocity
 void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocities) {
     assert(rotor_velocities);
-    
+
     // The controller is inactive if a point to reach is not coming
     if(!controller_active_){
        *rotor_velocities = Eigen::Vector4d::Zero(rotor_velocities->rows());
@@ -604,7 +642,7 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
 
 	  // Data storing section. It is actived if necessary
     if(dataStoring_active_){
-      
+
       // Saving drone attitude in a file
       std::stringstream tempDroneAttitude;
       tempDroneAttitude << state_.attitude.roll << "," << state_.attitude.pitch << "," << state_.attitude.yaw << ","
@@ -619,14 +657,14 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
 
       listDroneAngularVelocitiesABC_.push_back(tempDroneAngularVelocitiesABC.str());
     }
-    
+
     double first, second, third, fourth;
     first = (1 / ( 4 * bf_ )) * control_.uT;
     second = (1 / (4 * bf_ * l_ * cos(M_PI/4) ) ) * u_phi;
     third = (1 / (4 * bf_ * l_ * cos(M_PI/4) ) ) * u_theta;
     fourth = (1 / ( 4 * bf_ * bm_)) * u_psi;
 
-	
+
     if(dataStoring_active_){
       //Saving the control mixer terms in a file
       std::stringstream tempControlMixerTerms;
@@ -727,7 +765,7 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
 
       listPropellersAngularVelocities_.push_back(tempPropellersAngularVelocities.str());
     }
-    
+
     *rotor_velocities = Eigen::Vector4d(omega_1, omega_2, omega_3, omega_4);
 
 }
@@ -763,9 +801,20 @@ void PositionController::VelocityErrors(double* dot_e_x, double* dot_e_y, double
 	   dot_z = (-sin(theta) * state_.linearVelocity.x) + ( sin(phi) * cos(theta) * state_.linearVelocity.y) +
 	           (cos(phi) * cos(theta) * state_.linearVelocity.z);
 
-	   *dot_e_x = - dot_x;
-   	 *dot_e_y = - dot_y;
-   	 *dot_e_z = - dot_z;
+     if(spline_generator_){
+
+       *dot_e_x = command_trajectory_spline_.velocity[0] - dot_x;
+    	 *dot_e_y = command_trajectory_spline_.velocity[1] - dot_y;
+    	 *dot_e_z = command_trajectory_spline_.velocity[2] - dot_z;
+
+     }
+     else {
+
+       *dot_e_x = - dot_x;
+     	 *dot_e_y = - dot_y;
+     	 *dot_e_z = - dot_z;
+
+     }
 
    }
 
@@ -783,13 +832,21 @@ void PositionController::VelocityErrors(double* dot_e_x, double* dot_e_y, double
 // The function computes the position errors
 void PositionController::PositionErrors(double* e_x, double* e_y, double* e_z){
    assert(e_x);
-   assert(e_y); 
+   assert(e_y);
    assert(e_z);
-   
+
    double x_r, y_r, z_r;
-   x_r = command_trajectory_.position_W[0];
-   y_r = command_trajectory_.position_W[1]; 
-   z_r = command_trajectory_.position_W[2];
+
+   if(spline_generator_){
+     x_r = command_trajectory_spline_.position_W[0];
+     y_r = command_trajectory_spline_.position_W[1];
+     z_r = command_trajectory_spline_.position_W[2];
+   }
+   else {
+     x_r = command_trajectory_.position_W[0];
+     y_r = command_trajectory_.position_W[1];
+     z_r = command_trajectory_.position_W[2];
+   }
 
    *e_x = x_r - state_.position.x;
    *e_y = y_r - state_.position.y;
@@ -806,70 +863,70 @@ void PositionController::PosController(double* u_T, double* phi_r, double* theta
    assert(u_y);
    assert(u_z);
    assert(u_Terr);
-   
+
    //u_x computing
    *u_x = ( (e_x_ * K_x_1_ * K_x_2_)/lambda_x_ ) + ( (dot_e_x_ * K_x_2_)/lambda_x_ );
-   
+
    if (*u_x > 1 || *u_x <-1)
 	   if (*u_x > 1)
 		   *u_x = 1;
 	   else
 		   *u_x = -1;
-	   
+
    *u_x = (*u_x * 1/2) + ( (K_x_1_/lambda_x_) * dot_e_x_ );
-   
+
    if (*u_x > 1 || *u_x <-1)
 	   if (*u_x > 1)
 		   *u_x = 1;
 	   else
 		   *u_x = -1;
-	   
+
    *u_x = m_ * (*u_x * lambda_x_);
-   
+
    //u_y computing
    *u_y = ( (e_y_ * K_y_1_ * K_y_2_)/lambda_y_ ) + ( (dot_e_y_ * K_y_2_)/lambda_y_ );
-   
+
    if (*u_y > 1 || *u_y <-1)
 	   if (*u_y > 1)
 		   *u_y = 1;
 	   else
 		   *u_y = -1;
-	   
+
    *u_y = (*u_y * 1/2) + ( (K_y_1_/lambda_y_) * dot_e_y_ );
-   
+
    if (*u_y > 1 || *u_y <-1)
 	   if (*u_y > 1)
 		   *u_y = 1;
 	   else
 		   *u_y = -1;
-	   
+
    *u_y = m_* ( *u_y * lambda_y_);
-   
+
    //u_z computing
    *u_z = ( (e_z_ * K_z_1_ * K_z_2_)/lambda_z_ ) + ( (dot_e_z_ * K_z_2_)/lambda_z_ );
-   
+
    if (*u_z > 1 || *u_z <-1)
 	   if (*u_z > 1)
 		   *u_z = 1;
 	   else
 		   *u_z = -1;
-	   
+
    *u_z = (*u_z * 1/2) + ( (K_z_1_/lambda_z_) * dot_e_z_ );
-   
+
    if (*u_z > 1 || *u_z <-1)
 	   if (*u_z > 1)
 		   *u_z = 1;
 	   else
 		   *u_z = -1;
-	   
+
    *u_z = m_* ( *u_z * lambda_z_);
-   
+
    //u_Terr computing
    *u_Terr = *u_z + (m_ * g_);
-   
+
    //u_T computing
    *u_T = sqrt( pow(*u_x,2) + pow(*u_y,2) + pow(*u_Terr,2) );
-   
+
    double psi_r;
    psi_r = command_trajectory_.getYaw();
 
@@ -883,10 +940,10 @@ void PositionController::PosController(double* u_T, double* phi_r, double* theta
       tempReferenceAngles << *theta_r << "," << *phi_r << "," << odometry_.timeStampSec << "," << odometry_.timeStampNsec << "\n";
 
       listReferenceAngles_.push_back(tempReferenceAngles.str());
-	  
+
 	    double u_phi, u_theta, u_psi;
 	    AttitudeController(&u_phi, &u_theta, &u_psi);
-	  
+
 	    //Saving control signals in a file
       std::stringstream tempControlSignals;
       tempControlSignals << *u_T << "," << u_phi << "," << u_theta << "," << u_psi << "," << *u_x << "," << *u_y << ","
@@ -903,17 +960,27 @@ void PositionController::AttitudeErrors(double* e_phi, double* e_theta, double* 
    assert(e_phi);
    assert(e_theta);
    assert(e_psi);
-   
+
    double psi_r;
    psi_r = command_trajectory_.getYaw();
-   
+
    double u_T, u_x, u_y, u_z, u_Terr;
    PosController(&u_T, &control_.phiR, &control_.thetaR, &u_x, &u_y, &u_z, &u_Terr);
 
-   *e_phi = control_.phiR - state_.attitude.roll;
-   *e_theta = control_.thetaR - state_.attitude.pitch;
-   *e_psi = psi_r - state_.attitude.yaw;
+   if(spline_generator_){
 
+     double psi_r, roll_r, pitch_r;
+     Quaternion2EulerCommandTrajectory(&roll_r, &pitch_r, &psi_r);
+
+     *e_phi = roll_r - state_.attitude.roll;
+     *e_theta = pitch_r - state_.attitude.pitch;
+     *e_psi = psi_r - state_.attitude.yaw;
+   }
+   else {
+     *e_phi = control_.phiR - state_.attitude.roll;
+     *e_theta = control_.thetaR - state_.attitude.pitch;
+     *e_psi = psi_r - state_.attitude.yaw;
+   }
 }
 
 //The angular velocity errors
@@ -924,20 +991,45 @@ void PositionController::AngularVelocityErrors(double* dot_e_phi, double* dot_e_
 
    double psi_r;
    psi_r = command_trajectory_.getYaw();
-   
+
    double dot_phi, dot_theta, dot_psi;
 
    dot_phi = state_.angularVelocity.x + (sin(state_.attitude.roll) * tan(state_.attitude.pitch) * state_.angularVelocity.y)
                 + (cos(state_.attitude.roll) * tan(state_.attitude.pitch) * state_.angularVelocity.z);
-    
+
    dot_theta = (cos(state_.attitude.roll) * state_.angularVelocity.y) - (sin(state_.attitude.roll) * state_.angularVelocity.z);
 
    dot_psi = ( ( sin(state_.attitude.roll) * state_.angularVelocity.y) / cos(state_.attitude.pitch) ) +
 		         ( ( cos(state_.attitude.roll) * state_.angularVelocity.z) / cos(state_.attitude.pitch) );
 
-   *dot_e_phi =  - dot_phi;
-   *dot_e_theta = - dot_theta;
-   *dot_e_psi = - dot_psi;
+   if(spline_generator_){
+
+     double psi_r, roll_r, pitch_r;
+     Quaternion2EulerCommandTrajectory(&roll_r, &pitch_r, &psi_r);
+
+     double dot_e_phi_W_d, dot_e_theta_W_d, dot_e_psi_W_d;
+
+     // Desired angular rate rotated from body to fixed frame
+     dot_e_phi_W_d = command_trajectory_spline_.angular_velocity_B[0] + (sin(roll_r) * tan(pitch_r) * command_trajectory_spline_.angular_velocity_B[1])
+                     + (cos(roll_r) * tan(pitch_r) * command_trajectory_spline_.angular_velocity_B[2]);
+
+     dot_e_theta_W_d = cos(roll_r) * command_trajectory_spline_.angular_velocity_B[1] - sin(roll_r) * command_trajectory_spline_.angular_velocity_B[2];
+
+     dot_e_psi_W_d = ( sin(roll_r) * command_trajectory_spline_.angular_velocity_B[1]) / cos(pitch_r) +
+                    ( cos(roll_r) * command_trajectory_spline_.angular_velocity_B[2]) / cos(pitch_r);
+
+     *dot_e_phi = dot_e_phi_W_d - dot_phi;
+     *dot_e_theta = dot_e_theta_W_d - dot_theta;
+     *dot_e_psi = dot_e_psi_W_d - dot_psi;
+
+   }
+   else {
+
+     *dot_e_phi =  - dot_phi;
+     *dot_e_theta = - dot_theta;
+     *dot_e_psi = - dot_psi;
+
+   }
 
 }
 
@@ -956,12 +1048,12 @@ void PositionController::AttitudeController(double* u_phi, double* u_theta, doub
 
 //The function every TsA computes the attitude and angular velocity errors. When the data storing is active, the data are saved into csv files
 void PositionController::CallbackAttitude(const ros::TimerEvent& event){
-     
+
      AttitudeErrors(&e_phi_, &e_theta_, &e_psi_);
      AngularVelocityErrors(&dot_e_phi_, &dot_e_theta_, &dot_e_psi_);
 
      //Saving the time instant when the attitude errors are computed
-     if(dataStoring_active_){	
+     if(dataStoring_active_){
         clientAttitude_.call(my_messageAttitude_);
 
         std::stringstream tempTimeAttitudeErrors;
@@ -1005,7 +1097,7 @@ void PositionController::CallbackAttitude(const ros::TimerEvent& event){
 //  * the position and velocity errors are computed
 //  * the last part is used to store the data into csv files if the data storing is active
 void PositionController::CallbackPosition(const ros::TimerEvent& event){
-  
+
      // The function is used to invoke the waypoint filter employs to reduce the error dimension along the axes when the drone stars to follow the trajectory.
      // The waypoint filter works with an update time of Tsp
      if(controller_active_)
