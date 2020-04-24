@@ -43,7 +43,7 @@
 
     <!-- Launch the controller  -->
     <node name="position_controller_node" pkg="bebop_simulator" type="position_controller_node" output="screen">
-      <rosparam command="load" file="$(find bebop_simulator)/resource/controller_bebop.yaml" />
+      <rosparam command="load" file="$(find bebop_simulator)/resource/controller_bebop_spline.yaml" />
       <rosparam command="load" file="$(find bebop_simulator)/resource/bebop.yaml" />
       <rosparam command="load" file="$(find bebop_simulator)/resource/EKF_matrix.yaml" />
       <rosparam command="load" file="$(find bebop_simulator)/resource/waypoint_filter.yaml" />
@@ -62,11 +62,14 @@
       <remap from="/stateErrors" to="/bebop/stateErrors" />
       <remap from="/smoothedTrajectory" to="/bebop/smoothedTrajectory" />
       <remap from="/command/trajectory" to="/bebop/command/trajectory" />
+      <remap from="/drone_state" to="/bebop/drone_state" />
     </node>
 
     <!-- Launch the trajectory generator -->
    <group ns="$(arg name)">
-       <node name="hovering_example" pkg="bebop_simulator" type="hovering_example" output="screen"/>
+       <node name="hovering_example_spline" pkg="bebop_simulator" type="hovering_example_spline" output="screen">
+         <rosparam command="load" file="$(find bebop_simulator)/resource/spline_trajectory.yaml" />
+       </node>
     </group>
 
     <!-- Launch the trajectory plot -->

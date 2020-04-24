@@ -56,6 +56,7 @@
                                                             T* value);
 
          private:
+
              bool enable_parameter_computation_ = true;
              //polynomial coefficients
              Eigen::Vector3f a0_, a1_, a2_, a3_, a4_, a5_;
@@ -84,4 +85,5 @@
      };
 
  }
+
  #endif // SPLINE_TRAJECTORY_GENERATOR_H

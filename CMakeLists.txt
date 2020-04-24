@@ -22,17 +22,21 @@ catkin_package(
   INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
   LIBRARIES position_controller extendedKalmanFilter position_controller_with_bebop waypoint_filter
     spline_trajectory_generator
-  CATKIN_DEPENDS geometry_msgs mav_msgs nav_msgs roscpp sensor_msgs std_msgs
+  CATKIN_DEPENDS geometry_msgs mav_msgs nav_msgs roscpp sensor_msgs std_msgs gazebo_msgs
   DEPENDS Eigen
 )
 
-
+## Specify additional locations of header files
+## Your package locations should be listed before other locations
 include_directories(
-  include
+  src
+  launch
+  include/
   ${catkin_INCLUDE_DIRS}
   ${Eigen_INCLUDE_DIRS}
 )
 
+## Declare a C++ library
 add_library(position_controller
    src/library/position_controller.cpp
 )
@@ -42,7 +46,7 @@ add_library(position_controller_with_bebop
 )
 
 add_library(spline_trajectory_generator
-   src/library/spline_trajectory_generator.cpp
+  src/library/spline_trajectory_generator.cpp
 )
 
 add_library(extendedKalmanFilter
@@ -56,11 +60,11 @@ add_library(waypoint_filter
 target_link_libraries(position_controller ${catkin_LIBRARIES})
 add_dependencies(position_controller ${catkin_EXPORTED_TARGETS})
 
-target_link_libraries(spline_trajectory_generator ${catkin_LIBRARIES})
-add_dependencies(spline_trajectory_generator ${catkin_EXPORTED_TARGETS})
-
 target_link_libraries(position_controller_with_bebop ${catkin_LIBRARIES})
 add_dependencies(position_controller_with_bebop ${catkin_EXPORTED_TARGETS})
+
+target_link_libraries(spline_trajectory_generator ${catkin_LIBRARIES})
+add_dependencies(spline_trajectory_generator ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(extendedKalmanFilter ${catkin_LIBRARIES})
 add_dependencies(extendedKalmanFilter ${catkin_EXPORTED_TARGETS})
@@ -69,22 +73,30 @@ target_link_libraries(waypoint_filter ${catkin_LIBRARIES})
 add_dependencies(waypoint_filter ${catkin_EXPORTED_TARGETS})
 
 add_executable(position_controller_node src/nodes/position_controller_node.cpp)
-add_dependencies(position_controller_node ${catkin_EXPORTED_TARGETS})
+add_dependencies(position_controller_node spline_trajectory_generator
+  position_controller extendedKalmanFilter waypoint_filter
+  ${catkin_EXPORTED_TARGETS})
 target_link_libraries(position_controller_node spline_trajectory_generator
   position_controller extendedKalmanFilter waypoint_filter ${catkin_LIBRARIES})
 
 add_executable(position_controller_with_bebop_node src/nodes/position_controller_with_bebop_node.cpp)
-add_dependencies(position_controller_with_bebop_node ${catkin_EXPORTED_TARGETS})
+add_dependencies(position_controller_with_bebop_node spline_trajectory_generator
+  position_controller_with_bebop extendedKalmanFilter waypoint_filter
+  ${catkin_EXPORTED_TARGETS})
 target_link_libraries(position_controller_with_bebop_node spline_trajectory_generator
   position_controller_with_bebop extendedKalmanFilter waypoint_filter  ${catkin_LIBRARIES})
 
 add_executable(hovering_example src/nodes/hovering_example.cpp)
-target_link_libraries(hovering_example ${catkin_LIBRARIES})
-add_dependencies(hovering_example ${catkin_EXPORTED_TARGETS})
+target_link_libraries(hovering_example spline_trajectory_generator
+	${catkin_LIBRARIES})
+add_dependencies(hovering_example spline_trajectory_generator
+	${catkin_EXPORTED_TARGETS})
 
 add_executable(hovering_example_spline src/nodes/hovering_example_spline.cpp)
-target_link_libraries(hovering_example_spline ${catkin_LIBRARIES})
-add_dependencies(hovering_example_spline spline_trajectory_generator ${catkin_EXPORTED_TARGETS})
+target_link_libraries(hovering_example_spline spline_trajectory_generator
+  ${catkin_LIBRARIES})
+add_dependencies(hovering_example_spline spline_trajectory_generator
+  ${catkin_EXPORTED_TARGETS})
 
 add_executable(waypoint_example src/nodes/waypoint_example.cpp)
 target_link_libraries(waypoint_example ${catkin_LIBRARIES})
@@ -99,6 +111,11 @@ install(TARGETS position_controller extendedKalmanFilter position_controller_wit
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
+foreach(dir launch models resource worlds)
+   install(DIRECTORY ${dir}/
+      DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/${dir})
+endforeach(dir)
+
 install(TARGETS position_controller_node position_controller_with_bebop_node hovering_example
     waypoint_example quaternion_to_rpy hovering_example_spline
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
@@ -106,6 +123,7 @@ install(TARGETS position_controller_node position_controller_with_bebop_node hov
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
+## Mark cpp header files for installation
 install(
   DIRECTORY include/${PROJECT_NAME}/
   DIRECTORY include/bebop_simulator_msgs/

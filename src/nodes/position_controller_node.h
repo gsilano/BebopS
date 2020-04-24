@@ -55,9 +55,11 @@ namespace bebop_simulator {
             PositionController position_controller_;
 
             std::string namespace_;
+            bool spline_generator_ = false;
 
             //subscribers
             ros::Subscriber cmd_multi_dof_joint_trajectory_sub_;
+            ros::Subscriber cmd_multi_dof_joint_trajectory_spline_sub_;
             ros::Subscriber odometry_sub_;
             ros::Subscriber odometry_sub_gt_;
 

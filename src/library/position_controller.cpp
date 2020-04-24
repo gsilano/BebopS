@@ -640,6 +640,8 @@ void PositionController::CalculateRotorVelocities(Eigen::Vector4d* rotor_velocit
     AttitudeController(&u_phi, &u_theta, &u_psi);
 	  PosController(&control_.uT, &control_.phiR, &control_.thetaR, &u_x, &u_y, &u_z, &u_Terr);
 
+    ROS_DEBUG("Thurst_c: %f, Phi_c: %f, Theta_c: %f, Psi_c: %f", control_.uT, control_.phiR, control_.thetaR, u_psi);
+
 	  // Data storing section. It is actived if necessary
     if(dataStoring_active_){
 
@@ -807,12 +809,16 @@ void PositionController::VelocityErrors(double* dot_e_x, double* dot_e_y, double
     	 *dot_e_y = command_trajectory_spline_.velocity[1] - dot_y;
     	 *dot_e_z = command_trajectory_spline_.velocity[2] - dot_z;
 
+       ROS_DEBUG("[SPLINE] e_x_dot: %f, e_y_dot: %f, e_z_dot: %f", *dot_e_x, *dot_e_y, *dot_e_z);
+
      }
      else {
 
        *dot_e_x = - dot_x;
      	 *dot_e_y = - dot_y;
      	 *dot_e_z = - dot_z;
+
+       ROS_DEBUG("[WAYPOINT_FILTER] e_x_dot: %f, e_y_dot: %f, e_z_dot: %f", *dot_e_x, *dot_e_y, *dot_e_z);
 
      }
 
@@ -841,6 +847,9 @@ void PositionController::PositionErrors(double* e_x, double* e_y, double* e_z){
      x_r = command_trajectory_spline_.position_W[0];
      y_r = command_trajectory_spline_.position_W[1];
      z_r = command_trajectory_spline_.position_W[2];
+
+     ROS_DEBUG("[SPLINE] x_r: %f, y_r: %f, z_r: %f", x_r, y_r, z_r);
+
    }
    else {
      x_r = command_trajectory_.position_W[0];
@@ -851,6 +860,11 @@ void PositionController::PositionErrors(double* e_x, double* e_y, double* e_z){
    *e_x = x_r - state_.position.x;
    *e_y = y_r - state_.position.y;
    *e_z = z_r - state_.position.z;
+
+   if(spline_generator_)
+      ROS_DEBUG("[SPLINE] e_x: %f, e_y: %f, e_z: %f", *e_x, *e_y, *e_z);
+   else
+      ROS_DEBUG("[WAYPOINT_FILTER] e_x: %f, e_y: %f, e_z: %f", *e_x, *e_y, *e_z);
 
 }
 
@@ -975,11 +989,18 @@ void PositionController::AttitudeErrors(double* e_phi, double* e_theta, double* 
      *e_phi = roll_r - state_.attitude.roll;
      *e_theta = pitch_r - state_.attitude.pitch;
      *e_psi = psi_r - state_.attitude.yaw;
+
+     ROS_DEBUG("[SPLINE] e_phi: %f, e_theta: %f, e_psi: %f", *e_phi, *e_theta, *e_psi);
+
    }
    else {
+
      *e_phi = control_.phiR - state_.attitude.roll;
      *e_theta = control_.thetaR - state_.attitude.pitch;
      *e_psi = psi_r - state_.attitude.yaw;
+
+     ROS_DEBUG("[WAYPOINT_FILTER] e_phi: %f, e_theta: %f, e_psi: %f", *e_phi, *e_theta, *e_psi);
+
    }
 }
 
@@ -1022,12 +1043,16 @@ void PositionController::AngularVelocityErrors(double* dot_e_phi, double* dot_e_
      *dot_e_theta = dot_e_theta_W_d - dot_theta;
      *dot_e_psi = dot_e_psi_W_d - dot_psi;
 
+      ROS_DEBUG("[SPLINE] e_phi_dot: %f, e_theta_dot: %f, e_psi_dot: %f", *dot_e_phi, *dot_e_theta, *dot_e_psi);
+
    }
    else {
 
      *dot_e_phi =  - dot_phi;
      *dot_e_theta = - dot_theta;
      *dot_e_psi = - dot_psi;
+
+     ROS_DEBUG("[WAYPOINT_FILTER] e_phi_dot: %f, e_theta_dot: %f, e_psi_dot: %f", *dot_e_phi, *dot_e_theta, *dot_e_psi);
 
    }
 
@@ -1039,9 +1064,12 @@ void PositionController::AttitudeController(double* u_phi, double* u_theta, doub
    assert(u_theta);
    assert(u_psi);
 
-   *u_phi = Ix_ *   ( ( ( (alpha_phi_/mu_phi_    ) * dot_e_phi_  ) - ( (beta_phi_/pow(mu_phi_,2)    ) * e_phi_  ) ) - ( ( (Iy_ - Iz_)/(Ix_ * mu_theta_ * mu_psi_) ) * e_theta_ * e_psi_) );
-   *u_theta = Iy_ * ( ( ( (alpha_theta_/mu_theta_) * dot_e_theta_) - ( (beta_theta_/pow(mu_theta_,2)) * e_theta_) ) - ( ( (Iz_ - Ix_)/(Iy_ * mu_phi_ * mu_psi_  ) ) * e_phi_   * e_psi_) );
-   *u_psi = Iz_ *   ( ( ( (alpha_psi_/mu_psi_    ) * dot_e_psi_  ) - ( (beta_psi_/pow(mu_psi_,2)    ) * e_psi_  ) ) - ( ( (Ix_ - Iy_)/(Iz_ * mu_theta_ * mu_phi_) ) * e_theta_ * e_phi_) );
+   *u_phi = Ix_ *   ( ( ( (alpha_phi_/mu_phi_    ) * dot_e_phi_  ) - ( (beta_phi_/pow(mu_phi_,2)    ) * e_phi_  ) )
+            - ( ( (Iy_ - Iz_)/(Ix_ * mu_theta_ * mu_psi_) ) * e_theta_ * e_psi_) );
+   *u_theta = Iy_ * ( ( ( (alpha_theta_/mu_theta_) * dot_e_theta_) - ( (beta_theta_/pow(mu_theta_,2)) * e_theta_) )
+            - ( ( (Iz_ - Ix_)/(Iy_ * mu_phi_ * mu_psi_  ) ) * e_phi_   * e_psi_) );
+   *u_psi = Iz_ *   ( ( ( (alpha_psi_/mu_psi_    ) * dot_e_psi_  ) - ( (beta_psi_/pow(mu_psi_,2)    ) * e_psi_  ) )
+            - ( ( (Ix_ - Iy_)/(Iz_ * mu_theta_ * mu_phi_) ) * e_theta_ * e_phi_) );
 
 }
 

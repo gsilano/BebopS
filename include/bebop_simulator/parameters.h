@@ -19,14 +19,11 @@
 #ifndef INCLUDE_BEBOP_SIMULATOR_PARAMETERS_H_
 #define INCLUDE_BEBOP_SIMULATOR_PARAMETERS_H_
 
+#include <mav_msgs/eigen_mav_msgs.h>
+
+using namespace std;
+
 namespace bebop_simulator {
-// Default values for the Asctec Firefly rotor configuration.
-static constexpr double kDefaultRotor0Angle = 0.52359877559;
-static constexpr double kDefaultRotor1Angle = 1.57079632679;
-static constexpr double kDefaultRotor2Angle = 2.61799387799;
-static constexpr double kDefaultRotor3Angle = -2.61799387799;
-static constexpr double kDefaultRotor4Angle = -1.57079632679;
-static constexpr double kDefaultRotor5Angle = -0.52359877559;
 
 // Default vehicle parameters for Asctec Firefly.
 static constexpr double kDefaultMass = 1.56779;
@@ -40,52 +37,6 @@ static constexpr double kDefaultRotorMomentConstant = 1.6e-2;
 // Default physics parameters.
 static constexpr double kDefaultGravity = 9.81;
 
-struct Rotor {
-  Rotor()
-      : angle(0.0),
-        arm_length(kDefaultArmLength),
-        rotor_force_constant(kDefaultRotorForceConstant),
-        rotor_moment_constant(kDefaultRotorMomentConstant),
-        direction(1) {}
-  Rotor(double _angle, double _arm_length,
-        double _rotor_force_constant, double _rotor_moment_constant,
-        int _direction)
-      : angle(_angle),
-        arm_length(_arm_length),
-        rotor_force_constant(_rotor_force_constant),
-        rotor_moment_constant(_rotor_moment_constant),
-        direction(_direction) {}
-  double angle;
-  double arm_length;
-  double rotor_force_constant;
-  double rotor_moment_constant;
-  int direction;
-};
-
-struct RotorConfiguration {
-  RotorConfiguration() {
-    // Rotor configuration of Asctec Firefly.
-    rotors.push_back(
-      Rotor(kDefaultRotor0Angle, kDefaultArmLength, kDefaultRotorForceConstant,
-            kDefaultRotorMomentConstant, 1));
-    rotors.push_back(
-      Rotor(kDefaultRotor1Angle, kDefaultArmLength, kDefaultRotorForceConstant,
-            kDefaultRotorMomentConstant, -1));
-    rotors.push_back(
-      Rotor(kDefaultRotor2Angle, kDefaultArmLength, kDefaultRotorForceConstant,
-            kDefaultRotorMomentConstant, 1));
-    rotors.push_back(
-      Rotor(kDefaultRotor3Angle, kDefaultArmLength, kDefaultRotorForceConstant,
-            kDefaultRotorMomentConstant, -1));
-    rotors.push_back(
-      Rotor(kDefaultRotor4Angle, kDefaultArmLength, kDefaultRotorForceConstant,
-            kDefaultRotorMomentConstant, 1));
-    rotors.push_back(
-      Rotor(kDefaultRotor5Angle, kDefaultArmLength, kDefaultRotorForceConstant,
-            kDefaultRotorMomentConstant, -1));
-  }
-  std::vector<Rotor> rotors;
-};
 
 class VehicleParameters {
  public:
@@ -104,7 +55,6 @@ class VehicleParameters {
   double bm_;
   double bf_;
   double armLength_;
-  RotorConfiguration rotor_configuration_;
 };
 
 }

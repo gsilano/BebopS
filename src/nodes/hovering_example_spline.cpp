@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
   mav_msgs::DroneState trajectory_msg, trajectory_msg_pre;
   trajectory_msg.header.stamp = ros::Time::now();
   mav_msgs::EigenDroneState eigen_reference;
-  rotors_gazebo::SplineTrajectoryGenerator hovering_example_spline_generator;
+  bebop_simulator::SplineTrajectoryGenerator hovering_example_spline_generator;
 
   Eigen::Vector3f check_position_final;
   GetRosParameterHovering(nh_private, "position_final/x", check_position_final.x(),

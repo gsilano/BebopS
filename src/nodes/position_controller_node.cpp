@@ -37,6 +37,8 @@ PositionControllerNode::PositionControllerNode() {
 
     ros::NodeHandle nh;
 
+    ros::NodeHandle pnh_node("~");
+
     if(pnh_node.getParam("spline_generator", spline_generator_)){
       ROS_INFO("Got param 'spline_generator': %d", spline_generator_);
     }
@@ -116,10 +118,6 @@ void PositionControllerNode::MultiDofJointTrajectoryCallback(const trajectory_ms
 }
 
 void PositionControllerNode::MultiDofJointTrajectorySplineCallback(const mav_msgs::DroneState& drone_state_msg){
-    // Clear all pending commands.
-    command_timer_.stop();
-    commands_.clear();
-    command_waiting_times_.clear();
 
     if(drone_state_msg.position.z <= 0){
       ROS_WARN_STREAM("Got MultiDOFJointTrajectorySpline message, but message has no points.");
