@@ -72,27 +72,4 @@
        </node>
     </group>
 
-    <!-- Launch the trajectory plot -->
-    <node name="position_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/odometry/pose/pose/position" output="screen" />
-    <node name="quaternion_to_rpy" pkg="bebop_simulator" type="quaternion_to_rpy" output="screen" >
-       <remap from="/odometry" to="/bebop/odometry" />
-       <remap from="/orientation_rpy" to="/bebop/orientation_rpy" />
-    </node>
-    <node name="orientation_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/orientation_rpy" output="screen" />
-
-    <!-- Launch the reference angles plot -->
-    <node name="reference_angles_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/referenceAngles/pose/pose/position" output="screen"  />
-    <node name="uXY_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/referenceAngles/twist/twist/linear" output="screen" />
-
-    <!-- Launch the smoothed trajectory plot -->
-    <node name="smoothed_plot" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/smoothedTrajectory/pose/pose/position" output="screen" />
-
-    <!-- Launch the filtered output plot -->
-    <node name="position_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/filteredOutput/pose/pose/position" output="screen" />
-    <node name="velocity_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/filteredOutput/twist/twist/linear" output="screen" />
-
-    <!-- Launch the state errors plot -->
-    <node name="state_errors_position_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/stateErrors/pose/pose/position" output="screen" />
-    <node name="state_errors_velocity_plot_ekf" pkg="rqt_plot" type="rqt_plot" args="--clear-config /$(arg name)/stateErrors/twist/twist/linear" output="screen" />
-
 </launch>
