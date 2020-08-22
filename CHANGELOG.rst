@@ -2,6 +2,11 @@
 Changelog for package BebopS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.2 (2020-08-22)
+------------------
+* Add a default RVIZ configuration file #28
+* Contributors: tomlogan501
+
 2.0.1 (2019-12-26)
 ------------------
 * Updated the README.md file with instructions for Ubuntu 18.04, ROS Melodic Morenia and Gazebo 9 (master)

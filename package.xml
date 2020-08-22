@@ -1,16 +1,17 @@
 <package>
 
   <name>bebop_simulator</name>
-  <version>2.0.1</version>
+  <version>2.0.2</version>
   <description>This package aims to simulate the behavior of the Parrot Bebop by using SIL methodologies.</description>
 
-  <maintainer email="giuseppe.silano@unisannio.it">Giuseppe Silano</maintainer>
+  <maintainer email="giuseppe.silano@fel.cvut.cz">Giuseppe Silano</maintainer>
   <maintainer email="luigi.iannelli@unisannio.it">Luigi Iannelli</maintainer>
 
   <author>Giuseppe Silano</author>
   <author>Pasquale Oppido</author>
   <author>Luigi Iannelli</author>
   <author>Antun Ivanovic</author>
+  <author>tomlogan501</author>
 
   <license>Apache</license>
 
