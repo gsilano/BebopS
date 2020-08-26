@@ -2,10 +2,11 @@
 Changelog for package BebopS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-2.0.2 (2020-08-22)
+2.0.2 (2020-08-26)
 ------------------
+* Add multi-robot example #29
 * Add a default RVIZ configuration file #28
-* Contributors: tomlogan501
+* Contributors: tomlogan501, Collin-Thornton
 
 2.0.1 (2019-12-26)
 ------------------

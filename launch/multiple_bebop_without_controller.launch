@@ -1,0 +1,129 @@
+<?xml version="1.0"?>
+
+<launch>
+    <arg name="name" default="bebop"/>
+    <arg name="number" default="1"/>
+    <arg name="x" default="0.0" />
+    <arg name="y" default="0.0" />
+    <arg name="z" default="0.0" />
+    <arg name="use_sim_time" default="true"/>
+    <arg name="world_name" default="basic"/>
+    <arg name="wind_force" default="0.0"/>
+    <arg name="wind_start" default="5.0"/>
+    <arg name="wind_duration" default="40.0"/>
+    <arg name="wind_direction_x" default="0.0"/>
+    <arg name="wind_direction_y" default="0.0"/>
+    <arg name="wind_direction_z" default="0.0"/>
+    <arg name="enable_odometry_sensor_with_noise" default="false"/>
+    <!-- The "disable_odometry_sensor_with_noise" variable values is equal to true if "enable_odometry_sensor_with_noise"
+    is false, and viceversa -->
+    <arg name="disable_odometry_sensor_with_noise" value="true" unless="$(arg enable_odometry_sensor_with_noise)"/>
+    <arg name="disable_odometry_sensor_with_noise" value="false" if="$(arg enable_odometry_sensor_with_noise)"/>
+    <arg name="enable_ground_truth_sensor" default="false"/>
+    <arg name="enable_wind_plugin" default="false"/>
+    <arg name="enable_laser1D" default="false"/>
+    <arg name="enable_imu" default="true"/>
+
+    <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find bebop_simulator)/models"/>
+    <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find bebop_simulator)/models"/>
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+       <arg name="world_name" value="$(find bebop_simulator)/worlds/$(arg world_name).world" />
+    </include>
+
+    <!-- Launch Bebop_0 -->
+    <group ns="bebop_0">
+    <include file="$(find bebop_simulator)/launch/spawn_bebop.launch">
+       <arg name="name" value="$(arg name)0" />
+       <arg name="x" value="0.63661977"/>
+       <arg name="y" value="0"/>
+       <arg name="z" value="0"/>
+       <arg name="wind_force" value="$(arg wind_force)"/>
+       <arg name="wind_start" value="$(arg wind_start)"/>
+       <arg name="wind_duration" value="$(arg wind_duration)"/>
+       <arg name="wind_direction_x" value="$(arg wind_direction_x)"/>
+       <arg name="wind_direction_y" value="$(arg wind_direction_y)"/>
+       <arg name="wind_direction_z" value="$(arg wind_direction_z)"/>
+       <!-- The disable_odometry_sensor_with_noise will only become true if enable_odometry_sensor_with_noise will is false.
+       In this way, only one odometry sensor will be simulated: with or without noise. -->
+       <arg name="enable_odometry_sensor_with_noise" value="$(arg enable_odometry_sensor_with_noise)"/>
+       <arg name="disable_odometry_sensor_with_noise" value="$(arg disable_odometry_sensor_with_noise)" />
+       <arg name="enable_ground_truth_sensor" value="$(arg enable_ground_truth_sensor)"/>
+       <arg name="enable_wind_plugin" value="$(arg enable_wind_plugin)"/>
+       <arg name="enable_laser1D" value="$(arg enable_laser1D)"/>
+       <arg name="enable_imu" value="$(arg enable_imu)"/>
+    </include>
+    </group>
+
+   <!-- Launch Bebop_1 -->
+   <group ns="bebop_1">
+    <include file="$(find bebop_simulator)/launch/spawn_bebop.launch">
+       <arg name="name" value="$(arg name)1" />
+       <arg name="x" value="0"/>
+       <arg name="y" value="0.63661977"/>
+       <arg name="z" value="$(arg z)"/>
+       <arg name="wind_force" value="$(arg wind_force)"/>
+       <arg name="wind_start" value="$(arg wind_start)"/>
+       <arg name="wind_duration" value="$(arg wind_duration)"/>
+       <arg name="wind_direction_x" value="$(arg wind_direction_x)"/>
+       <arg name="wind_direction_y" value="$(arg wind_direction_y)"/>
+       <arg name="wind_direction_z" value="$(arg wind_direction_z)"/>
+       <!-- The disable_odometry_sensor_with_noise will only become true if enable_odometry_sensor_with_noise will is false.
+       In this way, only one odometry sensor will be simulated: with or without noise. -->
+       <arg name="enable_odometry_sensor_with_noise" value="$(arg enable_odometry_sensor_with_noise)"/>
+       <arg name="disable_odometry_sensor_with_noise" value="$(arg disable_odometry_sensor_with_noise)" />
+       <arg name="enable_ground_truth_sensor" value="$(arg enable_ground_truth_sensor)"/>
+       <arg name="enable_wind_plugin" value="$(arg enable_wind_plugin)"/>
+       <arg name="enable_laser1D" value="$(arg enable_laser1D)"/>
+       <arg name="enable_imu" value="$(arg enable_imu)"/>
+    </include>
+   </group>
+
+   <!-- Launch Bebop_2 -->
+   <group ns="bebop_2">
+    <include file="$(find bebop_simulator)/launch/spawn_bebop.launch">
+       <arg name="name" value="$(arg name)2" />
+       <arg name="x" value="-0.63661977"/>
+       <arg name="y" value="0"/>
+       <arg name="z" value="$(arg z)"/>
+       <arg name="wind_force" value="$(arg wind_force)"/>
+       <arg name="wind_start" value="$(arg wind_start)"/>
+       <arg name="wind_duration" value="$(arg wind_duration)"/>
+       <arg name="wind_direction_x" value="$(arg wind_direction_x)"/>
+       <arg name="wind_direction_y" value="$(arg wind_direction_y)"/>
+       <arg name="wind_direction_z" value="$(arg wind_direction_z)"/>
+       <!-- The disable_odometry_sensor_with_noise will only become true if enable_odometry_sensor_with_noise will is false.
+       In this way, only one odometry sensor will be simulated: with or without noise. -->
+       <arg name="enable_odometry_sensor_with_noise" value="$(arg enable_odometry_sensor_with_noise)"/>
+       <arg name="disable_odometry_sensor_with_noise" value="$(arg disable_odometry_sensor_with_noise)" />
+       <arg name="enable_ground_truth_sensor" value="$(arg enable_ground_truth_sensor)"/>
+       <arg name="enable_wind_plugin" value="$(arg enable_wind_plugin)"/>
+       <arg name="enable_laser1D" value="$(arg enable_laser1D)"/>
+       <arg name="enable_imu" value="$(arg enable_imu)"/>
+    </include>
+    </group>
+
+   <!-- Launch Bebop_3 -->
+   <group ns="bebop_3">
+    <include file="$(find bebop_simulator)/launch/spawn_bebop.launch">
+       <arg name="name" value="$(arg name)3" />
+       <arg name="x" value="0"/>
+       <arg name="y" value="-0.63661977"/>
+       <arg name="z" value="$(arg z)"/>
+       <arg name="wind_force" value="$(arg wind_force)"/>
+       <arg name="wind_start" value="$(arg wind_start)"/>
+       <arg name="wind_duration" value="$(arg wind_duration)"/>
+       <arg name="wind_direction_x" value="$(arg wind_direction_x)"/>
+       <arg name="wind_direction_y" value="$(arg wind_direction_y)"/>
+       <arg name="wind_direction_z" value="$(arg wind_direction_z)"/>
+       <!-- The disable_odometry_sensor_with_noise will only become true if enable_odometry_sensor_with_noise will is false.
+       In this way, only one odometry sensor will be simulated: with or without noise. -->
+       <arg name="enable_odometry_sensor_with_noise" value="$(arg enable_odometry_sensor_with_noise)"/>
+       <arg name="disable_odometry_sensor_with_noise" value="$(arg disable_odometry_sensor_with_noise)" />
+       <arg name="enable_ground_truth_sensor" value="$(arg enable_ground_truth_sensor)"/>
+       <arg name="enable_wind_plugin" value="$(arg enable_wind_plugin)"/>
+       <arg name="enable_laser1D" value="$(arg enable_laser1D)"/>
+       <arg name="enable_imu" value="$(arg enable_imu)"/>
+    </include>
+    </group>
+
+</launch>
