@@ -254,6 +254,15 @@ $ roslaunch bebop_simulator task2_world.launch
 
 the drone starts to follow the trajectory expressed as a sequence of waypoints (`x_r, y_r, z_r` and `\psi_r`) published at a settled time (`t_0, t_1, t_3`, etc.), as described in `waypoint.txt` file. To avoid system instabilities, a waypoint filter is employed to smooth the trajectory.
 
+In the repository a simple configuration file for RVIZ (see #28) and multi-robot example (see #29) are provided. To run the simulation, just simply type these command in the terminal line.
+
+```console
+# To run a multi-robot scenario along with the control algorithm
+$ roslaunch bebop_simulator multiple_task2_world.launch
+# To run a multi-robot scenario without the position_controller
+$ roslaunch bebop_simulator multiple_bebop_without_controller.launch
+```
+
 Gazebo Version
 --------------
 
