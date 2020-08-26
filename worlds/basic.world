@@ -17,6 +17,8 @@
       </sky>
     </scene>
     <!--}-->
+
+    <plugin name="ros_interface_plugin" filename="librotors_gazebo_ros_interface_plugin.so"/>
     
     <!-- coordinate system {-->
     <spherical_coordinates>
