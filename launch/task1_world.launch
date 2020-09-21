@@ -26,7 +26,6 @@
     <arg name="enable_ground_truth_sensor" default="false"/>
     <arg name="enable_wind_plugin" default="false"/>
     <arg name="enable_laser1D" default="false"/>
-    <arg name="enable_imu" default="true"/>
     
   <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find bebop_simulator)/models"/>
   <env name="GAZEBO_RESOURCE_PATH" value="${GAZEBO_RESOURCE_PATH}:$(find bebop_simulator)/models"/>
