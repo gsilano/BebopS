@@ -67,7 +67,8 @@
       <param name="user_account" value="$(arg user_account)"/>
       <param name="waypoint_filter" value="$(arg waypoint_filter)"/>
       <param name="EKFActive" value="$(arg EKFActive)"/>
-      <remap from="/command/motor_speed" to="/gazebo/command/motor_speed" />
+      <!-- <remap from="/command/motor_speed" to="/gazebo/command/motor_speed" /> -->
+      <remap from="/command/motor_speed" to="/bebop/command/motors" />
       <remap from="/odometry" to="/bebop/odometry" />
       <remap from="/odometry_gt" to="/bebop/odometry_gt" />
       <remap from="/referenceAngles" to="/bebop/referenceAngles" />
