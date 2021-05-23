@@ -81,16 +81,7 @@ jobs:
         env:
           ROS_DISTRO: kinetic
         run: |
-          mkdir -p ~/catkin_ws/src
-          catkin_init_workspace
-          catkin init
-          cd ~/catkin_ws/src
-          git clone -b med18 https://github.com/gsilano/rotors_simulator.git
-          git clone -b med18 https://github.com/gsilano/mav_comm.git
-          git clone https://github.com/gsilano/bebop_autonomy.git
-          cd ~/catkin_ws
-          rosdep install --from-paths src -i
-          catkin build
+          source /opt/ros/kinetic/setup.bash
 ##########################################################################################
 ## SECOND JOB - GITHUB ACTIONS - ROS MELODIC WITH GAZEBO 9
 ###########################################################################################
