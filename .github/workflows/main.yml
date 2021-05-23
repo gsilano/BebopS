@@ -77,7 +77,19 @@ jobs:
             rosdep install octomap_mapping
             rosmake octomap_mapping
 ############################################################################
-
+      - name: Installation completed! Started the building process..
+        env:
+          ROS_DISTRO: kinetic
+        run: |
+          mkdir -p ~/catkin_ws/src
+          catkin_init_workspace
+          catkin init
+          cd ~/catkin_ws/src
+          git clone -b med18 https://github.com/gsilano/rotors_simulator.git
+          git clone -b med18 https://github.com/gsilano/mav_comm.git
+          git clone https://github.com/gsilano/BebopS.git
+          git clone https://github.com/AutonomyLab/bebop_autonomy.git
+          cd ~/catkin_ws
 ##########################################################################################
 ## SECOND JOB - GITHUB ACTIONS - ROS MELODIC WITH GAZEBO 9
 ###########################################################################################
