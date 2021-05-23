@@ -8,13 +8,23 @@ on:
   push:
     branches:
        - 'master'
+       - 'dev/bebopInterface'
        - 'dev/gazebo9'
+       - 'dev/mitProject2019'
+       - 'sphinx'
        - 'dev/ros-melodic'
+       - 'feature/ros-kinetic-gazebo9-pkgs'
+       - 'feature/spline'
   pull_request:
     branches:
        - 'master'
+       - 'dev/bebopInterface'
        - 'dev/gazebo9'
+       - 'dev/mitProject2019'
+       - 'sphinx'
        - 'dev/ros-melodic'
+       - 'feature/ros-kinetic-gazebo9-pkgs'
+       - 'feature/spline'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
