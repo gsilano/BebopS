@@ -81,6 +81,7 @@ jobs:
         env:
           ROS_DISTRO: kinetic
         run: |
+          source /opt/ros/$ROS_DISTRO/setup.bash
           mkdir -p ~/catkin_ws/src
           catkin_init_workspace
           catkin init
