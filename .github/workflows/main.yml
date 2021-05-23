@@ -77,20 +77,7 @@ jobs:
             rosdep install octomap_mapping
             rosmake octomap_mapping
 ############################################################################
-      - name: Installation completed! Started the building process..
-        env:
-         ROS_DISTRO: kinetic
-        run: |
-          source /opt/ros/$ROS_DISTRO/setup.bash
-          mkdir -p ~/catkin_ws/src
-          catkin_init_workspace
-          catkin init
-          cd ~/catkin_ws/src
-          git clone -b med18 https://github.com/gsilano/rotors_simulator.git
-          git clone -b med18 https://github.com/gsilano/mav_comm.git
-          cd ~/catkin_ws
-          rosdep install --from-paths src -i
-          catkin build
+
 ##########################################################################################
 ## SECOND JOB - GITHUB ACTIONS - ROS MELODIC WITH GAZEBO 9
 ###########################################################################################
@@ -129,17 +116,4 @@ jobs:
         rosdep install octomap_mapping
         rosmake octomap_mapping
 #####################################################################################
-     - name: Installation completed! Started the building process..
-       env:
-        ROS_DISTRO: melodic
-       run: |
-        source /opt/ros/$ROS_DISTRO/setup.bash
-        mkdir -p ~/catkin_ws/src
-        catkin_init_workspace
-        catkin init
-        cd ~/catkin_ws/src
-        git clone -b med18_gazebo9 https://github.com/gsilano/rotors_simulator.git
-        git clone -b med18_gazebo9 https://github.com/gsilano/mav_comm.git
-        cd ~/catkin_ws
-        rosdep install --from-paths src -i
-        catkin build
+
