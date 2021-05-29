@@ -65,6 +65,13 @@ $ cd ~/catkin_ws
 $ rosdep install --from-paths src -i
 $ catkin build
 ```
+> In case the building process should fail, consider what's detailed in [#43](https://github.com/gsilano/CrazyS/issues/43). In particular, run the instructions reported at the bottom. 
+> ```console
+> $ cd ~/catkin_ws/src/rotors_simulator
+> $ git checkout med18_gazebo9_fix
+> $ cd ~/catkin_ws
+> $ catkin build
+> ```
 
 4. Add sourcing to your `.bashrc` file
 
