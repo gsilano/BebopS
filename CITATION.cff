@@ -11,6 +11,7 @@ preferred-citation:
   - family-names: "Iannelli"
     given-names: "Luigi"
     orcid: "https://orcid.org/0000-0003-2034-0005"
+  doi: "10.1109/SMC.2019.8914154"
   title: "Software-in-the-loop simulation for improving flight control system design: a quadrotor case study"
   publisher: "IEEE"
   preprint: "https://giuseppesilano.net/publications/smc19.pdf"
@@ -18,3 +19,4 @@ preferred-citation:
   link: "https://ieeexplore.ieee.org/document/8914154"
   start: 466 # First page number
   end: 471 # Last page number
+  year: 2019
