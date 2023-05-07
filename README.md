@@ -6,6 +6,8 @@
 # BebopS
 
 | BebopS build status | [![Build Status](https://github.com/gsilano/BebopS/actions/workflows/melodic.yml/badge.svg)](https://github.com/gsilano/BebopS/actions/workflows/melodic.yml) | [![Build Status](https://github.com/gsilano/BebopS/actions/workflows/noetic.yml/badge.svg)](https://github.com/gsilano/BebopS/actions/workflows/noetic.yml)
+|-----------------------|---------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|  
+
 BebopS is an extension of the ROS package [RotorS](https://github.com/ethz-asl/rotors_simulator), aimed to modeling, developing and integrating the [Parrot Bebop 2](https://www.parrot.com/us/drones/parrot-bebop-2) quadcopter in the physics based simulation environment Gazebo. The contribution can be also considered as a reference guide for expanding the RotorS functionalities in the Unmanned Aerial Vehicles (UAVs) filed and for simulating in a way rather close to reality the real aircraft behavior.
 
 The repository was made for designing complex control systems for the Parrot Bebop 2, but it can also be used as a basis for any other aircraft with the aim of helping in the controller implementation. Indeed, implementing the own control algorithm is a not easy process and having a complete software platform for simulating the multirotor behavior, considering also its on-board sensors and the secondary effects, could give advantages in terms of coding and deployment of the controller software.
