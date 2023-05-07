@@ -87,6 +87,7 @@ jobs:
         source /opt/ros/$ROS_DISTRO/setup.bash
         mkdir -p ~/catkin_ws/src
         catkin_init_workspace
+        cd ~/catkin_ws
         catkin init
         cd ~/catkin_ws/src
         git clone -b med18_gazebo9 https://github.com/gsilano/rotors_simulator.git
@@ -97,6 +98,7 @@ jobs:
         cd ~/catkin_ws
         rosdep install --from-paths src -i
         rosdep update
+        catkin config --cmake-args -DCMAKE_BUILD_TYPE=Release -DCATKIN_ENABLE_TESTING=False
         catkin build
         echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
         source ~/.bashrc
