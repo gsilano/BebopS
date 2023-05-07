@@ -2,6 +2,11 @@
 Changelog for package BebopS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+3.0.1 (2023-05-23)
+------------------
+* Add release for ROS Noetic and Gazebo 11
+* Contributors: Giuseppe Silano
+
 1.0.2 (2020-08-26)
 ------------------
 * Add multi-robot example #29
